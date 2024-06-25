@@ -66,7 +66,7 @@ export default function PokemonCard({ pokemon, types }: PokemonCardProps) {
                         height={256}
                         quality={100}
                         className="size-48 xs:size-56 sm:size-64"
-                        sizes="(max-width: 640px) 128px, (max-width: 768px) 192px, 256px"
+                        priority
                     />
                 </div>
                 <div className="flex flex-col bg-gradient-to-b from-[#9d9d9d] via-[#ffffff] to-[#9d9d9d] items-center justify-center" >

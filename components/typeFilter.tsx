@@ -88,6 +88,7 @@ export default function TypeFilter({ types, setTypeFilter, typeFilter }: TypeFil
                                                         width={24}
                                                         height={24}
                                                         quality={100}
+                                                        priority
                                                         className="border-2 border-slate-200 rounded-full size-7 sm:size-9"
                                                     />
                                                 </div>
