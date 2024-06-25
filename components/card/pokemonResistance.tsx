@@ -36,10 +36,9 @@ export default function PokemonResistance({ resistances, text, types, pokemonNam
                                                     <Image
                                                         src={findTypeInfos.sprites}
                                                         alt={findTypeInfos.name.fr}
-                                                        width={24}
-                                                        height={24}
+                                                        width={32}
+                                                        height={32}
                                                         quality={75}
-                                                        loading="lazy"
                                                         className="border-2 border-slate-200 rounded-full size-5 sm:size-6"
                                                         sizes="(max-width: 640px) 24px, (max-width: 768px) 32px, 48px"
                                                     />

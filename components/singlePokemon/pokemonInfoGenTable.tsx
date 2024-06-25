@@ -58,9 +58,9 @@ export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProp
                                                         <Image
                                                             src={type.image}
                                                             alt={type.name}
-                                                            width={64}
-                                                            height={64}
-                                                            quality={100}
+                                                            width={32}
+                                                            height={32}
+                                                            quality={75}
                                                             className="border-2 border-slate-200 rounded-full size-6 sm:size-8"
                                                         />
                                                     </TooltipTrigger>
