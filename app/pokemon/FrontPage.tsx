@@ -35,10 +35,10 @@ function getFilteredPokemonByType(pokemons: Pokemon[], typeFilter: TypeFilterTyp
 export default function FrontPage({ pokemons, types }: FrontPageProps) {
   const [searchValue, setSearchValue] = useState("");
   const [typeFilter, setTypeFilter] = useState(typeFilterDefaultValue);
-  console.log("pokemons", pokemons)
-  console.log("types", types)
-  const filteredPokemons = getFilteredPokemon(pokemons, searchValue);
-  const filteredByTypePokemons = getFilteredPokemonByType(filteredPokemons, typeFilter);
+  let filteredPokemons = getFilteredPokemon(pokemons, searchValue);
+  if (typeFilter != typeFilterDefaultValue) {
+    filteredPokemons = getFilteredPokemonByType(filteredPokemons, typeFilter);
+  }
 
   return (
     <>
@@ -47,10 +47,10 @@ export default function FrontPage({ pokemons, types }: FrontPageProps) {
         <TypeFilter types={types} setTypeFilter={setTypeFilter} typeFilter={typeFilter} />
         <div className="flex flex-row w-full gap-2 items-center justify-center">
           <span className="text-base font-medium">Nombre de pokémon:</span>
-          <span className="text-lg font-extrabold text-white">{filteredByTypePokemons.length}</span>
+          <span className="text-lg font-extrabold text-white">{filteredPokemons.length}</span>
         </div>
         <div className="flex flex-row flex-wrap items-center justify-center w-full gap-8 mt-4">
-          {filteredByTypePokemons.map((pokemon: Pokemon) =>
+          {filteredPokemons.map((pokemon: Pokemon) =>
             <div key={pokemon.pokedex_id}>
               <PokemonCard pokemon={pokemon} types={types} />
             </div>

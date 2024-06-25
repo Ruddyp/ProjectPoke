@@ -15,7 +15,10 @@ export type Pokemon = {
     sexe: PokemonSexe | null,
     catch_rate: number,
     level_100: number,
-    formes: PokemonForme[] | null
+    formes: PokemonForme[] | null,
+    cardStyle?: {
+        backgroundImage: string
+    }
 }
 
 export type PokemonName = {

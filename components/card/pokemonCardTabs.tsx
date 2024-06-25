@@ -1,13 +1,13 @@
 'use client'
 
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, Suspense, lazy } from "react";
 import { Images, Shield, Sparkles } from 'lucide-react';
 import { Pokemon, Types } from "@/app/type";
-import PokemonCardFormes from "./pokemonCardFormes";
-import PokemonResistances from "./pokemonResistances";
-import PokemonTalent from "./pokemonTalent";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+const PokemonCardFormes = lazy(() => import('./pokemonCardFormes'));
+const PokemonResistances = lazy(() => import('./pokemonResistances'));
+const PokemonTalent = lazy(() => import('./pokemonTalent'));
 
 type PokemonCardTabsProps = {
     pokemon: Pokemon;
@@ -58,13 +58,19 @@ export default function PokemonCardTabs({ pokemon, setSrcSprite, types }: Pokemo
                 </TabsTrigger>
             </TabsList>
             <TabsContent value="formes">
-                <PokemonCardFormes pokemon={pokemon} setSrcSprite={setSrcSprite} />
+                <Suspense fallback={"Chargement ..."}>
+                    <PokemonCardFormes pokemon={pokemon} setSrcSprite={setSrcSprite} />
+                </Suspense>
             </TabsContent>
             <TabsContent value="resistances">
-                <PokemonResistances pokemon={pokemon} types={types} />
+                <Suspense fallback={"Chargement ..."}>
+                    <PokemonResistances pokemon={pokemon} types={types} />
+                </Suspense>
             </TabsContent>
             <TabsContent value="talents">
-                <PokemonTalent pokemon={pokemon} />
+                <Suspense fallback={"Chargement ..."}>
+                    <PokemonTalent pokemon={pokemon} />
+                </Suspense>
             </TabsContent>
         </Tabs>
     )

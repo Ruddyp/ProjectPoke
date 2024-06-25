@@ -8,16 +8,7 @@ async function getPokemonInfo(id: number) {
   return await response.json();
 }
 
-// async function getTypes() {
-//   const url = "https://tyradex.tech/api/v1/types"
-//   const response = await fetch(url, {
-//     method: 'GET',
-//   });
-//   return await response.json();
-// }
-
 export default async function Page({ params }: any) {
-
   const pokemon = await getPokemonInfo(params.id);
   return (
     <>

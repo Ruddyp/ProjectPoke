@@ -12,7 +12,6 @@ type FrontPageProps = {
 
 export default function FrontPage({ pokemon }: FrontPageProps) {
   const router = useRouter();
-  console.log("pokemon", pokemon)
   const previousId = pokemon.pokedex_id - 1;
   const nextId = pokemon.pokedex_id + 1;
 
