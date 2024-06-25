@@ -1,0 +1,60 @@
+'use client'
+
+import Image from 'next/image'
+import { PokemonResistances, Types } from "@/app/type"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+
+type PokemonResistanceProps = {
+    resistances: PokemonResistances[];
+    text: string;
+    types: Types[];
+    pokemonName: string;
+}
+
+export default function PokemonResistance({ resistances, text, types, pokemonName }: PokemonResistanceProps) {
+
+    return (
+        <>
+            <div className="flex flex-col">
+                <Card className="m-0.5 rounded-md">
+                    <CardHeader className="flex flex-row text-nowrap items-center justify-center bg-muted/80 p-1 m-0">
+                        <CardTitle className="text-xs sm:text-sm">
+                            {text}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0 text-xs">
+                        <div className="flex flex-row items-center justify-center">
+                            {resistances.map((resistance: PokemonResistances, index: number) => {
+                                const findTypeInfos = types.find((type: Types) => type.name.fr == resistance.name);
+                                if (findTypeInfos == undefined) return null
+                                return (
+                                    <div key={`${pokemonName}-resi-${findTypeInfos?.name.fr}`} className="p-1">
+                                        <TooltipProvider delayDuration={200}>
+                                            <Tooltip>
+                                                <TooltipTrigger>
+                                                    <Image
+                                                        src={findTypeInfos.sprites}
+                                                        alt={findTypeInfos.name.fr}
+                                                        width={64}
+                                                        height={64}
+                                                        quality={100}
+                                                        priority
+                                                        className="border-2 border-slate-200 rounded-full size-5 sm:size-6"
+                                                    />
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>{findTypeInfos.name.fr}</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </>
+    )
+}

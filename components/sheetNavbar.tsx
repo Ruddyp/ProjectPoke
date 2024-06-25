@@ -34,9 +34,14 @@ export function SheetNavbar() {
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="sm:max-w-xs overflow-y-auto">
+                    <SheetHeader>
+                        <SheetTitle>Menu</SheetTitle>
+                        <SheetDescription>
+                        </SheetDescription>
+                    </SheetHeader>
                     <nav className="grid gap-2 text-base font-medium mt-4">
                         <Button
-                            className="w-full text-primary-foreground hover:bg-primary/60 p-1"
+                            className="w-full text-secondary hover:bg-accent/60 p-1"
                             size="default_responsive"
                             variant="link"
                             onClick={() => setSheetOpen(false)}

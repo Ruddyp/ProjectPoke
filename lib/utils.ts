@@ -1,4 +1,4 @@
-import { MultiplierResistances, PokemonColorType } from "@/app/type"
+import { PokemonColorType, PokemonEvolution } from "@/app/type"
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -43,4 +43,11 @@ export const colors: Record<PokemonColorType, string> = {
   ténèbres_light: "#827371",
   dragon: "#5061e1",
   dragon_light: "#9AA5FB",
+}
+
+
+export function isEvolution(pokemonEvols: PokemonEvolution) {
+  if (pokemonEvols == null) return false
+  if (pokemonEvols.pre == null) return false
+  if (pokemonEvols.pre.length > 0) return true
 }

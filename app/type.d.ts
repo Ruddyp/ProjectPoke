@@ -60,8 +60,8 @@ export type PokemonResistances = {
 export type MultiplierResistances = 0 | 0.25 | 0.5 | 1 | 2 | 4;
 
 export type PokemonEvolution = {
-    pre: Evolution | null;
-    next: Evolution | null;
+    pre: Evolution[] | null;
+    next: Evolution[] | null;
     mega: MegaEvolution[] | null
 }
 
