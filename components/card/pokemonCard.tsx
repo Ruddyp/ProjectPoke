@@ -88,7 +88,6 @@ export default function PokemonCard({ pokemon, types }: PokemonCardProps) {
                             width={256}
                             height={256}
                             quality={100}
-                            priority
                             className="size-48 xs:size-56 sm:size-64"
                         />
                     </div>

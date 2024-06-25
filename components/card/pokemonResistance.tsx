@@ -39,7 +39,6 @@ export default function PokemonResistance({ resistances, text, types, pokemonNam
                                                         width={64}
                                                         height={64}
                                                         quality={100}
-                                                        priority
                                                         className="border-2 border-slate-200 rounded-full size-5 sm:size-6"
                                                     />
                                                 </TooltipTrigger>
