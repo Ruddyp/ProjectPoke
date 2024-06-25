@@ -42,11 +42,10 @@ export default function PokemonCard({ pokemon, types }: PokemonCardProps) {
                                             <Image
                                                 src={type.image}
                                                 alt={type.name}
-                                                width={32}
-                                                height={32}
+                                                width={24}
+                                                height={24}
                                                 quality={75}
                                                 className="border-2 border-slate-200 rounded-full size-6 sm:size-8 sm:m-1"
-                                                sizes="(max-width: 640px) 24px, (max-width: 768px) 32px, 48px"
                                             />
                                         </TooltipTrigger>
                                         <TooltipContent sideOffset={10}>

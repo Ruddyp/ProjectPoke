@@ -85,11 +85,10 @@ export default function TypeFilter({ types, setTypeFilter, typeFilter }: TypeFil
                                                     <Image
                                                         src={type.sprites}
                                                         alt={type.name.fr}
-                                                        width={32}
-                                                        height={32}
+                                                        width={24}
+                                                        height={24}
                                                         quality={100}
                                                         className="border-2 border-slate-200 rounded-full size-7 sm:size-9"
-                                                        sizes="(max-width: 640px) 24px, (max-width: 768px) 32px, 48px"
                                                     />
                                                 </div>
                                             </TooltipTrigger>
