@@ -1,14 +1,15 @@
 'use client'
 
-import { Pokemon } from "@/app/type";
+import { Pokemon, Types } from "@/app/type";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import PokemonInfoGen from './pokemonInfoGen';
 
 type PokemonTabsProps = {
     pokemon: Pokemon;
+    types: Types[]
 }
 
-export default function PokemonTabs({ pokemon }: PokemonTabsProps) {
+export default function PokemonTabs({ pokemon, types }: PokemonTabsProps) {
 
     return (
         <Tabs defaultValue="information" className="w-full opacity-90">
@@ -27,7 +28,7 @@ export default function PokemonTabs({ pokemon }: PokemonTabsProps) {
                 </TabsTrigger>
             </TabsList>
             <TabsContent value="information">
-                <PokemonInfoGen pokemon={pokemon} />
+                <PokemonInfoGen pokemon={pokemon} types={types} />
             </TabsContent>
             <TabsContent value="evolution">
             </TabsContent>

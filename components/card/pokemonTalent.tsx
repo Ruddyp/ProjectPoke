@@ -11,7 +11,7 @@ export default function PokemonTalent({ pokemon }: PokemonTalentsProps) {
     const { talents } = pokemon;
     return (
         <>
-            <Card className="m-0.5 rounded-md">
+            <Card className="m-0.5 rounded-md border border-slate-500">
                 <CardHeader className="flex flex-row text-nowrap items-center justify-center bg-muted/80 p-1 m-0">
                     <CardTitle className="text-sm sm:text-base">
                         Liste des talents

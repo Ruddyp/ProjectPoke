@@ -1,17 +1,20 @@
 'use client'
 
-import { Pokemon } from "@/app/type";
+import { Pokemon, Types } from "@/app/type";
 import Image from 'next/image'
 import PokemonInfoGenTable from "./pokemonInfoGenTable";
+import PokemonInfoGenResistances from "./pokemonInfoGenResistances";
+import PokemonTalent from "../card/pokemonTalent";
 
 type PokemonInfoGenProps = {
     pokemon: Pokemon;
+    types: Types[];
 }
 
-export default function PokemonInfoGen({ pokemon }: PokemonInfoGenProps) {
+export default function PokemonInfoGen({ pokemon, types }: PokemonInfoGenProps) {
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div className="flex items-center justify-center">
                 <Image
                     src={pokemon.sprites.regular}
@@ -26,6 +29,12 @@ export default function PokemonInfoGen({ pokemon }: PokemonInfoGenProps) {
             </div>
             <div>
                 <PokemonInfoGenTable pokemon={pokemon} />
+            </div>
+            <div className="col-span-1 sm:col-span-2">
+                <PokemonInfoGenResistances pokemon={pokemon} types={types} />
+            </div>
+            <div className="col-span-1 sm:col-span-2">
+                <PokemonTalent pokemon={pokemon} />
             </div>
         </div>
     )
