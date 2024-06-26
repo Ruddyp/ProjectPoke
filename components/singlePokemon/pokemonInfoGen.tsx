@@ -20,7 +20,8 @@ export default function PokemonInfoGen({ pokemon }: PokemonInfoGenProps) {
                     height={512}
                     quality={100}
                     priority
-                    className="size-48 xs:size-56 sm:size-64 md:size-72 lg:size-80 "
+                    className="size-48 xs:size-56 sm:size-64 md:size-72 lg:size-80"
+                    unoptimized
                 />
             </div>
             <div>

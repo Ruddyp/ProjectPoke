@@ -64,6 +64,7 @@ export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProp
                                                                     height={32}
                                                                     quality={75}
                                                                     className="border-2 border-slate-200 rounded-full size-6 sm:size-8"
+                                                                    unoptimized
                                                                 />
                                                             </TooltipTrigger>
                                                             <TooltipContent sideOffset={10}>

@@ -25,6 +25,7 @@ export function SheetNavbar() {
                         src="/pokeball.svg"
                         width={25}
                         height={25}
+                        unoptimized
                         alt="Pokeball"
                     />
                 </Link>

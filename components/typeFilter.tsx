@@ -88,6 +88,7 @@ export default function TypeFilter({ types, setTypeFilter, typeFilter }: TypeFil
                                                         fill
                                                         sizes="(max-width: 640px) 32px, 48px"
                                                         className="rounded-full object-cover p-1"
+                                                        unoptimized
                                                     />
                                                 </div>
                                             </TooltipTrigger>

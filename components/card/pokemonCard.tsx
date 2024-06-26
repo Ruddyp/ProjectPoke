@@ -48,6 +48,7 @@ export default function PokemonCard({ pokemon, types, indexCard }: PokemonCardPr
                                                         fill
                                                         sizes="(max-width: 640px) 32px, 48px"
                                                         className="border-2 border-slate-200 rounded-full object-cover"
+                                                        unoptimized
                                                     />
                                                 </TooltipTrigger>
                                                 <TooltipContent sideOffset={10}>
@@ -71,6 +72,7 @@ export default function PokemonCard({ pokemon, types, indexCard }: PokemonCardPr
                             className="object-cover"
                             sizes="(max-width: 475px) 192px, (max-width: 640px) 224px, 256px"
                             priority={(indexCard >= 0 && indexCard < 4) ? true : false}
+                            unoptimized
                         />
                     </div>
                 </div>

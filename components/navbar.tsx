@@ -23,6 +23,7 @@ export default function NavBar() {
                                 src="/pokeball.svg"
                                 width={25}
                                 height={25}
+                                unoptimized
                                 alt="Pokeball"
                             />
                             <span className="ml-2 text-lg">Project Poke</span>

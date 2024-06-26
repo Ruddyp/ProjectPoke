@@ -21,9 +21,6 @@ export default function PokemonResistances({ pokemon, types }: PokemonResistance
 
     return (
         <>
-            <div className="hidden justify-center bg-gradient-to-b from-[#9d9d9d] via-[#ffffff] to-[#9d9d9d] p-1 sm:p-2">
-                <span className="text-black text-sm sm:text-base">Faiblesses et résistances</span>
-            </div>
             <div className="flex flex-row my-2 items-center justify-center flex-wrap">
                 {immuneTypes.length > 0 ?
                     <>
