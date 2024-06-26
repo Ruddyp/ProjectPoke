@@ -2,6 +2,7 @@
 
 import { Pokemon, Types } from "@/app/type"
 import PokemonResistance from "./pokemonResistance";
+import { Card, CardContent } from "../ui/card";
 
 type PokemonResistancesProps = {
     pokemon: Pokemon;
@@ -11,7 +12,13 @@ type PokemonResistancesProps = {
 export default function PokemonResistances({ pokemon, types }: PokemonResistancesProps) {
     const { resistances } = pokemon;
     if (resistances == null) {
-        return (<p>Ce pokémon n&apos;a pas de résistances ni de faiblesses</p>)
+        return (
+            <Card className="m-0.5 rounded-md">
+                <CardContent className="p-1 text-xs sm:text-sm text-center">
+                    Ce pokémon n&apos;a pas de résistances ni de faiblesses
+                </CardContent>
+            </Card>
+        )
     }
     const immuneTypes = resistances.filter((resistance) => resistance.multiplier == 0);
     const veryResistant = resistances.filter((resistance) => resistance.multiplier == 0.25);

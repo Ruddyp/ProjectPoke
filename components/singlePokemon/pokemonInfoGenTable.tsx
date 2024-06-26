@@ -19,21 +19,6 @@ export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProp
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-0 text-xs sm:text-sm">
-                {/* <div className="grid grid-cols-1 gap-1 p-4">
-                    <div className="flex flex-row gap-2 items-center">
-                        <span className="text-red-400 w-[75%] self-end">Numéro pokédex:</span>
-                        <span className="text-red-400 w-[25%] self">N°{pokemon.pokedex_id}</span>
-                    </div>
-                    <div className="flex flex-row gap-2 items-center">
-                        <span className="text-red-400 w-[75%] self-end">Génération:</span>
-                        <span className="text-red-400 w-[25%] self">{pokemon.generation} génération</span>
-                    </div>
-                    <div className="flex w-[50%]">N°{pokemon.pokedex_id}</div>
-                    <div className="flex justify-end font-bold text-red-400">Génération:</div><div className=" flex items-center justify-start">{pokemon.generation} génération</div>
-                    <div className="flex justify-end font-bold text-red-400">Numéro du pokédex:</div><div className=" flex items-center justify-start">N°{pokemon.pokedex_id}</div>
-                    <div className="flex justify-end font-bold text-red-400">Numéro du pokédex:</div><div className=" flex items-center justify-start">N°{pokemon.pokedex_id}</div>
-                    <div>Génération</div><div>{pokemon.generation} génération</div>
-                </div> */}
                 <table className="w-full table-auto">
                     <thead>
                     </thead>

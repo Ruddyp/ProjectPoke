@@ -31,8 +31,13 @@ export default function PokemonCard({ pokemon, types, indexCard }: PokemonCardPr
             <CardHeader className="relative flex flex-row p-0 py-1">
                 <CardTitle className="text-xl ml-14 sm:text-2xl text-black">{pokemon.name.fr}</CardTitle>
                 <span className="text-xs sm:text-sm text-black italic ml-1">{`(${srcSprite.text})`}</span>
-                <span className="ml-auto text-sm sm:text-base text-black self-center sm:self-end">PV</span>
-                <span className="text-2xl sm:text-3xl text-black font-bold self-start">{pokemon.stats != null ? pokemon.stats.hp : "Pas de PV"}</span>
+                {pokemon.stats != null ?
+                    <>
+                        <span className="ml-auto text-sm sm:text-base text-black self-center sm:self-end">PV</span>
+                        <span className="text-2xl sm:text-3xl text-black font-bold self-start">{pokemon.stats.hp}</span>
+                    </>
+                    : null
+                }
                 <div className="flex flex-row gap-1 ml-1 mr-2">
                     {
                         pokemon.types != null ?
@@ -77,7 +82,11 @@ export default function PokemonCard({ pokemon, types, indexCard }: PokemonCardPr
                     </div>
                 </div>
                 <div className="flex flex-col bg-gradient-to-b from-[#9d9d9d] via-[#ffffff] to-[#9d9d9d] items-center justify-center" >
-                    <p className="text-[#5b575a] text-xs sm:text-sm font-medium">N°{pokemon.pokedex_id}&nbsp;/&nbsp;{pokemon.category}&nbsp;/&nbsp;{pokemon.height}&nbsp;/&nbsp;{pokemon.weight}</p>
+                    <p className="text-[#5b575a] text-xs sm:text-sm font-medium">
+                        N°{pokemon.pokedex_id}&nbsp;/&nbsp;{pokemon.category}&nbsp;
+                        {pokemon.height != null ? `/ ${pokemon.height} ` : null}
+                        {pokemon.weight != null ? `/ ${pokemon.weight} ` : null}
+                    </p>
                 </div>
             </CardContent>
             <CardFooter className="flex flex-col justify-center items-center mt-2 sm:mt-4 gap-1.5 sm:gap-3 p-0">
