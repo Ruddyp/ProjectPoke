@@ -62,8 +62,8 @@ export default function PokemonCard({ pokemon, types, indexCard }: PokemonCardPr
                 </div>
             </CardHeader>
             <CardContent className="relative flex flex-col bg-gradient-to-b from-[#9d9d9d] via-[#ffffff] to-[#9d9d9d] sm:mt-1 p-1 mx-5 xs:mx-8 sm:mx-12 rounded-md">
-                <div onClick={() => router.push(`/pokemon/${pokemon.pokedex_id}`)} className="flex flex-row h-full w-full items-center justify-center bg-background rounded-md cursor-pointer">
-                    <div className="relative size-48 xs:size-56 sm:size-64">
+                <div className="flex flex-row h-full w-full items-center justify-center bg-background rounded-md cursor-pointer">
+                    <div onClick={() => router.push(`/pokemon/${pokemon.pokedex_id}`)} className="relative size-48 xs:size-56 sm:size-64">
                         <Image
                             src={srcSprite.img}
                             alt={"Pokemon sprites"}
