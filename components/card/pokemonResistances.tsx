@@ -10,6 +10,9 @@ type PokemonResistancesProps = {
 
 export default function PokemonResistances({ pokemon, types }: PokemonResistancesProps) {
     const { resistances } = pokemon;
+    if (resistances == null) {
+        return (<p>Ce pokémon n&apos;a pas de résistances ni de faiblesses</p>)
+    }
     const immuneTypes = resistances.filter((resistance) => resistance.multiplier == 0);
     const veryResistant = resistances.filter((resistance) => resistance.multiplier == 0.25);
     const resistant = resistances.filter((resistance) => resistance.multiplier == 0.5);

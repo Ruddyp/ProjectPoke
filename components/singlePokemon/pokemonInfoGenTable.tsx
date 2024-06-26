@@ -49,28 +49,32 @@ export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProp
                         <tr className="border-b border-slate-500">
                             <td className="text-red-400 p-2">Types:</td>
                             <td className="p-2 flex flex-row gap-1.5">
-                                {pokemon.types.map((type: PokemonTypes, index: number) => {
-                                    return (
-                                        <div key={`${pokemon.pokedex_id}_type_${index}`}>
-                                            <TooltipProvider delayDuration={200}>
-                                                <Tooltip>
-                                                    <TooltipTrigger>
-                                                        <Image
-                                                            src={type.image}
-                                                            alt={type.name}
-                                                            width={32}
-                                                            height={32}
-                                                            quality={75}
-                                                            className="border-2 border-slate-200 rounded-full size-6 sm:size-8"
-                                                        />
-                                                    </TooltipTrigger>
-                                                    <TooltipContent sideOffset={10}>
-                                                        <p>{type.name}</p>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                        </div>)
-                                })}
+                                {
+                                    pokemon.types != null ?
+                                        pokemon.types.map((type: PokemonTypes, index: number) => {
+                                            return (
+                                                <div key={`${pokemon.pokedex_id}_type_${index}`}>
+                                                    <TooltipProvider delayDuration={200}>
+                                                        <Tooltip>
+                                                            <TooltipTrigger>
+                                                                <Image
+                                                                    src={type.image}
+                                                                    alt={type.name}
+                                                                    width={32}
+                                                                    height={32}
+                                                                    quality={75}
+                                                                    className="border-2 border-slate-200 rounded-full size-6 sm:size-8"
+                                                                />
+                                                            </TooltipTrigger>
+                                                            <TooltipContent sideOffset={10}>
+                                                                <p>{type.name}</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+                                                </div>)
+                                        })
+                                        : <p>Ce pokémon n&apos;a pas de type</p>
+                                }
                             </td>
                         </tr>
                         <tr className="border-b border-slate-500">
@@ -79,11 +83,11 @@ export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProp
                         </tr>
                         <tr className="border-b border-slate-500">
                             <td className="text-red-400 p-2">Poids:</td>
-                            <td className="p-2">{pokemon.weight}</td>
+                            <td className="p-2">{pokemon.weight != null ? pokemon.weight : "Poids inconnu"}</td>
                         </tr>
                         <tr className="border-b border-slate-500">
                             <td className="text-red-400 p-2">Taille:</td>
-                            <td className="p-2">{pokemon.height}</td>
+                            <td className="p-2">{pokemon.height != null ? pokemon.height : "Taille inconnu"}</td>
                         </tr>
                         <tr className="border-b border-slate-500">
                             <td className="text-red-400 p-2">Répartition des sexes:</td>
@@ -91,7 +95,7 @@ export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProp
                         </tr>
                         <tr>
                             <td className="text-red-400 p-2">Exp pour le lvl 100:</td>
-                            <td className="p-2">{pokemon.level_100.toLocaleString()}</td>
+                            <td className="p-2">{pokemon.level_100 != null ? pokemon.level_100.toLocaleString() : "Exp inconnu"}</td>
                         </tr>
                     </tbody>
                 </table>
