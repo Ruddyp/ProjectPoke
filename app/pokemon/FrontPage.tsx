@@ -54,9 +54,6 @@ export default function FrontPage({ pokemons, types }: FrontPageProps) {
   const [startIndex, setStartIndex] = useState(0);
   const [endIndex, setEndIndex] = useState(rowsPerPage);
 
-  console.log({ startIndex })
-  console.log({ endIndex })
-
   const filteredPokemons = getFilteredPokemon(pokemons, searchValue, typeFilter)
 
   useEffect(() => {

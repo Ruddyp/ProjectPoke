@@ -78,19 +78,16 @@ export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProp
                         <tr className="border-b border-slate-500">
                             <td className="text-red-400 p-2">Répartition des sexes:</td>
                             <td className="p-2">
-                                {/* <div
-                                    className="w-full font-bold text-center rounded-2xl"
-                                    style={{
-                                        // backgroundImage: `linear-gradient(to right, #5bc0de, #5bc0de ${pokemon.sexe?.male}%, #ffc0cb)`
-                                        backgroundImage: `linear-gradient(to right, #5bc0de ${pokemon.sexe?.male}%, #ffc0cb)`
-                                    }}>
-                                    <span className="text-accent text-base">{pokemon.sexe?.male} - {pokemon.sexe?.female} </span>
-                                </div> */}
-                                <div className="relative flex flex-row justify-center w-full h-8">
-                                    <div className="bg-[#5bc0de] rounded-l-lg border-b-2 border-l-2 border-t-2 border-white" style={{ width: `${pokemon.sexe?.male}%` }}></div>
-                                    <div className="bg-[#ffc0cb] rounded-r-lg border-b-2 border-r-2 border-t-2 border-white" style={{ width: `${pokemon.sexe?.female}%` }}></div>
-                                    <span className="absolute self-center text-accent font-medium">{pokemon.sexe?.male}% - {pokemon.sexe?.female}% </span>
-                                </div>
+                                {
+                                    pokemon.sexe != null ?
+                                        <div className="relative flex flex-row justify-center w-full h-8">
+                                            <div className="bg-[#5bc0de] rounded-l-lg border-b-2 border-l-2 border-t-2 border-white" style={{ width: `${pokemon.sexe?.male}%` }}></div>
+
+                                            <div className="bg-[#ffc0cb] rounded-r-lg border-b-2 border-r-2 border-t-2 border-white" style={{ width: `${pokemon.sexe?.female}%` }}></div>
+                                            <span className="absolute self-center text-accent font-medium">{pokemon.sexe?.male}% - {pokemon.sexe?.female}% </span>
+                                        </div>
+                                        : "Répartition inconnue"
+                                }
                             </td>
                         </tr>
                         <tr>
