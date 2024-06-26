@@ -11,15 +11,6 @@ async function getPokemons() {
   return await response.json();
 }
 
-async function getPokemons2() {
-  const allPokemon = "https://tyradex.vercel.app/api/v1/pokemon"
-  const gen1 = "https://tyradex.vercel.app/api/v1/gen/2"
-  const response = await fetch(gen1, {
-    method: 'GET',
-  });
-  return await response.json();
-}
-
 async function getTypes() {
   const url = "https://tyradex.tech/api/v1/types"
   const response = await fetch(url, {
@@ -28,9 +19,17 @@ async function getTypes() {
   return await response.json();
 }
 
-function getCardBgColor(types: PokemonTypes[]) {
-  const colorType1 = types[0].name.toLowerCase() as PokemonColorType;
+function getCardBgColor(types: PokemonTypes[] | null) {
 
+  // Cas pour missing no ou il n'a pas de type, on renvoie un type normal en linear gradient
+  if (types == null) {
+    return {
+      backgroundImage: `linear-gradient(to right bottom, ${colors['normal']} 20%, ${colors['normal_light']})`
+    }
+  }
+
+  // Cas pour les autres pokemons on regarde s'il y a un ou deux types
+  const colorType1 = types[0].name.toLowerCase() as PokemonColorType
   if (types.length > 1) {
     const colorType2 = types[1].name.toLowerCase() as PokemonColorType;
     return {
@@ -47,15 +46,6 @@ function getCardBgColor(types: PokemonTypes[]) {
 export default async function Page() {
 
   let pokemons = await getPokemons();
-  // On enlève missing no
-  if (pokemons[0].pokedex_id == 0) {
-    pokemons.shift();
-  }
-
-  let pokemons2 = await getPokemons2();
-
-  pokemons = pokemons.concat(pokemons2);
-
   pokemons.forEach((pokemon: Pokemon) => {
     Object.assign(pokemon, { cardStyle: getCardBgColor(pokemon.types) });
   });

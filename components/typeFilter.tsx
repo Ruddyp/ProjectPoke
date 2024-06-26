@@ -4,7 +4,7 @@ import { Types } from "@/app/type";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 
 type TypeFilterProps = {
     types: Types[]
@@ -74,22 +74,20 @@ export default function TypeFilter({ types, setTypeFilter, typeFilter }: TypeFil
                             const state = typeFilter[name];
                             const style = isTypeActive(name, typeFilter) ? "bg-plante" : "bg-accent";
                             return (
-                                <div key={`${type.name.fr}-filter_type-${index}`} className="p-0.5">
+                                <div key={`${type.name.fr}-filter_type-${index}`} className="p-1">
                                     <TooltipProvider delayDuration={200}>
                                         <Tooltip>
                                             <TooltipTrigger onClick={() => setTypeFilter({
                                                 ...typeFilter,
                                                 [type.name.fr.toLocaleLowerCase()]: !state
                                             })}>
-                                                <div className={`${style} p-1.5 rounded-xl`}>
+                                                <div className={`${style} relative size-8 sm:size-10 rounded-md outline outline-offset-0 outline-slate-500`}>
                                                     <Image
                                                         src={type.sprites}
                                                         alt={type.name.fr}
-                                                        width={24}
-                                                        height={24}
-                                                        quality={100}
-                                                        priority
-                                                        className="border-2 border-slate-200 rounded-full size-7 sm:size-9"
+                                                        fill
+                                                        sizes="(max-width: 640px) 32px, 48px"
+                                                        className="rounded-full object-cover p-1"
                                                     />
                                                 </div>
                                             </TooltipTrigger>

@@ -24,22 +24,21 @@ export default function PokemonResistance({ resistances, text, types, pokemonNam
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0 text-xs">
-                        <div className="flex flex-row items-center justify-center">
+                        <div className="flex flex-row items-center justify-center gap-1 p-1">
                             {resistances.map((resistance: PokemonResistances, index: number) => {
                                 const findTypeInfos = types.find((type: Types) => type.name.fr == resistance.name);
                                 if (findTypeInfos == undefined) return null
                                 return (
-                                    <div key={`${pokemonName}-resi-${findTypeInfos?.name.fr}`} className="p-1">
+                                    <div key={`${pokemonName}-resi-${findTypeInfos?.name.fr}`} className="relative rounded-full size-5 sm:size-6">
                                         <TooltipProvider delayDuration={200}>
                                             <Tooltip>
                                                 <TooltipTrigger>
                                                     <Image
                                                         src={findTypeInfos.sprites}
                                                         alt={findTypeInfos.name.fr}
-                                                        width={24}
-                                                        height={24}
-                                                        quality={75}
-                                                        className="border-2 border-slate-200 rounded-full size-5 sm:size-6"
+                                                        fill
+                                                        sizes="(max-width: 640px) 32px, 48px"
+                                                        className="border-2 border-slate-200 rounded-full object-cover"
                                                     />
                                                 </TooltipTrigger>
                                                 <TooltipContent>

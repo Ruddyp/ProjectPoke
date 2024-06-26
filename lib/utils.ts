@@ -46,7 +46,7 @@ export const colors: Record<PokemonColorType, string> = {
 }
 
 
-export function isEvolution(pokemonEvols: PokemonEvolution) {
+export function isEvolution(pokemonEvols: PokemonEvolution | null) {
   if (pokemonEvols == null) return false
   if (pokemonEvols.pre == null) return false
   if (pokemonEvols.pre.length > 0) return true
