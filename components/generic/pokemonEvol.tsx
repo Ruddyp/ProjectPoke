@@ -23,7 +23,7 @@ export default function PokemonEvol({ pokemon, evol }: PokemonEvolProps) {
                 </CardTitle>
             </CardHeader>
             <CardContent className="flex justify-center items-center p-1 text-xs sm:text-sm text-center">
-                <div onClick={() => router.push(`/pokemon/${pokemon.pokedex_id}`)} className="relative size-48 xs:size-56 sm:size-64">
+                <div onClick={() => router.push(`/pokemon/${evol.pokedex_id}`)} className="relative size-48 xs:size-56 sm:size-64">
                     <Image
                         src={`https://raw.githubusercontent.com/Yarkis01/TyraDex/images/sprites/${evol.pokedex_id}/regular.png`}
                         alt={evol.name}

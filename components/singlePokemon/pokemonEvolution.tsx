@@ -47,7 +47,7 @@ export default function PokemonEvolution({ pokemon }: PokemonEvolutionProps) {
     const evols = getPokemonEvols(pokemon);
 
     return (
-        <div className="flex flex-row flex-wrap gap-8 items-center justify-center">
+        <div className="flex flex-row flex-wrap gap-4 sm:gap-8 items-center justify-center">
             {evols.length > 0 ?
                 <>
                     {evols.map((evol, index: number) => {
