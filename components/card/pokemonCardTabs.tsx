@@ -6,8 +6,8 @@ import { Pokemon, Types } from "@/app/type";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 const PokemonCardFormes = lazy(() => import('./pokemonCardFormes'));
-const PokemonResistances = lazy(() => import('./pokemonResistances'));
-const PokemonTalent = lazy(() => import('./pokemonTalent'));
+const PokemonResistances = lazy(() => import('../generic/pokemonResistances'));
+const PokemonTalent = lazy(() => import('../generic/pokemonTalent'));
 
 type PokemonCardTabsProps = {
     pokemon: Pokemon;

@@ -45,6 +45,15 @@ export const colors: Record<PokemonColorType, string> = {
   dragon_light: "#9AA5FB",
 }
 
+export const maxStats: any = {
+  hp: 255,
+  atk: 190,
+  def: 250,
+  spe_atk: 194,
+  spe_def: 250,
+  vit: 200
+}
+
 
 export function isEvolution(pokemonEvols: PokemonEvolution | null) {
   if (pokemonEvols == null) return false

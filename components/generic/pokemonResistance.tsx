@@ -18,7 +18,7 @@ export default function PokemonResistance({ resistances, text, types, pokemonNam
         <>
             <div className="flex flex-col">
                 <Card className="m-0.5 rounded-md">
-                    <CardHeader className="flex flex-row text-nowrap items-center justify-center bg-muted/80 p-1 m-0">
+                    <CardHeader className="flex flex-row text-nowrap items-center justify-center bg-muted/80 p-1 m-0 rounded-t-md">
                         <CardTitle className="text-xs sm:text-sm">
                             {text}
                         </CardTitle>

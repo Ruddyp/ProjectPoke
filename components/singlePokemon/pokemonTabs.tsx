@@ -1,8 +1,12 @@
 'use client'
 
+import { Suspense, lazy } from "react";
 import { Pokemon, Types } from "@/app/type";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import PokemonInfoGen from './pokemonInfoGen';
+
+const PokemonInfoGen = lazy(() => import('./pokemonInfoGen'));
+const PokemonImagerie = lazy(() => import('./pokemonImagerie'));
+const PokemonEvolution = lazy(() => import('./pokemonEvolution'));
 
 type PokemonTabsProps = {
     pokemon: Pokemon;
@@ -28,11 +32,19 @@ export default function PokemonTabs({ pokemon, types }: PokemonTabsProps) {
                 </TabsTrigger>
             </TabsList>
             <TabsContent value="information">
-                <PokemonInfoGen pokemon={pokemon} types={types} />
+                <Suspense fallback={"Chargement ..."}>
+                    <PokemonInfoGen pokemon={pokemon} types={types} />
+                </Suspense>
             </TabsContent>
             <TabsContent value="evolution">
+                <Suspense fallback={"Chargement ..."}>
+                    <PokemonEvolution pokemon={pokemon} />
+                </Suspense>
             </TabsContent>
             <TabsContent value="imagerie">
+                <Suspense fallback={"Chargement ..."}>
+                    <PokemonImagerie pokemon={pokemon} />
+                </Suspense>
             </TabsContent>
             <TabsContent value="pokemon_go">
             </TabsContent>

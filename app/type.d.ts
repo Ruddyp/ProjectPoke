@@ -47,12 +47,12 @@ export type PokemonTalents = {
 }
 
 export type PokemonStats = {
-    hp: string;
-    atk: string;
-    def: string;
-    spe_atk: string;
-    spe_def: string;
-    vit: string;
+    hp: number;
+    atk: number;
+    def: number;
+    spe_atk: number;
+    spe_def: number;
+    vit: number;
 }
 
 export type PokemonResistances = {

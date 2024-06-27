@@ -1,10 +1,11 @@
 'use client';
 
-import { Types } from "@/app/type";
+import { PokemonColorType, Types } from "@/app/type";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Dispatch, SetStateAction } from "react";
+import { colors } from "@/lib/utils";
 
 type TypeFilterProps = {
     types: Types[]
@@ -72,7 +73,8 @@ export default function TypeFilter({ types, setTypeFilter, typeFilter }: TypeFil
                         {types.map((type: Types, index: number) => {
                             const name = type.name.fr.toLowerCase() as keyof TypeFilterType;
                             const state = typeFilter[name];
-                            const style = isTypeActive(name, typeFilter) ? "bg-plante" : "bg-accent";
+                            const typeColor = colors[name as PokemonColorType];
+                            const bgColor = isTypeActive(name, typeFilter) ? `${typeColor}` : "#42496c";
                             return (
                                 <div key={`${type.name.fr}-filter_type-${index}`} className="p-1">
                                     <TooltipProvider delayDuration={200}>
@@ -81,7 +83,7 @@ export default function TypeFilter({ types, setTypeFilter, typeFilter }: TypeFil
                                                 ...typeFilter,
                                                 [type.name.fr.toLocaleLowerCase()]: !state
                                             })}>
-                                                <div className={`${style} relative size-8 sm:size-10 rounded-md outline outline-offset-0 outline-slate-500`}>
+                                                <div className={`relative size-8 sm:size-10 rounded-md outline outline-offset-0 outline-slate-500`} style={{ backgroundColor: bgColor }}>
                                                     <Image
                                                         src={type.sprites}
                                                         alt={type.name.fr}

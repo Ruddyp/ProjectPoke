@@ -4,6 +4,7 @@ import { Pokemon, PokemonTypes } from "@/app/type";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import Image from 'next/image'
+import PokemonGenderStats from "../generic/pokemonGenderStats";
 
 type PokemonInfoGenTableProps = {
     pokemon: Pokemon;
@@ -13,7 +14,7 @@ export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProp
 
     return (
         <Card className="m-0.5 rounded-md border border-slate-500">
-            <CardHeader className="flex flex-row text-nowrap items-center justify-center bg-muted/80 p-1 m-0">
+            <CardHeader className="flex flex-row text-nowrap items-center justify-center bg-muted/80 p-1 m-0 rounded-t-md">
                 <CardTitle className="text-xs sm:text-sm">
                     Informations Générales
                 </CardTitle>
@@ -78,16 +79,7 @@ export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProp
                         <tr className="border-b border-slate-500">
                             <td className="text-red-400 p-2">Répartition des sexes:</td>
                             <td className="p-2">
-                                {
-                                    pokemon.sexe != null ?
-                                        <div className="relative flex flex-row justify-center w-full h-8">
-                                            <div className="bg-[#5bc0de] rounded-l-lg border-b-2 border-l-2 border-t-2 border-white" style={{ width: `${pokemon.sexe?.male}%` }}></div>
-
-                                            <div className="bg-[#ffc0cb] rounded-r-lg border-b-2 border-r-2 border-t-2 border-white" style={{ width: `${pokemon.sexe?.female}%` }}></div>
-                                            <span className="absolute self-center text-accent font-medium">{pokemon.sexe?.male}% - {pokemon.sexe?.female}% </span>
-                                        </div>
-                                        : "Répartition inconnue"
-                                }
+                                <PokemonGenderStats sexe={pokemon.sexe} />
                             </td>
                         </tr>
                         <tr>

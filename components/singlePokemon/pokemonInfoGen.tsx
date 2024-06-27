@@ -4,7 +4,8 @@ import { Pokemon, Types } from "@/app/type";
 import Image from 'next/image'
 import PokemonInfoGenTable from "./pokemonInfoGenTable";
 import PokemonInfoGenResistances from "./pokemonInfoGenResistances";
-import PokemonTalent from "../card/pokemonTalent";
+import PokemonTalent from "../generic/pokemonTalent";
+import PokemonInfoGenStats from "./pokemonInfoGenStats";
 
 type PokemonInfoGenProps = {
     pokemon: Pokemon;
@@ -32,6 +33,9 @@ export default function PokemonInfoGen({ pokemon, types }: PokemonInfoGenProps) 
             </div>
             <div className="col-span-1 sm:col-span-2">
                 <PokemonInfoGenResistances pokemon={pokemon} types={types} />
+            </div>
+            <div className="col-span-1 sm:col-span-2">
+                <PokemonInfoGenStats pokemon={pokemon} />
             </div>
             <div className="col-span-1 sm:col-span-2">
                 <PokemonTalent pokemon={pokemon} />

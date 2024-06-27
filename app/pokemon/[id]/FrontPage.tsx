@@ -16,6 +16,7 @@ export default function FrontPage({ pokemon, types }: FrontPageProps) {
   const router = useRouter();
   const previousId = pokemon.pokedex_id - 1;
   const nextId = pokemon.pokedex_id + 1;
+  console.log("pokemon", pokemon);
 
   return (
     <div className="flex flex-col items-center justify-center gap-6 m-10">
@@ -26,18 +27,16 @@ export default function FrontPage({ pokemon, types }: FrontPageProps) {
           onClick={() => router.push(`/pokemon/${previousId}`)}
           disabled={previousId < 0 ? true : false}
         >
-          {/* <span>{"<--"}</span><span className="hidden sm:flex ml-0.5">Précédent</span> */}
           <ChevronLeft className="h-5 w-5" strokeWidth={3} />
           <span className="hidden sm:flex">Précédent</span>
         </Button>
-        <span className="text-red-400 font-bold text-4xl">{pokemon.name.fr}</span>
+        <span className="text-red-400 font-bold text-2xl sm:text-4xl">{pokemon.name.fr}</span>
         <Button
           variant="default"
           size="default_responsive"
           onClick={() => router.push(`/pokemon/${nextId}`)}
           disabled={previousId >= 1024 ? true : false}
         >
-          {/* <span className="hidden sm:flex mr-0.5">Suivant</span><span>{"-->"}</span> */}
           <span className="hidden sm:flex">Suivant</span>
           <ChevronRight className="h-5 w-5" strokeWidth={3} />
         </Button>
