@@ -17,7 +17,7 @@ export default function PokemonTalent({ pokemon }: PokemonTalentsProps) {
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-1 text-xs sm:text-sm text-center">
-                {talents == null || talents.length == 0 ? "Ce pokémon ne possède aucun talents" :
+                {talents == null || talents.length == 0 ? "Ce pokémon ne possède aucuns talents" :
                     <div className="flex flex-col gap-1">
                         {talents != null && talents.map((talent: PokemonTalents, index: number) => {
                             return (

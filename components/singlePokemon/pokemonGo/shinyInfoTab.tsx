@@ -38,17 +38,17 @@ export default function ShinyInfoTab({ pokemon }: ShinyInfoTabProps) {
     function badge(condition: boolean) {
         if (condition) {
             return (
-                <div className="flex flex-row items-center w-min bg-green-500 font-bold text-background py-0.5 px-2 sm:py-1 sm:px-3 rounded-full">
+                <div className="flex flex-row items-center w-min text-background bg-green-500 font-bold py-0.5 px-2 sm:py-1 sm:px-3 rounded-full">
                     Oui
-                    <Check className="ml-2 text-background h-5 w-5" />
+                    <Check className="ml-2 h-5 w-5" />
                 </div>
             )
         }
 
         return (
-            <div className="flex flex-row items-center w-min bg-[#ff7675] font-bold text-background py-0.5 px-2 sm:py-1 sm:px-3 rounded-full">
-                Non
-                <X className="ml-1 text-background h-5 w-5" />
+            <div className="flex flex-row items-center w-min text-background bg-[#ff7675] font-bold py-0.5 px-2 sm:py-1 sm:px-3 rounded-full">
+                <p>Non</p>
+                <X className="ml-1 h-5 w-5" />
             </div>
         )
     }

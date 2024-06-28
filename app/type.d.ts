@@ -188,6 +188,10 @@ type PoGoApiPokemonMaxCp = {
     pokemon_name: string;
 }
 
+interface PoGoApiJsonList<T> {
+    [key: string]: T[];
+}
+
 type PoGoApiBuddyDistance = {
     distance: number;
     pokemon_id: number;
@@ -195,6 +199,17 @@ type PoGoApiBuddyDistance = {
     form: string;
 }
 
-type PoGoApiBuddyDistanceList = {
-    [key: string]: PoGoApiBuddyDistance[];
+type PoGoApiCandyEvolve = {
+    candy_required: number;
+    form: string;
+    pokemon_id: number;
+    pokemon_name: string;
 }
+
+type PoGoPokemonRarity = {
+    rarity: string;
+    form: string;
+    pokemon_id: number;
+    pokemon_name: string;
+}
+
