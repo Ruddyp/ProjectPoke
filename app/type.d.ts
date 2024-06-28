@@ -165,3 +165,36 @@ type PokeApiVersion = {
     name: string;
     url: string;
 }
+
+type PoGoApiShinyPokemonList = {
+    [key: number]: PoGoApiShinyPokemon
+}
+
+type PoGoApiShinyPokemon = {
+    name: string;
+    found_wild: boolean;
+    found_raid: boolean;
+    found_egg: boolean;
+    found_evolution: boolean;
+    found_photobomb: boolean;
+    found_research: boolean;
+    id: number;
+}
+
+type PoGoApiPokemonMaxCp = {
+    form: string;
+    max_cp: number;
+    pokemon_id: number;
+    pokemon_name: string;
+}
+
+type PoGoApiBuddyDistance = {
+    distance: number;
+    pokemon_id: number;
+    pokemon_name: string;
+    form: string;
+}
+
+type PoGoApiBuddyDistanceList = {
+    [key: string]: PoGoApiBuddyDistance[];
+}

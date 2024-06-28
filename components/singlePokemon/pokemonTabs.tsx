@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 const PokemonInfoGenTab = lazy(() => import('./pokemonInfoGenTab'));
 const PokemonImagerieTab = lazy(() => import('./pokemonImagerieTab'));
 const PokemonEvolutionTab = lazy(() => import('./pokemonEvolutionTab'));
+const PokemonGoTabs = lazy(() => import('./pokemonGoTabs'));
 
 type PokemonTabsProps = {
     pokemon: Pokemon;
@@ -46,7 +47,10 @@ export default function PokemonTabs({ pokemon, types }: PokemonTabsProps) {
                     <PokemonImagerieTab pokemon={pokemon} />
                 </Suspense>
             </TabsContent>
-            <TabsContent value="pokemon_go">
+            <TabsContent className="flex items-center justify-center" value="pokemon_go">
+                <Suspense fallback={"Chargement ..."}>
+                    <PokemonGoTabs pokemon={pokemon} />
+                </Suspense>
             </TabsContent>
         </Tabs>
     )
