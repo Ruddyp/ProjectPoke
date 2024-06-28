@@ -145,3 +145,23 @@ type PokeApiPokemon = {
         legacy: string;
     }
 }
+
+type PokeApiPokemonSpecies = {
+    flavor_text_entries: PokeApiFlavorTextEntries[]
+}
+
+type PokeApiFlavorTextEntries = {
+    flavor_text: string;
+    language: PokeApiLanguage;
+    version: PokeApiVersion;
+}
+
+type PokeApiLanguage = {
+    name: string;
+    url: string;
+}
+
+type PokeApiVersion = {
+    name: string;
+    url: string;
+}

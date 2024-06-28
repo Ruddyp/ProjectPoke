@@ -14,7 +14,6 @@ type PokemonInfoGenTableProps = {
 
 export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProps) {
     const [pokeApiPokemon, setPokeApiPokemon] = useState<PokeApiPokemon | null>(null)
-    console.log("pokeApiPokemon", pokeApiPokemon);
 
     useEffect(() => {
         // Getting pokemon info from pokeapi

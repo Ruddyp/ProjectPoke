@@ -16,7 +16,6 @@ export default function FrontPage({ pokemon, types }: FrontPageProps) {
   const router = useRouter();
   const previousId = pokemon.pokedex_id - 1;
   const nextId = pokemon.pokedex_id + 1;
-  console.log("pokemon", pokemon);
 
   return (
     <div className="flex flex-col items-center justify-center gap-6 m-10">
