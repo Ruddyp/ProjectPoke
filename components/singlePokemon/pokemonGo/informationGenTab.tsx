@@ -10,14 +10,18 @@ type InformationGenTabProps = {
 }
 
 function getPokemonMaxCp(pokemonId: number, pokemonMaxCpJson: PoGoApiPokemonMaxCp[]) {
-    return pokemonMaxCpJson.find((pokemon) => pokemon.pokemon_id == pokemonId && pokemon.form == "Normal")
+    // J'ai enlevé la condition pokemon.form == "Normal" car certain pokemon n'ont pas de forme normal
+    // return pokemonMaxCpJson.find((pokemon) => pokemon.pokemon_id == pokemonId && pokemon.form == "Normal")
+    return pokemonMaxCpJson.find((pokemon) => pokemon.pokemon_id == pokemonId)
 }
 
 function getFromJsonList<T extends { pokemon_id: number; form: string }>(pokemonId: number, jsonList: PoGoApiJsonList<T>) {
     for (const key in jsonList) {
         if (jsonList.hasOwnProperty(key)) {
             const pokemonList = jsonList[key];
-            const buddyDistance = pokemonList.find(pokemon => pokemon.pokemon_id === pokemonId && pokemon.form == "Normal");
+            // J'ai enlevé la condition pokemon.form == "Normal" car certain pokemon n'ont pas de forme normal
+            // const buddyDistance = pokemonList.find(pokemon => pokemon.pokemon_id === pokemonId && pokemon.form == "Normal"); 
+            const buddyDistance = pokemonList.find(pokemon => pokemon.pokemon_id === pokemonId);
             if (buddyDistance) {
                 return buddyDistance;
             }
@@ -80,6 +84,7 @@ export default function InformationGenTab({ pokemon }: InformationGenTabProps) {
                 method: 'GET',
             });
             const candyEvolveList: PoGoApiJsonList<PoGoApiCandyEvolve> = await response.json();
+            console.log("candyEvolveList", candyEvolveList)
             const candyEvolve = getFromJsonList(pokemon.pokedex_id, candyEvolveList)
             setCandyEvolve(candyEvolve);
         }
