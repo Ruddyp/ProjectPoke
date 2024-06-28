@@ -5,7 +5,8 @@ import SearchBar from "@/components/searchBar"
 import { useEffect, useState } from "react"
 import TypeFilter, { TypeFilterType, typeFilterDefaultValue } from "@/components/typeFilter"
 import PokemonCard from "@/components/card/pokemonCard"
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger } from "@/components/ui/select"
 
 type FrontPageProps = {
   pokemons: Pokemon[]
@@ -47,14 +48,29 @@ function getFilteredPokemon(pokemons: Pokemon[], searchValue: string, typeFilter
   return filteredPokemons
 }
 
+function getPagesForSelect(filteredPokemonsLength: number, rowsPerPage: number) {
+  const nbPages = Math.ceil(filteredPokemonsLength / rowsPerPage)
+  const pages: string[] = [];
+  for (let index = 1; index < nbPages + 1; index++) {
+    pages.push(`${index}`)
+  }
+  return pages
+}
+
 export default function FrontPage({ pokemons, types }: FrontPageProps) {
   const rowsPerPage = 20;
   const [searchValue, setSearchValue] = useState("");
   const [typeFilter, setTypeFilter] = useState(typeFilterDefaultValue);
   const [startIndex, setStartIndex] = useState(0);
   const [endIndex, setEndIndex] = useState(rowsPerPage);
+  const [selectValue, setSelectValue] = useState("1");
 
-  const filteredPokemons = getFilteredPokemon(pokemons, searchValue, typeFilter)
+
+  const filteredPokemons = getFilteredPokemon(pokemons, searchValue, typeFilter);
+  const pages = getPagesForSelect(filteredPokemons.length, rowsPerPage);
+  console.log('endIndex', endIndex)
+  console.log('effe', (startIndex / rowsPerPage) + 1)
+  console.log('pages lenght', pages.length)
 
   useEffect(() => {
     setStartIndex(0)
@@ -75,10 +91,11 @@ export default function FrontPage({ pokemons, types }: FrontPageProps) {
             <PaginationItem>
               <PaginationPrevious
                 size={"default_responsive"}
-                className={startIndex === 0 ? "hidden" : "bg-primary text-primary-foreground hover:bg-primary/90"}
+                className={startIndex === 0 ? "hidden" : "bg-primary text-primary-foreground hover:bg-primary/90 p-1"}
                 onClick={(() => {
                   setStartIndex(startIndex - rowsPerPage);
                   setEndIndex(endIndex - rowsPerPage);
+                  setSelectValue(startIndex == 0 ? "1" : ((startIndex / rowsPerPage)).toString())
                 })}
               />
             </PaginationItem>
@@ -86,19 +103,44 @@ export default function FrontPage({ pokemons, types }: FrontPageProps) {
               {
                 filteredPokemons.length > 0
                   ?
-                  <>
-                    Page {startIndex == 0 ? "1" : (startIndex / rowsPerPage) + 1} / {Math.ceil(filteredPokemons.length / rowsPerPage)}
-                  </>
+                  <Select
+                    value={selectValue}
+                    onValueChange={(value: string) => {
+                      const pageNumber = parseInt(value, 10);
+                      setSelectValue(value)
+                      setStartIndex((pageNumber - 1) * rowsPerPage);
+                      setEndIndex((pageNumber * rowsPerPage) + rowsPerPage);
+                    }}
+                  >
+                    <SelectTrigger className="flex flex-row gap-1 border-2 border-secondary/60 hover:border-secondary p-1 h-8">
+                      Page {startIndex == 0 ? "1" : (startIndex / rowsPerPage) + 1} / {Math.ceil(filteredPokemons.length / rowsPerPage)}
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {pages.map((page: string, index: number) => {
+                          return (
+                            <div key={page}>
+                              <SelectItem value={page}>
+                                {page}
+                              </SelectItem>
+                            </div>
+                          )
+                        })
+                        }
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                   : null
               }
             </PaginationItem>
             <PaginationItem>
               <PaginationNext
                 size={"default_responsive"}
-                className={endIndex > filteredPokemons.length ? "hidden" : "bg-primary text-primary-foreground hover:bg-primary/90"}
+                className={((startIndex / rowsPerPage) + 1 >= pages.length) ? "hidden" : "bg-primary text-primary-foreground hover:bg-primary/90 p-1"}
                 onClick={(() => {
                   setStartIndex(startIndex + rowsPerPage);
                   setEndIndex(endIndex + rowsPerPage);
+                  setSelectValue(startIndex == 0 ? "2" : ((startIndex / rowsPerPage) + 2).toString())
                 })} />
             </PaginationItem>
           </PaginationContent>

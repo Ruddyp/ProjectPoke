@@ -4,9 +4,9 @@ import { Suspense, lazy } from "react";
 import { Pokemon, Types } from "@/app/type";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
-const PokemonInfoGen = lazy(() => import('./pokemonInfoGen'));
-const PokemonImagerie = lazy(() => import('./pokemonImagerie'));
-const PokemonEvolution = lazy(() => import('./pokemonEvolution'));
+const PokemonInfoGenTab = lazy(() => import('./pokemonInfoGenTab'));
+const PokemonImagerieTab = lazy(() => import('./pokemonImagerieTab'));
+const PokemonEvolutionTab = lazy(() => import('./pokemonEvolutionTab'));
 
 type PokemonTabsProps = {
     pokemon: Pokemon;
@@ -33,17 +33,17 @@ export default function PokemonTabs({ pokemon, types }: PokemonTabsProps) {
             </TabsList>
             <TabsContent value="information">
                 <Suspense fallback={"Chargement ..."}>
-                    <PokemonInfoGen pokemon={pokemon} types={types} />
+                    <PokemonInfoGenTab pokemon={pokemon} types={types} />
                 </Suspense>
             </TabsContent>
             <TabsContent value="evolution">
                 <Suspense fallback={"Chargement ..."}>
-                    <PokemonEvolution pokemon={pokemon} />
+                    <PokemonEvolutionTab pokemon={pokemon} />
                 </Suspense>
             </TabsContent>
             <TabsContent value="imagerie">
                 <Suspense fallback={"Chargement ..."}>
-                    <PokemonImagerie pokemon={pokemon} />
+                    <PokemonImagerieTab pokemon={pokemon} />
                 </Suspense>
             </TabsContent>
             <TabsContent value="pokemon_go">

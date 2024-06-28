@@ -3,7 +3,7 @@
 import { Pokemon } from "@/app/type";
 import PokemonFoilImg from "../generic/pokemonFoilImg";
 
-type PokemonImagerieProps = {
+type PokemonImagerieTabProps = {
     pokemon: Pokemon;
 }
 
@@ -31,7 +31,7 @@ function getImagesInfo(pokemon: Pokemon) {
     return imagesInfo
 }
 
-export default function PokemonImagerie({ pokemon }: PokemonImagerieProps) {
+export default function PokemonImagerieTab({ pokemon }: PokemonImagerieTabProps) {
     const imagesInfo = getImagesInfo(pokemon);
 
     return (

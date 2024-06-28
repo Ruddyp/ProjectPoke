@@ -1,10 +1,9 @@
 'use client'
 
 import { Evolution, Pokemon } from "@/app/type";
-import PokemonFoilImg from "../generic/pokemonFoilImg";
 import PokemonEvol from "../generic/pokemonEvol";
 
-type PokemonEvolutionProps = {
+type PokemonEvolutionTabProps = {
     pokemon: Pokemon;
 }
 
@@ -42,7 +41,7 @@ function getPokemonEvols(pokemon: Pokemon) {
 }
 
 
-export default function PokemonEvolution({ pokemon }: PokemonEvolutionProps) {
+export default function PokemonEvolutionTab({ pokemon }: PokemonEvolutionTabProps) {
 
     const evols = getPokemonEvols(pokemon);
 

@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card'
 import { Evolution, Pokemon } from '@/app/type'
-import router, { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 type PokemonEvolProps = {
     pokemon: Pokemon;
@@ -22,7 +22,7 @@ export default function PokemonEvol({ pokemon, evol }: PokemonEvolProps) {
                     {evol.name}
                 </CardTitle>
             </CardHeader>
-            <CardContent className="flex justify-center items-center p-1 text-xs sm:text-sm text-center">
+            <CardContent className="flex justify-center items-center p-1 text-xs sm:text-sm text-center cursor-pointer">
                 <div onClick={() => router.push(`/pokemon/${evol.pokedex_id}`)} className="relative size-48 xs:size-56 sm:size-64">
                     <Image
                         src={`https://raw.githubusercontent.com/Yarkis01/TyraDex/images/sprites/${evol.pokedex_id}/regular.png`}

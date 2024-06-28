@@ -29,10 +29,10 @@ export default function PokemonResistance({ resistances, text, types, pokemonNam
                                 const findTypeInfos = types.find((type: Types) => type.name.fr == resistance.name);
                                 if (findTypeInfos == undefined) return null
                                 return (
-                                    <div key={`${pokemonName}-resi-${findTypeInfos?.name.fr}`} className="relative rounded-full size-5 sm:size-6">
+                                    <div key={`${pokemonName}-resi-${findTypeInfos?.name.fr}`}>
                                         <TooltipProvider delayDuration={200}>
                                             <Tooltip>
-                                                <TooltipTrigger>
+                                                <TooltipTrigger className='relative rounded-full size-5 sm:size-6'>
                                                     <Image
                                                         src={findTypeInfos.sprites}
                                                         alt={findTypeInfos.name.fr}

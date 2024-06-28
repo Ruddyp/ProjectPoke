@@ -137,3 +137,11 @@ export type PokemonColorType =
     'ténèbres_light' |
     'dragon' |
     'dragon_light';
+
+
+type PokeApiPokemon = {
+    cries: {
+        latest: string;
+        legacy: string;
+    }
+}

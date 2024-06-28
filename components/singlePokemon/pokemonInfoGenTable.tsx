@@ -1,16 +1,43 @@
 'use client'
 
-import { Pokemon, PokemonTypes } from "@/app/type";
+import { PokeApiPokemon, Pokemon, PokemonTypes } from "@/app/type";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import Image from 'next/image'
 import PokemonGenderStats from "../generic/pokemonGenderStats";
+import { useEffect, useRef, useState } from "react";
+import { Play } from "lucide-react";
 
 type PokemonInfoGenTableProps = {
     pokemon: Pokemon;
 }
 
 export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProps) {
+    const [pokeApiPokemon, setPokeApiPokemon] = useState<PokeApiPokemon | null>(null)
+    console.log("pokeApiPokemon", pokeApiPokemon);
+
+    useEffect(() => {
+        // Getting pokemon info from pokeapi
+        // Je fais ça que pour avoir le son du cri du pokemon (pour le moment)
+        async function getPokeApiInfo() {
+            const url = `https://pokeapi.co/api/v2/pokemon/${pokemon.pokedex_id}`
+            const response = await fetch(url, {
+                method: 'GET',
+            });
+            const data: PokeApiPokemon = await response.json();
+            setPokeApiPokemon(data);
+        }
+        getPokeApiInfo();
+    }, [])
+
+    const audioRef = useRef<HTMLAudioElement>(null);
+
+    const handlePlay = () => {
+        if (audioRef.current) {
+            audioRef.current.volume = 0.2;
+            audioRef.current.play();
+        }
+    };
 
     return (
         <Card className="m-0.5 rounded-md border border-slate-500">
@@ -82,9 +109,26 @@ export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProp
                                 <PokemonGenderStats sexe={pokemon.sexe} />
                             </td>
                         </tr>
-                        <tr>
+                        <tr className="border-b border-slate-500">
                             <td className="text-red-400 p-2">Exp pour le lvl 100:</td>
                             <td className="p-2">{pokemon.level_100 != null ? pokemon.level_100.toLocaleString() : "Exp inconnu"}</td>
+                        </tr>
+                        <tr>
+                            <td className="text-red-400 p-2">Cri:</td>
+                            <td className="p-2">
+                                {pokeApiPokemon != null ?
+                                    <div onClick={handlePlay} className="flex items-center justify-center w-10 bg-accent border-2 border-white rounded-full cursor-pointer p-1 hover:bg-primary">
+                                        <Play fill="white" color="white" className="rounded-full" />
+                                        <audio
+                                            ref={audioRef}
+                                            className="hidden"
+                                            controls
+                                            src={pokeApiPokemon?.cries.latest}
+                                        ></audio>
+                                    </div>
+                                    : "Aucun cri disponible"
+                                }
+                            </td>
                         </tr>
                     </tbody>
                 </table>

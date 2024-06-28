@@ -7,12 +7,12 @@ import PokemonInfoGenResistances from "./pokemonInfoGenResistances";
 import PokemonTalent from "../generic/pokemonTalent";
 import PokemonInfoGenStats from "./pokemonInfoGenStats";
 
-type PokemonInfoGenProps = {
+type PokemonInfoGenTabProps = {
     pokemon: Pokemon;
     types: Types[];
 }
 
-export default function PokemonInfoGen({ pokemon, types }: PokemonInfoGenProps) {
+export default function PokemonInfoGenTab({ pokemon, types }: PokemonInfoGenTabProps) {
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
