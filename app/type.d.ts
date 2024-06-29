@@ -166,6 +166,18 @@ type PokeApiVersion = {
     url: string;
 }
 
+type PokeApiMove = {
+    name: string;
+    names: {
+        name: string
+        language: PokeApiLanguage
+    }[];
+}
+
+type PokeApiMoves = {
+    [key: string]: PokeApiMove;
+}
+
 type PoGoApiShinyPokemonList = {
     [key: number]: PoGoApiShinyPokemon
 }
@@ -206,10 +218,28 @@ type PoGoApiCandyEvolve = {
     pokemon_name: string;
 }
 
-type PoGoPokemonRarity = {
+type PoGoApiPokemonRarity = {
     rarity: string;
     form: string;
     pokemon_id: number;
     pokemon_name: string;
 }
 
+type PoGoApiCurrentPokemonMoves = {
+    charged_moves: string[];
+    fast_moves: string[];
+    elite_charged_moves: string[];
+    elite_fast_moves: string[];
+    form: string;
+    pokemon_id: number;
+    pokemon_name: string;
+}
+
+type PoGoApiPvpMoves = {
+    energy_delta: number;
+    move_id: number;
+    power: number;
+    turn_duration: number;
+    name: string;
+    type: string;
+}

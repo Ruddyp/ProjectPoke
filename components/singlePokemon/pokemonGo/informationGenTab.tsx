@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { useEffect, useState } from "react";
-import { PoGoApiBuddyDistance, PoGoApiCandyEvolve, PoGoApiJsonList, PoGoApiPokemonMaxCp, PoGoPokemonRarity, Pokemon } from "@/app/type"
+import { PoGoApiBuddyDistance, PoGoApiCandyEvolve, PoGoApiJsonList, PoGoApiPokemonMaxCp, PoGoApiPokemonRarity, Pokemon } from "@/app/type"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type InformationGenTabProps = {
@@ -30,7 +30,7 @@ function getFromJsonList<T extends { pokemon_id: number; form: string }>(pokemon
     return undefined;
 }
 
-function getRarityColor(pokemonRarity: PoGoPokemonRarity | undefined) {
+function getRarityColor(pokemonRarity: PoGoApiPokemonRarity | undefined) {
     if (pokemonRarity == undefined) return undefined
 
     if (pokemonRarity.rarity == "Standard") {
@@ -50,7 +50,7 @@ export default function InformationGenTab({ pokemon }: InformationGenTabProps) {
     const [pokemonMaxCp, setPokemonMaxCp] = useState<PoGoApiPokemonMaxCp | undefined>(undefined);
     const [buddyDistance, setBuddyDistance] = useState<PoGoApiBuddyDistance | undefined>(undefined);
     const [candyEvolve, setCandyEvolve] = useState<PoGoApiCandyEvolve | undefined>(undefined);
-    const [pokemonRarity, setPokemonRarity] = useState<PoGoPokemonRarity | undefined>(undefined);
+    const [pokemonRarity, setPokemonRarity] = useState<PoGoApiPokemonRarity | undefined>(undefined);
     console.log("pokemon", pokemon);
     console.log("pokemonMaxCp", pokemonMaxCp);
     console.log("buddyDistance", buddyDistance);
@@ -94,7 +94,7 @@ export default function InformationGenTab({ pokemon }: InformationGenTabProps) {
             const response = await fetch(url, {
                 method: 'GET',
             });
-            const pokemonRarityList: PoGoApiJsonList<PoGoPokemonRarity> = await response.json();
+            const pokemonRarityList: PoGoApiJsonList<PoGoApiPokemonRarity> = await response.json();
             const pokemonRarity = getFromJsonList(pokemon.pokedex_id, pokemonRarityList)
             setPokemonRarity(pokemonRarity);
         }
