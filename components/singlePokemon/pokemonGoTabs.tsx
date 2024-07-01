@@ -1,8 +1,8 @@
 'use client'
 
-import { Pokemon } from "@/app/type";
+import { Pokemon, Types } from "@/app/type";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 
 const InformationGenTab = lazy(() => import('./pokemonGo/informationGenTab'));
 const ShinyInfoTab = lazy(() => import('./pokemonGo/shinyInfoTab'));
@@ -13,6 +13,19 @@ type PokemonGoTabsProps = {
 }
 
 export default function PokemonGoTabs({ pokemon }: PokemonGoTabsProps) {
+    const [types, setTypes] = useState<Types[]>([])
+
+    useEffect(() => {
+        async function getTypes() {
+            const url = "https://tyradex.tech/api/v1/types"
+            const response = await fetch(url, {
+                method: 'GET',
+            });
+            const types: Types[] = await response.json();
+            setTypes(types);
+        }
+        getTypes();
+    }, [])
 
     return (
         <Tabs defaultValue="info_gen_go" className="w-[80%] opacity-90">
@@ -34,7 +47,7 @@ export default function PokemonGoTabs({ pokemon }: PokemonGoTabsProps) {
             </TabsContent>
             <TabsContent value="attack">
                 <Suspense fallback={"Chargement ..."}>
-                    <AttaquesTab pokemon={pokemon} />
+                    <AttaquesTab pokemon={pokemon} types={types} />
                 </Suspense>
             </TabsContent>
             <TabsContent value="shiny">

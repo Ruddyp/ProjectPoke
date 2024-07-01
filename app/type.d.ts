@@ -172,6 +172,9 @@ type PokeApiMove = {
         name: string
         language: PokeApiLanguage
     }[];
+    type: {
+        name: string
+    }
 }
 
 type PokeApiMoves = {

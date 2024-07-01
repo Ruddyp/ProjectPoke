@@ -1,11 +1,14 @@
 'use client'
 
-import { PoGoApiCurrentPokemonMoves, PoGoApiPvpMoves, PokeApiMove, PokeApiMoves, Pokemon } from "@/app/type"
+import { PoGoApiCurrentPokemonMoves, PoGoApiPvpMoves, PokeApiMove, PokeApiMoves, Pokemon, Types } from "@/app/type"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
+import PvpFastMoves from "./pvpFastMoves";
+import PvpChargedMoves from "./pvpChargedMoves";
 
 type AttaquesTabProps = {
     pokemon: Pokemon;
+    types: Types[]
 }
 
 function getCurrentPokemonMoves(pokemonId: number, currentPokemonMovesList: PoGoApiCurrentPokemonMoves[]) {
@@ -16,13 +19,13 @@ function getCurrentPokemonMoves(pokemonId: number, currentPokemonMovesList: PoGo
     return currentPokemonMovesList.find((pokemon) => pokemon.pokemon_id == pokemonId);
 }
 
-export default function AttaquesTab({ pokemon }: AttaquesTabProps) {
-    const [pvpFastMoves, setPvpFastMoves] = useState<PoGoApiPvpMoves[] | undefined>(undefined)
-    const [pvpChargedMoves, setPvpChargedMoves] = useState<PoGoApiPvpMoves[] | undefined>(undefined)
+export default function AttaquesTab({ pokemon, types }: AttaquesTabProps) {
+    const [pokemonGoPvpFastMoves, setPokemonGoPvpFastMoves] = useState<PoGoApiPvpMoves[] | undefined>(undefined)
+    const [pokemonGoPvpChargedMoves, setPokemonGoPvpChargedMoves] = useState<PoGoApiPvpMoves[] | undefined>(undefined)
     const [pokemonMoves, setPokemonMoves] = useState<PoGoApiCurrentPokemonMoves | undefined>(undefined)
     const [movesInfo, setMovesInfo] = useState<PokeApiMoves | undefined>(undefined)
-    console.log("pvpFastMoves", pvpFastMoves);
-    console.log("pvpChargedMoves", pvpChargedMoves);
+    console.log("pokemonGoPvpFastMoves", pokemonGoPvpFastMoves);
+    console.log("pokemonGoPvpChargedMoves", pokemonGoPvpChargedMoves);
     console.log("pokemonMoves", pokemonMoves);
     console.log("movesInfo", movesInfo);
 
@@ -33,7 +36,7 @@ export default function AttaquesTab({ pokemon }: AttaquesTabProps) {
                 method: 'GET',
             });
             const pvpFastMoves: PoGoApiPvpMoves[] = await response.json();
-            setPvpFastMoves(pvpFastMoves);
+            setPokemonGoPvpFastMoves(pvpFastMoves);
         }
 
         async function getPoGoApiPvpChargedMoves() {
@@ -42,7 +45,7 @@ export default function AttaquesTab({ pokemon }: AttaquesTabProps) {
                 method: 'GET',
             });
             const pvpChargedMoves: PoGoApiPvpMoves[] = await response.json();
-            setPvpChargedMoves(pvpChargedMoves);
+            setPokemonGoPvpChargedMoves(pvpChargedMoves);
         }
 
         async function getPoGoApiCurrentPokemonMoves() {
@@ -91,7 +94,15 @@ export default function AttaquesTab({ pokemon }: AttaquesTabProps) {
 
     }, [pokemonMoves])
 
-    if (pokemonMoves == undefined && pvpFastMoves == undefined && pvpChargedMoves == undefined && movesInfo == undefined) {
+    if (pokemonGoPvpFastMoves == undefined || pokemonGoPvpChargedMoves == undefined) {
+        return <p className="p-1 text-xs sm:text-sm text-center">Impossible de récupérer la liste des attaques dans pokémon GO</p>
+    }
+
+    if (movesInfo == undefined) {
+        return <p className="p-1 text-xs sm:text-sm text-center">Impossible de récupérer les informations des attaques du pokémon.</p>
+    }
+
+    if (pokemonMoves == undefined) {
         return <p className="p-1 text-xs sm:text-sm text-center">Ce pokémon n&apos;est pas présent dans pokémon GO</p>
     }
 
@@ -104,25 +115,13 @@ export default function AttaquesTab({ pokemon }: AttaquesTabProps) {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-1 text-xs sm:text-sm">
-                    {movesInfo != undefined && pokemonMoves?.fast_moves.map((move) => {
-                        const moveInfo = pvpFastMoves?.find((fastMove) => fastMove.name == move)
-                        const frInfo = movesInfo[move]?.names.find((element) => element.language.name == "fr")
-                        if (moveInfo == undefined) {
-                            return <>
-                                <div key={`${pokemon.pokedex_id}-${move}`}>
-                                    <p>{frInfo?.name}</p>
-                                </div>
-                            </>
-                        }
-                        return (<>
-                            <div key={`${pokemon.pokedex_id}-${move}`} className="flex flex-row gap-1">
-                                <p>{frInfo?.name}</p>
-                                <p>DPS: {moveInfo?.power / moveInfo?.turn_duration}</p>
-                                <p>EPS: {moveInfo?.energy_delta / moveInfo?.turn_duration}</p>
-                                <p>Type: {moveInfo?.type}</p>
-                            </div>
-                        </>)
-                    })}
+                    <PvpFastMoves
+                        pokemon={pokemon}
+                        pokemonGoPvpFastMoves={pokemonGoPvpFastMoves}
+                        pokemonMoves={pokemonMoves}
+                        movesInfo={movesInfo}
+                        types={types}
+                    />
                 </CardContent>
             </Card>
 
@@ -133,25 +132,13 @@ export default function AttaquesTab({ pokemon }: AttaquesTabProps) {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-1 text-xs sm:text-sm">
-                    {movesInfo != undefined && pokemonMoves?.charged_moves.map((move) => {
-                        const moveInfo = pvpChargedMoves?.find((chargedMove) => chargedMove.name == move)
-                        const frInfo = movesInfo[move]?.names.find((element) => element.language.name == "fr")
-                        if (moveInfo == undefined) {
-                            return <>
-                                <div key={`${pokemon.pokedex_id}-${move}`}>
-                                    <p>{frInfo?.name}</p>
-                                </div>
-                            </>
-                        }
-                        return (<>
-                            <div key={`${pokemon.pokedex_id}-${move}`} className="flex flex-row gap-1">
-                                <p>{frInfo?.name}</p>
-                                <p>Puissance: {moveInfo?.power}</p>
-                                <p>Energie: {moveInfo?.energy_delta}</p>
-                                <p>Type: {moveInfo?.type}</p>
-                            </div>
-                        </>)
-                    })}
+                    <PvpChargedMoves
+                        pokemon={pokemon}
+                        pokemonGoPvpChargedMoves={pokemonGoPvpChargedMoves}
+                        pokemonMoves={pokemonMoves}
+                        movesInfo={movesInfo}
+                        types={types}
+                    />
                 </CardContent>
             </Card>
         </div>

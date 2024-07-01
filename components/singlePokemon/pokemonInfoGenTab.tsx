@@ -16,7 +16,6 @@ type PokemonInfoGenTabProps = {
 
 export default function PokemonInfoGenTab({ pokemon, types }: PokemonInfoGenTabProps) {
     const [pokemonSpecies, setPokemonSpecies] = useState<PokeApiPokemonSpecies | null>(null)
-    console.log("pokemonSpecies", pokemonSpecies);
 
     useEffect(() => {
         // Recuperation du PokemonSpecies de PokeApi
