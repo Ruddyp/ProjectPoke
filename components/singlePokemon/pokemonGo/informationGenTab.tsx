@@ -1,8 +1,7 @@
 'use client'
 
-import Image from 'next/image'
 import { useEffect, useState } from "react";
-import { PoGoApiBuddyDistance, PoGoApiCandyEvolve, PoGoApiJsonList, PoGoApiPokemonMaxCp, PoGoApiPokemonRarity, Pokemon } from "@/app/type"
+import { PoGoApiBuddyDistance, PoGoApiJsonList, PoGoApiPokemonMaxCp, PoGoApiPokemonRarity, Pokemon } from "@/app/type"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type InformationGenTabProps = {
@@ -53,7 +52,6 @@ function getRarityColor(pokemonRarity: PoGoApiPokemonRarity | undefined) {
 export default function InformationGenTab({ pokemon }: InformationGenTabProps) {
     const [pokemonMaxCp, setPokemonMaxCp] = useState<PoGoApiPokemonMaxCp | undefined>(undefined);
     const [buddyDistance, setBuddyDistance] = useState<PoGoApiBuddyDistance | undefined>(undefined);
-    const [candyEvolve, setCandyEvolve] = useState<PoGoApiCandyEvolve | undefined>(undefined);
     const [pokemonRarity, setPokemonRarity] = useState<PoGoApiPokemonRarity | undefined>(undefined);
 
     useEffect(() => {
@@ -77,16 +75,6 @@ export default function InformationGenTab({ pokemon }: InformationGenTabProps) {
             setBuddyDistance(buddyDistance);
         }
 
-        async function getPoGoApiCandyEvolve() {
-            const url = `https://pogoapi.net/api/v1/pokemon_candy_to_evolve.json`
-            const response = await fetch(url, {
-                method: 'GET',
-            });
-            const candyEvolveList: PoGoApiJsonList<PoGoApiCandyEvolve> = await response.json();
-            const candyEvolve = getFromJsonList(pokemon.pokedex_id, candyEvolveList)
-            setCandyEvolve(candyEvolve);
-        }
-
         async function getPoGoApiPokemonRarity() {
             const url = `https://pogoapi.net/api/v1/pokemon_rarity.json`
             const response = await fetch(url, {
@@ -97,14 +85,12 @@ export default function InformationGenTab({ pokemon }: InformationGenTabProps) {
             setPokemonRarity(pokemonRarity);
         }
 
-
         getPoGoApiPokemonMaxCp();
         getPoGoApiBuddyDistance();
-        getPoGoApiCandyEvolve();
         getPoGoApiPokemonRarity();
     }, [])
 
-    if (pokemonMaxCp == undefined && buddyDistance == undefined && candyEvolve == undefined && pokemonRarity == undefined) {
+    if (pokemonMaxCp == undefined && buddyDistance == undefined && pokemonRarity == undefined) {
         return <p className="p-1 text-xs sm:text-sm text-center">Ce pokémon n&apos;est pas présent dans pokémon GO</p>
     }
 
@@ -135,29 +121,6 @@ export default function InformationGenTab({ pokemon }: InformationGenTabProps) {
                             <tr className="border-b border-slate-500">
                                 <td className="text-red-400 p-2 text-right font-medium">Distance copain:</td>
                                 <td className="p-2">{buddyDistance != undefined ? <span className="font-bold">{buddyDistance?.distance} km</span> : "Inconnu"}</td>
-                            </tr>
-                            <tr>
-                                <td className="text-red-400 p-2 text-right font-medium">Nombre de bonbon pour évoluer:</td>
-                                <td className="p-2">
-                                    {
-                                        candyEvolve != undefined ?
-                                            <div className="flex flex-row gap-1.5 items-center">
-                                                <p className="font-bold">
-                                                    {candyEvolve?.candy_required}
-                                                </p>
-                                                <div className={`relative size-5 sm:size-6`}>
-                                                    <Image
-                                                        src={"/Sprite_Super_Bonbon_GO.png"}
-                                                        alt={"Candy"}
-                                                        fill
-                                                        className="rounded-full object-cover"
-                                                        unoptimized
-                                                    />
-                                                </div>
-                                            </div>
-                                            : "Ce pokémon n'évolue pas"
-                                    }
-                                </td>
                             </tr>
                         </tbody>
                     </table>

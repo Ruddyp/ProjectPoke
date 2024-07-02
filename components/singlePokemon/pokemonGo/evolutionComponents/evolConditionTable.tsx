@@ -1,6 +1,7 @@
 'use client'
 
 import { PoGoApiEvolution } from '@/app/type'
+import { lureToFrench } from '@/lib/utils';
 import Image from 'next/image'
 
 type EvolConditionTableProps = {
@@ -43,7 +44,7 @@ export default function EvolConditionTable({ evol }: EvolConditionTableProps) {
                 {evol.buddy_distance_required != undefined ?
                     <tr>
                         <td className="text-red-400 p-2 text-right font-medium">Distance copain requis:</td>
-                        <td className="p-2">{evol.buddy_distance_required}</td>
+                        <td className="p-2">{evol.buddy_distance_required} km</td>
                     </tr>
                     : null
                 }
@@ -57,7 +58,7 @@ export default function EvolConditionTable({ evol }: EvolConditionTableProps) {
                 {evol.lure_required != undefined ?
                     <tr>
                         <td className="text-red-400 p-2 text-right font-medium">Leurre requis:</td>
-                        <td className="p-2">{evol.lure_required}</td>
+                        <td className="p-2">{lureToFrench(evol.lure_required)}</td>
                     </tr>
                     : null
                 }

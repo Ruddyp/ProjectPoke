@@ -67,6 +67,10 @@ export function lureToFrench(lure: string) {
       return "Module leurre glaciaire"
     case "Mossy Lure Module":
       return "Module leurre moussu"
+    case "Magnetic Lure Module":
+      return "Module leurre magnétique"
+    case "Rainy Lure Module":
+      return "Module leurre pluvieux"
     default:
       break;
   }

@@ -32,7 +32,7 @@ export default function EvolCard({ pokemon, evol }: EvolCardProps) {
     const nameInfo = pokemonSpecies?.names.find(name => name.language.name === "fr");
 
     return (
-        <Card className={`m-0.5 rounded-md border border-slate-500 w-72 sm:w-80`}>
+        <Card className={`m-0.5 rounded-md border border-slate-500 w-64`}>
             <CardHeader className="flex flex-row text-nowrap items-center justify-center bg-muted/80 p-1 m-0 rounded-t-md">
                 <CardTitle className="text-sm sm:text-base">
                     {nameInfo?.name ?? evol.pokemon_name}
@@ -52,7 +52,7 @@ export default function EvolCard({ pokemon, evol }: EvolCardProps) {
             </CardContent>
             <CardFooter className='flex flex-col items-center justify-center p-0 m-0'>
                 <CardTitle className='w-full border-t border-slate-500 bg-muted/80 text-center text-sm sm:text-base'>
-                    Condition d&apos;évolution
+                    Conditions d&apos;évolution
                 </CardTitle>
                 <CardContent>
                     <EvolConditionTable evol={evol} />
