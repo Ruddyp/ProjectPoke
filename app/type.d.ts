@@ -140,6 +140,7 @@ export type PokemonColorType =
 
 
 type PokeApiPokemon = {
+
     cries: {
         latest: string;
         legacy: string;
@@ -147,7 +148,11 @@ type PokeApiPokemon = {
 }
 
 type PokeApiPokemonSpecies = {
-    flavor_text_entries: PokeApiFlavorTextEntries[]
+    flavor_text_entries: PokeApiFlavorTextEntries[];
+    names: {
+        name: string
+        language: PokeApiLanguage
+    }[];
 }
 
 type PokeApiFlavorTextEntries = {
@@ -245,4 +250,26 @@ type PoGoApiPvpMoves = {
     turn_duration: number;
     name: string;
     type: string;
+}
+
+type PoGoApiEvolutions = {
+    pokemon_id: number;
+    pokemon_name: string;
+    evolutions: PoGoApiEvolution[];
+}
+
+type PoGoApiEvolution = {
+    pokemon_id: number;
+    pokemon_name: string;
+    form: string;
+    candy_required: number;
+    buddy_distance_required?: number;
+    must_be_buddy_to_evolve?: boolean;
+    only_evolves_in_daytime?: boolean;
+    only_evolves_in_nighttime?: boolean;
+    priority?: number;
+    lure_required?: string;
+    item_required?: string;
+    no_candy_cost_if_traded?: boolean;
+    gender_required?: string;
 }

@@ -3,8 +3,8 @@
 import { PoGoApiCurrentPokemonMoves, PoGoApiPvpMoves, PokeApiMove, PokeApiMoves, Pokemon, Types } from "@/app/type"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
-import PvpFastMoves from "./pvpFastMoves";
-import PvpChargedMoves from "./pvpChargedMoves";
+import PvpFastMovesTable from "./attaqueComponents/pvpFastMovesTable";
+import PvpChargedMovesTable from "./attaqueComponents/pvpChargedMovesTable";
 
 type AttaquesTabProps = {
     pokemon: Pokemon;
@@ -24,10 +24,6 @@ export default function AttaquesTab({ pokemon, types }: AttaquesTabProps) {
     const [pokemonGoPvpChargedMoves, setPokemonGoPvpChargedMoves] = useState<PoGoApiPvpMoves[] | undefined>(undefined)
     const [pokemonMoves, setPokemonMoves] = useState<PoGoApiCurrentPokemonMoves | undefined>(undefined)
     const [movesInfo, setMovesInfo] = useState<PokeApiMoves | undefined>(undefined)
-    console.log("pokemonGoPvpFastMoves", pokemonGoPvpFastMoves);
-    console.log("pokemonGoPvpChargedMoves", pokemonGoPvpChargedMoves);
-    console.log("pokemonMoves", pokemonMoves);
-    console.log("movesInfo", movesInfo);
 
     useEffect(() => {
         async function getPoGoApiPvpFastMoves() {
@@ -115,8 +111,7 @@ export default function AttaquesTab({ pokemon, types }: AttaquesTabProps) {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-1 text-xs sm:text-sm">
-                    <PvpFastMoves
-                        pokemon={pokemon}
+                    <PvpFastMovesTable
                         pokemonGoPvpFastMoves={pokemonGoPvpFastMoves}
                         pokemonMoves={pokemonMoves}
                         movesInfo={movesInfo}
@@ -124,7 +119,6 @@ export default function AttaquesTab({ pokemon, types }: AttaquesTabProps) {
                     />
                 </CardContent>
             </Card>
-
             <Card className="m-0.5 rounded-md border border-slate-500 w-full">
                 <CardHeader className="flex flex-row text-nowrap items-center justify-center bg-muted/80 p-1 m-0 rounded-t-md">
                     <CardTitle className="text-sm sm:text-base">
@@ -132,8 +126,7 @@ export default function AttaquesTab({ pokemon, types }: AttaquesTabProps) {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-1 text-xs sm:text-sm">
-                    <PvpChargedMoves
-                        pokemon={pokemon}
+                    <PvpChargedMovesTable
                         pokemonGoPvpChargedMoves={pokemonGoPvpChargedMoves}
                         pokemonMoves={pokemonMoves}
                         movesInfo={movesInfo}

@@ -1,8 +1,8 @@
 'use client'
 
 import { Pokemon } from "@/app/type";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import PokemonStatBar from "../generic/pokemonStatBar";
+import PokemonStatBar from "@/components/generic/pokemonStatBar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type PokemonInfoGenStatsProps = {
     pokemon: Pokemon;

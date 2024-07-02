@@ -2,12 +2,12 @@
 
 import { PokeApiPokemonSpecies, Pokemon, Types } from "@/app/type";
 import Image from 'next/image'
-import PokemonInfoGenTable from "./pokemonInfoGenTable";
-import PokemonInfoGenResistances from "./pokemonInfoGenResistances";
 import PokemonTalent from "../generic/pokemonTalent";
-import PokemonInfoGenStats from "./pokemonInfoGenStats";
 import { useEffect, useState } from "react";
-import PokemonDescription from "./pokemonDescription";
+import PokemonDescription from "./InfoGenComponents/pokemonDescription";
+import PokemonInfoGenTable from "./InfoGenComponents/pokemonInfoGenTable";
+import PokemonInfoGenResistances from "./InfoGenComponents/pokemonInfoGenResistances";
+import PokemonInfoGenStats from "./InfoGenComponents/pokemonInfoGenStats";
 
 type PokemonInfoGenTabProps = {
     pokemon: Pokemon;

@@ -1,12 +1,12 @@
 'use client'
 
 import { PokeApiPokemon, Pokemon, PokemonTypes } from "@/app/type";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import Image from 'next/image'
-import PokemonGenderStats from "../generic/pokemonGenderStats";
 import { useEffect, useRef, useState } from "react";
 import { Play } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import PokemonGenderStats from "@/components/generic/pokemonGenderStats";
 
 type PokemonInfoGenTableProps = {
     pokemon: Pokemon;

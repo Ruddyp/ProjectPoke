@@ -44,6 +44,10 @@ function getRarityColor(pokemonRarity: PoGoApiPokemonRarity | undefined) {
     if (pokemonRarity.rarity == "Mythic") {
         return "bg-gradient-to-b from-[#9333ea] via-[#e879f9] to-[#9333ea] text-[#86198f]"
     }
+
+    if (pokemonRarity.rarity == "Ultra beast") {
+        return "bg-gradient-to-b from-[#2563eb] via-[#60a5fa] to-[#2563eb] text-[#1e40af]"
+    }
 }
 
 export default function InformationGenTab({ pokemon }: InformationGenTabProps) {
@@ -51,11 +55,6 @@ export default function InformationGenTab({ pokemon }: InformationGenTabProps) {
     const [buddyDistance, setBuddyDistance] = useState<PoGoApiBuddyDistance | undefined>(undefined);
     const [candyEvolve, setCandyEvolve] = useState<PoGoApiCandyEvolve | undefined>(undefined);
     const [pokemonRarity, setPokemonRarity] = useState<PoGoApiPokemonRarity | undefined>(undefined);
-    console.log("pokemon", pokemon);
-    console.log("pokemonMaxCp", pokemonMaxCp);
-    console.log("buddyDistance", buddyDistance);
-    console.log("candyEvolve", candyEvolve);
-    console.log("pokemonRarity", pokemonRarity);
 
     useEffect(() => {
         async function getPoGoApiPokemonMaxCp() {
@@ -84,7 +83,6 @@ export default function InformationGenTab({ pokemon }: InformationGenTabProps) {
                 method: 'GET',
             });
             const candyEvolveList: PoGoApiJsonList<PoGoApiCandyEvolve> = await response.json();
-            console.log("candyEvolveList", candyEvolveList)
             const candyEvolve = getFromJsonList(pokemon.pokedex_id, candyEvolveList)
             setCandyEvolve(candyEvolve);
         }
@@ -110,10 +108,7 @@ export default function InformationGenTab({ pokemon }: InformationGenTabProps) {
         return <p className="p-1 text-xs sm:text-sm text-center">Ce pokémon n&apos;est pas présent dans pokémon GO</p>
     }
 
-    // bg-[#fb940a]
-
     const rarityColor = getRarityColor(pokemonRarity);
-
     return (
         <div className='flex flex-col gap-2 m-1'>
             {pokemonRarity != undefined ?

@@ -7,6 +7,7 @@ import { Suspense, lazy, useEffect, useState } from "react";
 const InformationGenTab = lazy(() => import('./pokemonGo/informationGenTab'));
 const ShinyInfoTab = lazy(() => import('./pokemonGo/shinyInfoTab'));
 const AttaquesTab = lazy(() => import('./pokemonGo/attaquesTab'));
+const EvolutionTab = lazy(() => import('./pokemonGo/evolutionTab'));
 
 type PokemonGoTabsProps = {
     pokemon: Pokemon;
@@ -36,6 +37,9 @@ export default function PokemonGoTabs({ pokemon }: PokemonGoTabsProps) {
                 <TabsTrigger className="flex text-sm sm:text-base" value="attack">
                     <p className="text-xs sm:text-sm text-wrap">Attaques</p>
                 </TabsTrigger>
+                <TabsTrigger className="flex text-sm sm:text-base" value="evol">
+                    <p className="text-xs sm:text-sm text-wrap">Évolutions</p>
+                </TabsTrigger>
                 <TabsTrigger className="flex text-sm sm:text-base" value="shiny">
                     <p className="text-xs sm:text-sm text-wrap">Shiny</p>
                 </TabsTrigger>
@@ -48,6 +52,11 @@ export default function PokemonGoTabs({ pokemon }: PokemonGoTabsProps) {
             <TabsContent value="attack">
                 <Suspense fallback={"Chargement ..."}>
                     <AttaquesTab pokemon={pokemon} types={types} />
+                </Suspense>
+            </TabsContent>
+            <TabsContent value="evol">
+                <Suspense fallback={"Chargement ..."}>
+                    <EvolutionTab pokemon={pokemon} />
                 </Suspense>
             </TabsContent>
             <TabsContent value="shiny">

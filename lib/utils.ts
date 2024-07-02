@@ -60,3 +60,14 @@ export function isEvolution(pokemonEvols: PokemonEvolution | null) {
   if (pokemonEvols.pre == null) return false
   if (pokemonEvols.pre.length > 0) return true
 }
+
+export function lureToFrench(lure: string) {
+  switch (lure) {
+    case "Glacial Lure Module":
+      return "Module leurre glaciaire"
+    case "Mossy Lure Module":
+      return "Module leurre moussu"
+    default:
+      break;
+  }
+}

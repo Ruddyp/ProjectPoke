@@ -1,8 +1,8 @@
 'use client'
 
 import { Pokemon, Types } from "@/app/type";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import PokemonResistances from "../generic/pokemonResistances";
+import PokemonResistances from "@/components/generic/pokemonResistances";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type PokemonInfoGenResistancesProps = {
     pokemon: Pokemon;

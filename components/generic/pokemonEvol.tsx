@@ -34,15 +34,11 @@ export default function PokemonEvol({ pokemon, evol }: PokemonEvolProps) {
                     />
                 </div>
             </CardContent>
-            {
-                evol.condition != "" ?
-                    <CardFooter className='flex flex-row items-center justify-center bg-muted/80 p-1 m-0 rounded-b-md'>
-                        <CardTitle className='text-center text-sm sm:text-base'>
-                            {evol.condition}
-                        </CardTitle>
-                    </CardFooter>
-                    : null
-            }
+            <CardFooter className='flex flex-row items-center justify-center bg-muted/80 p-1 m-0 rounded-b-md'>
+                <CardTitle className='text-center text-sm sm:text-base'>
+                    {evol.condition != "" ? evol.condition : <p>&nbsp;</p>}
+                </CardTitle>
+            </CardFooter>
         </Card>
     )
 }
