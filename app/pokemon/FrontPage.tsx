@@ -80,7 +80,7 @@ export default function FrontPage({ pokemons, types }: FrontPageProps) {
         <SearchBar onChange={setSearchValue} value={searchValue} />
         <TypeFilter types={types} setTypeFilter={setTypeFilter} typeFilter={typeFilter} />
         <div className="flex flex-row w-full gap-2 items-center justify-center">
-          <span className="text-base font-medium">Nombre de pokémon:</span>
+          <span className="text-base font-medium">Nombre de pokémon :</span>
           <span className="text-lg font-extrabold text-white">{filteredPokemons.length}</span>
         </div>
         <Pagination>

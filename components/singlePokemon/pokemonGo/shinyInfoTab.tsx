@@ -66,28 +66,28 @@ export default function ShinyInfoTab({ pokemon }: ShinyInfoTabProps) {
                     </thead>
                     <tbody>
                         <tr className="border-b border-slate-500">
-                            <td className="text-red-400 p-2 text-right font-medium">Dans un oeuf:</td>
+                            <td className="text-red-400 p-2 text-right font-medium">Dans un oeuf :</td>
                             <td className="p-2">{badge(shinyData.found_egg)}</td>
                         </tr>
                         <tr className="border-b border-slate-500">
-                            <td className="text-red-400 p-2 text-right font-medium">Via une évolution:</td>
+                            <td className="text-red-400 p-2 text-right font-medium">Via une évolution :</td>
                             <td className="p-2">{badge(shinyData.found_evolution)}</td>
                         </tr>
 
                         <tr className="border-b border-slate-500">
-                            <td className="text-red-400 p-2 text-right font-medium">Dans un photobomb:</td>
+                            <td className="text-red-400 p-2 text-right font-medium">Dans un photobomb :</td>
                             <td className="p-2">{badge(shinyData.found_photobomb)}</td>
                         </tr>
                         <tr className="border-b border-slate-500">
-                            <td className="text-red-400 p-2 text-right font-medium">Dans un raid:</td>
+                            <td className="text-red-400 p-2 text-right font-medium">Dans un raid :</td>
                             <td className="p-2">{badge(shinyData.found_raid)}</td>
                         </tr>
                         <tr className="border-b border-slate-500">
-                            <td className="text-red-400 p-2 text-right font-medium">Dans une étude de recherche:</td>
+                            <td className="text-red-400 p-2 text-right font-medium">Dans une étude de recherche :</td>
                             <td className="p-2">{badge(shinyData.found_research)}</td>
                         </tr>
                         <tr>
-                            <td className="text-red-400 p-2 text-right font-medium">Dans la nature:</td>
+                            <td className="text-red-400 p-2 text-right font-medium">Dans la nature :</td>
                             <td className="p-2">{badge(shinyData.found_wild)}</td>
                         </tr>
                     </tbody>

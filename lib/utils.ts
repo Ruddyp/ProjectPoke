@@ -64,15 +64,15 @@ export function isEvolution(pokemonEvols: PokemonEvolution | null) {
 export function lureToFrench(lure: string) {
   switch (lure) {
     case "Glacial Lure Module":
-      return "Module leurre glaciaire"
+      return "Leurre glaciaire"
     case "Mossy Lure Module":
-      return "Module leurre moussu"
+      return "Leurre moussu"
     case "Magnetic Lure Module":
-      return "Module leurre magnétique"
+      return "Leurre magnétique"
     case "Rainy Lure Module":
-      return "Module leurre pluvieux"
+      return "Leurre pluvieux"
     case "Golden Lure Module":
-      return "Module leurre dorée"
+      return "Leurre dorée"
     default:
       break;
   }

@@ -2,7 +2,7 @@
 
 import { Pokemon, Types } from "@/app/type";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Suspense, lazy, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, Suspense, lazy, useEffect, useState } from "react";
 
 const InformationGenTab = lazy(() => import('./pokemonGo/informationGenTab'));
 const ShinyInfoTab = lazy(() => import('./pokemonGo/shinyInfoTab'));
@@ -11,9 +11,11 @@ const EvolutionTab = lazy(() => import('./pokemonGo/evolutionTab'));
 
 type PokemonGoTabsProps = {
     pokemon: Pokemon;
+    tab: string;
+    setTab: Dispatch<SetStateAction<string>>
 }
 
-export default function PokemonGoTabs({ pokemon }: PokemonGoTabsProps) {
+export default function PokemonGoTabs({ pokemon, tab, setTab }: PokemonGoTabsProps) {
     const [types, setTypes] = useState<Types[]>([])
 
     useEffect(() => {
@@ -28,8 +30,12 @@ export default function PokemonGoTabs({ pokemon }: PokemonGoTabsProps) {
         getTypes();
     }, [])
 
+    const handleTabChange = (value: string) => {
+        setTab(value);
+    };
+
     return (
-        <Tabs defaultValue="info_gen_go" className="w-[80%] opacity-90">
+        <Tabs value={tab} onValueChange={handleTabChange} className="w-[80%] opacity-90">
             <TabsList className="grid grid-rows-1 sm:grid-cols-3 justify-stretch">
                 <TabsTrigger className="flex text-sm sm:text-base" value="info_gen_go">
                     <p className="text-xs sm:text-sm text-wrap">Informations</p>

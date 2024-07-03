@@ -115,11 +115,11 @@ export default function InformationGenTab({ pokemon }: InformationGenTabProps) {
                         </thead>
                         <tbody>
                             <tr className="border-b border-slate-500">
-                                <td className="text-red-400 p-2 text-right font-medium">Max PC:</td>
+                                <td className="text-red-400 p-2 text-right font-medium">Max PC :</td>
                                 <td className="p-2">{pokemonMaxCp != undefined ? <span className="font-bold">{pokemonMaxCp.max_cp}</span> : "Inconnu"}</td>
                             </tr>
-                            <tr className="border-b border-slate-500">
-                                <td className="text-red-400 p-2 text-right font-medium">Distance copain:</td>
+                            <tr>
+                                <td className="text-red-400 p-2 text-right font-medium">Distance copain :</td>
                                 <td className="p-2">{buddyDistance != undefined ? <span className="font-bold">{buddyDistance?.distance} km</span> : "Inconnu"}</td>
                             </tr>
                         </tbody>

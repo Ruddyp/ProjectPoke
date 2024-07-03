@@ -51,15 +51,15 @@ export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProp
                     </thead>
                     <tbody>
                         <tr className="border-b border-slate-500">
-                            <td className="text-red-400 p-2 font-medium">Numéro pokédex:</td>
+                            <td className="text-red-400 p-2 font-medium">Numéro pokédex :</td>
                             <td className="p-2">N° {pokemon.pokedex_id}</td>
                         </tr>
                         <tr className="border-b border-slate-500">
-                            <td className="text-red-400 p-2 font-medium">Génération:</td>
+                            <td className="text-red-400 p-2 font-medium">Génération :</td>
                             <td className="p-2">{pokemon.generation}</td>
                         </tr>
                         <tr className="border-b border-slate-500">
-                            <td className="text-red-400 p-2 font-medium">Types:</td>
+                            <td className="text-red-400 p-2 font-medium">Types :</td>
                             <td className="p-2 flex flex-row gap-1.5">
                                 {
                                     pokemon.types != null ?
@@ -91,29 +91,29 @@ export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProp
                             </td>
                         </tr>
                         <tr className="border-b border-slate-500">
-                            <td className="text-red-400 p-2 font-medium">Catégorie:</td>
+                            <td className="text-red-400 p-2 font-medium">Catégorie :</td>
                             <td className="p-2">{pokemon.category}</td>
                         </tr>
                         <tr className="border-b border-slate-500">
-                            <td className="text-red-400 p-2 font-medium">Poids:</td>
+                            <td className="text-red-400 p-2 font-medium">Poids :</td>
                             <td className="p-2">{pokemon.weight != null ? pokemon.weight : "Poids inconnu"}</td>
                         </tr>
                         <tr className="border-b border-slate-500">
-                            <td className="text-red-400 p-2 font-medium">Taille:</td>
+                            <td className="text-red-400 p-2 font-medium">Taille :</td>
                             <td className="p-2">{pokemon.height != null ? pokemon.height : "Taille inconnu"}</td>
                         </tr>
                         <tr className="border-b border-slate-500">
-                            <td className="text-red-400 p-2 font-medium">Répartition des sexes:</td>
+                            <td className="text-red-400 p-2 font-medium">Répartition des sexes :</td>
                             <td className="p-2">
                                 <PokemonGenderStats sexe={pokemon.sexe} />
                             </td>
                         </tr>
                         <tr className="border-b border-slate-500">
-                            <td className="text-red-400 p-2 font-medium">Exp pour le lvl 100:</td>
+                            <td className="text-red-400 p-2 font-medium">Exp pour le lvl 100 :</td>
                             <td className="p-2">{pokemon.level_100 != null ? pokemon.level_100.toLocaleString() : "Exp inconnu"}</td>
                         </tr>
                         <tr>
-                            <td className="text-red-400 p-2 font-medium">Cri:</td>
+                            <td className="text-red-400 p-2 font-medium">Cri :</td>
                             <td className="p-2">
                                 {pokeApiPokemon != null ?
                                     <div onClick={handlePlay} className="flex items-center justify-center w-10 bg-accent border-2 border-white rounded-full cursor-pointer p-1 hover:bg-primary">

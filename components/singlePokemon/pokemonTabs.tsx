@@ -1,8 +1,11 @@
 'use client'
 
-import { Suspense, lazy } from "react";
+import { Dispatch, SetStateAction, Suspense, lazy, useEffect, useState } from "react";
 import { Pokemon, Types } from "@/app/type";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { useRouter } from "next/navigation";
+import { usePathname } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 
 const PokemonInfoGenTab = lazy(() => import('./pokemonInfoGenTab'));
 const PokemonImagerieTab = lazy(() => import('./pokemonImagerieTab'));
@@ -11,13 +14,21 @@ const PokemonGoTabs = lazy(() => import('./pokemonGoTabs'));
 
 type PokemonTabsProps = {
     pokemon: Pokemon;
-    types: Types[]
+    types: Types[];
+    tab: string;
+    setTab: Dispatch<SetStateAction<string>>
+    tabGo: string;
+    setTabGo: Dispatch<SetStateAction<string>>
 }
 
-export default function PokemonTabs({ pokemon, types }: PokemonTabsProps) {
+export default function PokemonTabs({ pokemon, types, tab, setTab, tabGo, setTabGo }: PokemonTabsProps) {
+
+    const handleTabChange = (value: string) => {
+        setTab(value);
+    };
 
     return (
-        <Tabs defaultValue="information" className="w-full opacity-90">
+        <Tabs value={tab} onValueChange={handleTabChange} className="w-full opacity-90">
             <TabsList className="grid grid-rows-1 sm:grid-cols-3 justify-stretch">
                 <TabsTrigger className="flex text-sm sm:text-base" value="information">
                     <p className="text-xs sm:text-sm text-wrap">Informations</p>
@@ -49,7 +60,7 @@ export default function PokemonTabs({ pokemon, types }: PokemonTabsProps) {
             </TabsContent>
             <TabsContent className="flex items-center justify-center" value="pokemon_go">
                 <Suspense fallback={"Chargement ..."}>
-                    <PokemonGoTabs pokemon={pokemon} />
+                    <PokemonGoTabs pokemon={pokemon} tab={tabGo} setTab={setTabGo} />
                 </Suspense>
             </TabsContent>
         </Tabs>
