@@ -76,7 +76,7 @@ function getIndices(pokemon: Pokemon, types: Types[], pokemonDescription: PokeAp
   return indices;
 }
 
-function getRandomInt(max = 1027) {
+function getRandomInt(max = 493) {
   return Math.floor(Math.random() * max);
 }
 
