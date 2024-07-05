@@ -3,10 +3,11 @@
 import { Pokemon, Types } from "../type"
 import SearchBar from "@/components/searchBar"
 import { useEffect, useState } from "react"
-import TypeFilter, { TypeFilterType, typeFilterDefaultValue } from "@/components/typeFilter"
+import TypeFilter, { TypeFilterType, typeFilterInitValue } from "@/components/typeFilter"
 import PokemonCard from "@/components/card/pokemonCard"
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger } from "@/components/ui/select"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 type FrontPageProps = {
   pokemons: Pokemon[]
@@ -42,7 +43,7 @@ function getFilteredPokemonByType(pokemons: Pokemon[], typeFilter: TypeFilterTyp
 
 function getFilteredPokemon(pokemons: Pokemon[], searchValue: string, typeFilter: TypeFilterType) {
   let filteredPokemons = getFilteredPokemonBySearch(pokemons, searchValue);
-  if (typeFilter != typeFilterDefaultValue) {
+  if (typeFilter != typeFilterInitValue) {
     filteredPokemons = getFilteredPokemonByType(filteredPokemons, typeFilter);
   }
   return filteredPokemons
@@ -57,13 +58,66 @@ function getPagesForSelect(filteredPokemonsLength: number, rowsPerPage: number) 
   return pages
 }
 
+function getActiveTypeFilter(typeFilter: TypeFilterType) {
+  return Object.entries(typeFilter)
+    .filter(([key, value]) => value === true)
+    .map(([key, value]) => key);
+}
+
+function getTypeFilterDefaultValue(activeTypes: string | null) {
+  if (activeTypes == null) {
+    return typeFilterInitValue
+  }
+
+  let typefilterDefaultValue = { ...typeFilterInitValue };
+  activeTypes.split(',').forEach(type => {
+    if (typefilterDefaultValue.hasOwnProperty(type)) {
+      typefilterDefaultValue[type as keyof TypeFilterType] = true;
+    }
+  });
+  return typefilterDefaultValue;
+
+}
+
 export default function FrontPage({ pokemons, types }: FrontPageProps) {
   const rowsPerPage = 20;
-  const [searchValue, setSearchValue] = useState("");
-  const [typeFilter, setTypeFilter] = useState(typeFilterDefaultValue);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activeTypes = searchParams.get('types');
+  const searchDefaultValue = searchParams.get('search') ?? "";
+  const [searchValue, setSearchValue] = useState(searchDefaultValue);
+  const [typeFilter, setTypeFilter] = useState(getTypeFilterDefaultValue(activeTypes));
   const [startIndex, setStartIndex] = useState(0);
   const [endIndex, setEndIndex] = useState(rowsPerPage);
   const [selectValue, setSelectValue] = useState("1");
+
+  useEffect(() => {
+    const activeTypeFilters = getActiveTypeFilter(typeFilter);
+    let activeTypeFilterString = ""
+    for (let index = 0; index < activeTypeFilters.length; index++) {
+      activeTypeFilterString += activeTypeFilters[index]
+      if (index + 1 < activeTypeFilters.length) {
+        activeTypeFilterString += ","
+      }
+    }
+
+    if (activeTypeFilterString == "" && searchValue == "") {
+      router.push(`${pathname}`);
+    }
+
+    if (activeTypeFilterString != "" && searchValue == "") {
+      router.push(`${pathname}?types=${activeTypeFilterString}`);
+    }
+
+    if (activeTypeFilterString != "" && searchValue != "") {
+      router.push(`${pathname}?search=${searchValue}&types=${activeTypeFilterString}`);
+    }
+
+    if (activeTypeFilterString == "" && searchValue != "") {
+      router.push(`${pathname}?search=${searchValue}`);
+    }
+  }, [pathname, router, typeFilter, searchValue]);
 
 
   const filteredPokemons = getFilteredPokemon(pokemons, searchValue, typeFilter);

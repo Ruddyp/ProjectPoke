@@ -15,7 +15,6 @@ function findShinyDataByPokemonId(shinyData: PoGoApiShinyPokemonList, id: number
 
 export default function ShinyInfoTab({ pokemon }: ShinyInfoTabProps) {
     const [shinyData, setShinyData] = useState<PoGoApiShinyPokemon | null>(null)
-    console.log("shinyData", shinyData);
 
     useEffect(() => {
         // Recuperation dinfops d'obtention des shiny de PoGoApi

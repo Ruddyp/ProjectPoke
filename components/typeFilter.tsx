@@ -34,7 +34,7 @@ export type TypeFilterType = {
     dragon: boolean;
 }
 
-export const typeFilterDefaultValue: TypeFilterType = {
+export const typeFilterInitValue: TypeFilterType = {
     plante: false,
     poison: false,
     feu: false,
@@ -75,6 +75,7 @@ export default function TypeFilter({ types, setTypeFilter, typeFilter }: TypeFil
                             const state = typeFilter[name];
                             const typeColor = colors[name as PokemonColorType];
                             const bgColor = isTypeActive(name, typeFilter) ? `${typeColor}` : "#42496c";
+                            const outlineColor = isTypeActive(name, typeFilter) ? "#cbd5e1" : "#64748b";
                             return (
                                 <div key={`${type.name.fr}-filter_type-${index}`} className="p-1">
                                     <TooltipProvider delayDuration={200}>
@@ -83,7 +84,7 @@ export default function TypeFilter({ types, setTypeFilter, typeFilter }: TypeFil
                                                 ...typeFilter,
                                                 [type.name.fr.toLocaleLowerCase()]: !state
                                             })}>
-                                                <div className={`relative size-8 sm:size-10 rounded-md outline outline-offset-0 outline-slate-500`} style={{ backgroundColor: bgColor }}>
+                                                <div className={`relative size-8 sm:size-10 rounded-md outline outline-offset-0`} style={{ backgroundColor: bgColor, outlineColor: outlineColor }}>
                                                     <Image
                                                         src={type.sprites}
                                                         alt={type.name.fr}
