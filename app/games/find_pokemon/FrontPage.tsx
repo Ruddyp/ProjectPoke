@@ -72,6 +72,7 @@ function getIndices(pokemon: Pokemon, types: Types[], pokemonDescription: PokeAp
   const description = pokemonDescription?.flavor_text_entries.find((desc) => desc.language.name == "fr");
   indices.push(<TextIndice title="Description" text={description != undefined ? description.flavor_text : "Aucune description disponible"} />)
   indices.push(<ComponentIndice title="Types" component={<PokemonTypesComponent pokemon={pokemon} />} />);
+  indices.push(<TextIndice title="Id du pokedex" text={pokemon.pokedex_id.toString()} />)
   return indices;
 }
 
