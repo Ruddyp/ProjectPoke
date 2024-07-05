@@ -9,14 +9,14 @@ import PokemonTalent from "@/components/generic/pokemonTalent"
 import SearchBar from "@/components/searchBar"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Image from 'next/image'
 
 
 type FrontPageProps = {
-  pokemon: Pokemon
-  types: Types[]
-  pokemonDescription: PokeApiPokemonSpecies
+  // pokemon: Pokemon
+  // types: Types[]
+  // pokemonDescription: PokeApiPokemonSpecies
 }
 
 type PokemonTypesComponentProps = {
@@ -76,20 +76,71 @@ function getIndices(pokemon: Pokemon, types: Types[], pokemonDescription: PokeAp
   return indices;
 }
 
-export default function FrontPage({ pokemon, types, pokemonDescription }: FrontPageProps) {
+function getRandomInt(max = 1027) {
+  return Math.floor(Math.random() * max);
+}
+
+export default function FrontPage({ }: FrontPageProps) {
+  const [types, setTypes] = useState<Types[]>([])
+  const [pokemon, setPokemon] = useState<Pokemon | undefined>(undefined)
+  const [pokemonDescription, setPokemonDescription] = useState<PokeApiPokemonSpecies | undefined>(undefined)
   const [response, setResponse] = useState("");
   const [indexIndice, setIndexIndice] = useState(-1);
+
+  useEffect(() => {
+    async function getTypes() {
+      const url = "https://tyradex.tech/api/v1/types"
+      const response = await fetch(url, {
+        method: 'GET',
+      });
+      const types: Types[] = await response.json();
+      setTypes(types);
+    }
+    async function getPokemon(id: string) {
+      const pokemonUrl = `https://tyradex.vercel.app/api/v1/pokemon/${id}`
+      const response = await fetch(pokemonUrl, {
+        method: 'GET',
+      });
+      const pokemon: Pokemon = await response.json();
+      setPokemon(pokemon);
+    }
+    getTypes();
+    getPokemon(getRandomInt().toString());
+  }, [])
+
+  useEffect(() => {
+    async function getPokemonDescription(id: string) {
+      const url = `https://pokeapi.co/api/v2/pokemon-species/${id}`
+      const response = await fetch(url, {
+        method: 'GET',
+      });
+      const pokemonDescription: PokeApiPokemonSpecies = await response.json();
+      setPokemonDescription(pokemonDescription);
+    }
+    if (pokemon) {
+      getPokemonDescription(pokemon?.pokedex_id.toString());
+    }
+  }, [pokemon])
+
+  if (pokemon == undefined) {
+    return <p>Error while fetching pokemon</p>
+  }
+
+  if (pokemonDescription == undefined) {
+    return <p>Error while fetching pokemon description</p>
+  }
+
 
   const indices = getIndices(pokemon, types, pokemonDescription);
   console.log("pokemon", pokemon);
 
   function handleValidation() {
-    if (response != pokemon.name.fr.toLocaleLowerCase()) {
+    if (response != pokemon?.name.fr.toLocaleLowerCase()) {
       setIndexIndice(indexIndice + 1)
       setResponse("");
     }
 
-    if (response == pokemon.name.fr.toLocaleLowerCase()) {
+    if (response == pokemon?.name.fr.toLocaleLowerCase()) {
       alert("BRAVO tu as trouvé le pokémon");
     }
   }

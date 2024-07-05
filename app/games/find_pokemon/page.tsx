@@ -35,7 +35,7 @@ export default async function Page() {
   const pokemonDescription: PokeApiPokemonSpecies = await getPokemonDescription(pokemon.pokedex_id.toString());
   return (
     <>
-      <FrontPage pokemon={pokemon} types={types} pokemonDescription={pokemonDescription} />
+      <FrontPage />
     </>
   );
 }
