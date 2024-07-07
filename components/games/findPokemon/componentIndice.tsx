@@ -15,7 +15,7 @@ export default function ComponentIndice({ component, title }: ComponentIndicePro
                     {title}
                 </CardTitle>
             </CardHeader>
-            <CardContent className="p-1 text-xs sm:text-sm text-center">
+            <CardContent className="flex flex-row items-center justify-center p-1 text-xs sm:text-sm text-center">
                 {component}
             </CardContent>
         </Card>

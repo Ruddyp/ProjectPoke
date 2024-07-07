@@ -35,14 +35,14 @@ export function SheetNavbar() {
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="sm:max-w-xs overflow-y-auto">
-                    <SheetHeader>
+                    <SheetHeader className="flex flex-col justify-center items-center">
                         <SheetTitle>Menu</SheetTitle>
                         <SheetDescription>
                         </SheetDescription>
                     </SheetHeader>
                     <nav className="grid gap-2 text-base font-medium mt-4">
                         <Button
-                            className="w-full bg-accent text-secondary hover:bg-accent/60 p-1"
+                            className="w-full bg-background text-secondary hover:bg-accent/60 p-1"
                             size="default_responsive"
                             variant="link"
                             onClick={() => setSheetOpen(false)}
@@ -53,7 +53,7 @@ export function SheetNavbar() {
                             </Link>
                         </Button>
                         <Button
-                            className="w-full bg-accent text-secondary hover:bg-accent/60 p-1"
+                            className="w-full bg-background text-secondary hover:bg-accent/60 p-1"
                             size="default_responsive"
                             variant="link"
                             onClick={() => setSheetOpen(false)}

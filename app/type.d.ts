@@ -99,6 +99,13 @@ export type Types = {
     resistances: PokemonResistances[],
 }
 
+export type Generation = {
+    generation: number,
+    from: number,
+    to: number,
+    isActive?: boolean
+}
+
 export type PokemonColorType =
     'plante' |
     'plante_light' |

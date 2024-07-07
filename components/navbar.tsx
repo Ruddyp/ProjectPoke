@@ -23,10 +23,10 @@ const games: { title: string; href: string; description: string }[] = [
             "L'objectif de ce jeu est de trouver le pokémon",
     },
     {
-        title: "Le juste poids",
+        title: "A venir ...",
         href: "/docs/primitives/hover-card",
         description:
-            "L'objectif de ce jeu est de trouver le poids du pokémon",
+            "A venir soon :D",
     },
 ]
 

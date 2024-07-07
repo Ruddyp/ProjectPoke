@@ -3,17 +3,17 @@
 import { PokeApiPokemon, Pokemon, PokemonTypes } from "@/app/type";
 import Image from 'next/image'
 import { useEffect, useRef, useState } from "react";
-import { Play } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import PokemonGenderStats from "@/components/generic/pokemonGenderStats";
+import PokemonCri from "@/components/generic/pokemonCri";
 
 type PokemonInfoGenTableProps = {
     pokemon: Pokemon;
 }
 
 export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProps) {
-    const [pokeApiPokemon, setPokeApiPokemon] = useState<PokeApiPokemon | null>(null)
+    const [pokeApiPokemon, setPokeApiPokemon] = useState<PokeApiPokemon | undefined>(undefined)
 
     useEffect(() => {
         // Getting pokemon info from pokeapi
@@ -115,18 +115,7 @@ export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProp
                         <tr>
                             <td className="text-red-400 p-2 font-medium">Cri :</td>
                             <td className="p-2">
-                                {pokeApiPokemon != null ?
-                                    <div onClick={handlePlay} className="flex items-center justify-center w-10 bg-accent border-2 border-white rounded-full cursor-pointer p-1 hover:bg-primary">
-                                        <Play fill="white" color="white" className="rounded-full" />
-                                        <audio
-                                            ref={audioRef}
-                                            className="hidden"
-                                            controls
-                                            src={pokeApiPokemon?.cries.latest}
-                                        ></audio>
-                                    </div>
-                                    : "Aucun cri disponible"
-                                }
+                                <PokemonCri pokeApiPokemon={pokeApiPokemon} />
                             </td>
                         </tr>
                     </tbody>

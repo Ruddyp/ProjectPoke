@@ -19,7 +19,7 @@ export default function SearchBar({ onChange, value, className }: SearchBarProps
     };
 
     return (
-        <div className={cn("flex flex-row items-center w-[80%] relative p-1 rounded-lg", className)}>
+        <div className={cn("flex flex-row items-center w-[80%] relative rounded-lg", className)}>
             <Search className="h-4 w-4 ml-2 absolute text-white" />
             <Input
                 type="search"

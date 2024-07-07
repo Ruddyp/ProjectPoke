@@ -1,6 +1,6 @@
 'use client'
 
-import { PokeApiPokemonSpecies, Pokemon, PokemonTypes, Types } from "@/app/type"
+import { Generation, PokeApiPokemon, PokeApiPokemonSpecies, Pokemon, Types } from "@/app/type"
 import ComponentIndice from "@/components/games/findPokemon/componentIndice"
 import TextIndice from "@/components/games/findPokemon/textIndice"
 import PokemonGenderStats from "@/components/generic/pokemonGenderStats"
@@ -8,55 +8,23 @@ import PokemonResistances from "@/components/generic/pokemonResistances"
 import PokemonTalent from "@/components/generic/pokemonTalent"
 import SearchBar from "@/components/searchBar"
 import { Button } from "@/components/ui/button"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useEffect, useState } from "react"
-import Image from 'next/image'
-
+import PokemonTypesComponent from "@/components/generic/pokemonTypesComponent"
+import GenerationFilter from "@/components/games/findPokemon/generationFilter"
+import PokemonCri from "@/components/generic/pokemonCri"
+import PokemonBlurImg from "@/components/generic/pokemonBlurImg"
+import { RotateCcw } from "lucide-react"
+import DialogSuccess from "@/components/games/findPokemon/diaglogSuccess"
+import { ConfettiFireworks } from "@/lib/utils"
 
 type FrontPageProps = {
-  // pokemon: Pokemon
-  // types: Types[]
-  // pokemonDescription: PokeApiPokemonSpecies
+  pokemons: Pokemon[];
+  types: Types[];
+  generations: Generation[];
 }
 
-type PokemonTypesComponentProps = {
-  pokemon: Pokemon
-}
-
-function PokemonTypesComponent({ pokemon }: PokemonTypesComponentProps) {
-  return (
-    <div className="flex flex-row justify-center items-center gap-4">
-      {pokemon.types != null ?
-        pokemon.types.map((type: PokemonTypes, index: number) => {
-          return (
-            <div key={`${pokemon.pokedex_id}_type_${index}`}>
-              <TooltipProvider delayDuration={200}>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Image
-                      src={type.image}
-                      alt={type.name}
-                      width={32}
-                      height={32}
-                      quality={75}
-                      className="border-2 border-slate-200 rounded-full size-6 sm:size-8"
-                      unoptimized
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent sideOffset={10}>
-                    <p>{type.name}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>)
-        })
-        : <p>Ce pokémon n&apos;a pas de type</p>
-      }
-    </div>
-  )
-}
-
-function getIndices(pokemon: Pokemon, types: Types[], pokemonDescription: PokeApiPokemonSpecies) {
+function getIndices(pokemon: Pokemon | undefined, types: Types[], pokemonDescription: PokeApiPokemonSpecies | undefined, pokeApiPokemon: PokeApiPokemon | undefined) {
+  if (pokemon == undefined || pokemonDescription == undefined || pokeApiPokemon == undefined) return undefined
   const indices = []
   indices.push(<ComponentIndice title="Répartition des sexes" component={<PokemonGenderStats sexe={pokemon.sexe} />} />)
   if (pokemon.weight != null) {
@@ -68,45 +36,51 @@ function getIndices(pokemon: Pokemon, types: Types[], pokemonDescription: PokeAp
   indices.push(<TextIndice title="Génération" text={pokemon.generation.toString()} />)
   indices.push(<TextIndice title="Catégorie" text={pokemon.category} />)
   indices.push(<ComponentIndice title="Faiblesses et résistances" component={<PokemonResistances pokemon={pokemon} types={types} />} />)
+  indices.push(<ComponentIndice title="Cri du pokémon" component={<PokemonCri pokeApiPokemon={pokeApiPokemon} />} />)
   indices.push(<PokemonTalent pokemon={pokemon} />)
   const description = pokemonDescription?.flavor_text_entries.find((desc) => desc.language.name == "fr");
   indices.push(<TextIndice title="Description" text={description != undefined ? description.flavor_text : "Aucune description disponible"} />)
   indices.push(<ComponentIndice title="Types" component={<PokemonTypesComponent pokemon={pokemon} />} />);
   indices.push(<TextIndice title="Id du pokedex" text={pokemon.pokedex_id.toString()} />)
+  indices.push(<ComponentIndice title="Images du pokemon floutée" component={<PokemonBlurImg pokemon={pokemon} />} />);
   return indices;
 }
 
-function getRandomInt(max = 493) {
-  return Math.floor(Math.random() * max);
+function getRandomNumber(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export default function FrontPage({ }: FrontPageProps) {
-  const [types, setTypes] = useState<Types[]>([])
-  const [pokemon, setPokemon] = useState<Pokemon | undefined>(undefined)
-  const [pokemonDescription, setPokemonDescription] = useState<PokeApiPokemonSpecies | undefined>(undefined)
+function getRandomPokemonFromActiveGeneration(generations: Generation[], pokemons: Pokemon[]): Pokemon | undefined {
+  // Filtrer les générations actives
+  const activeGenerations = generations.filter(gen => gen.isActive);
+
+  // Si aucun élément actif n'est trouvé, retourner undefined
+  if (activeGenerations.length === 0) {
+    return undefined;
+  }
+
+  // Sélectionner aléatoirement un élément de l'array filtré
+  const randomIndex = Math.floor(Math.random() * activeGenerations.length);
+  const randomPokemonId = getRandomNumber(activeGenerations[randomIndex].from, activeGenerations[randomIndex].to);
+  return pokemons.find((pokemon) => pokemon.pokedex_id == randomPokemonId)
+}
+
+export default function FrontPage({ pokemons, types, generations }: FrontPageProps) {
+  const [generationFilter, setGenerationFilter] = useState(generations);
+  const [pokemon, setPokemon] = useState<Pokemon | undefined>(getRandomPokemonFromActiveGeneration(generationFilter, pokemons));
+  const [pokemonDescription, setPokemonDescription] = useState<PokeApiPokemonSpecies | undefined>(undefined);
+  const [pokeApiPokemon, setPokeApiPokemon] = useState<PokeApiPokemon | undefined>(undefined)
   const [response, setResponse] = useState("");
   const [indexIndice, setIndexIndice] = useState(-1);
+  const [congrats, setCongrats] = useState(false);
+
+  const nbActiveGenerations = generationFilter.filter(gen => gen.isActive).length;
 
   useEffect(() => {
-    async function getTypes() {
-      const url = "https://tyradex.tech/api/v1/types"
-      const response = await fetch(url, {
-        method: 'GET',
-      });
-      const types: Types[] = await response.json();
-      setTypes(types);
-    }
-    async function getPokemon(id: string) {
-      const pokemonUrl = `https://tyradex.vercel.app/api/v1/pokemon/${id}`
-      const response = await fetch(pokemonUrl, {
-        method: 'GET',
-      });
-      const pokemon: Pokemon = await response.json();
-      setPokemon(pokemon);
-    }
-    getTypes();
-    getPokemon(getRandomInt().toString());
-  }, [])
+    setResponse("");
+    setIndexIndice(-1)
+    setPokemon(getRandomPokemonFromActiveGeneration(generationFilter, pokemons))
+  }, [generationFilter, pokemons])
 
   useEffect(() => {
     async function getPokemonDescription(id: string) {
@@ -117,22 +91,35 @@ export default function FrontPage({ }: FrontPageProps) {
       const pokemonDescription: PokeApiPokemonSpecies = await response.json();
       setPokemonDescription(pokemonDescription);
     }
-    if (pokemon) {
-      getPokemonDescription(pokemon?.pokedex_id.toString());
+
+    async function getPokeApiInfo(id: string) {
+      const url = `https://pokeapi.co/api/v2/pokemon/${id}`
+      const response = await fetch(url, {
+        method: 'GET',
+      });
+      const data: PokeApiPokemon = await response.json();
+      setPokeApiPokemon(data);
     }
+
+    if (pokemon == undefined) {
+      setPokemonDescription(undefined);
+      setPokeApiPokemon(undefined);
+    } else {
+      getPokemonDescription(pokemon.pokedex_id.toString());
+      getPokeApiInfo(pokemon.pokedex_id.toString());
+    }
+
   }, [pokemon])
 
-  if (pokemon == undefined) {
-    return <p>Error while fetching pokemon</p>
-  }
+  useEffect(() => {
+    if (congrats == false) {
+      setResponse("");
+      setIndexIndice(-1)
+      setPokemon(getRandomPokemonFromActiveGeneration(generationFilter, pokemons))
+    }
+  }, [congrats, generationFilter, pokemons])
 
-  if (pokemonDescription == undefined) {
-    return <p>Error while fetching pokemon description</p>
-  }
-
-
-  const indices = getIndices(pokemon, types, pokemonDescription);
-  console.log("pokemon", pokemon);
+  const indices = getIndices(pokemon, types, pokemonDescription, pokeApiPokemon);
 
   function handleValidation() {
     if (response != pokemon?.name.fr.toLocaleLowerCase()) {
@@ -141,27 +128,44 @@ export default function FrontPage({ }: FrontPageProps) {
     }
 
     if (response == pokemon?.name.fr.toLocaleLowerCase()) {
-      alert("BRAVO tu as trouvé le pokémon");
+      setCongrats(true);
+      ConfettiFireworks();
     }
+  }
+
+  function handleRestart() {
+    setIndexIndice(-1)
+    setResponse("");
+    setPokemon(getRandomPokemonFromActiveGeneration(generationFilter, pokemons))
   }
 
   return (
     <div className="flex flex-col gap-2 justify-center items-center m-5">
       <p className="text-center font-bold text-2xl sm:text-4xl">Devine le pokemon</p>
-      <div className="flex flex-row justify-center items-center gap-2">
-        <SearchBar onChange={setResponse} value={response} className="w-[250px] sm:w-[500px]" />
-        <Button size="default_responsive" className="h-12" onClick={handleValidation}>Valider</Button>
-      </div>
-      <div className="flex flex-row gap-2 flex-wrap justify-center items-center">
-        {indices.map((indice: JSX.Element, index: number) => {
-          if (index > indexIndice) return null;
-          return (
-            <div className="w-[300px]" key={`Indice-${index}`}>
-              {indice}
-            </div>
-          )
-        })}
-      </div>
+      <GenerationFilter generationFilter={generationFilter} setGenerationFilter={setGenerationFilter} />
+      {congrats ? <DialogSuccess setCongrats={setCongrats} /> : null}
+      {nbActiveGenerations === 0 ? <p>Veuillez sélectionner au moins une génération</p> : null}
+      {nbActiveGenerations > 0 && indices != undefined ?
+        <>
+          <div className="sticky top-20 z-50 flex flex-row justify-center items-center gap-1 sm:gap-2">
+            <SearchBar onChange={setResponse} value={response} className="w-[225px] sm:w-[500px]" />
+            <Button size="default_responsive" className="w-[50px] sm:w-max h-12" onClick={handleValidation}>Valider</Button>
+            <Button size="default_responsive" className="bg-gray-500 hover:bg-gray-600 w-[50px] sm:w-max h-12" onClick={handleRestart}><RotateCcw /></Button>
+          </div>
+          <div className="flex flex-col gap-2 flex-wrap justify-center items-center">
+            {indices.map((indice: JSX.Element, index: number) => {
+              if (index > indexIndice) return null;
+              return (
+                <div className="w-[300px] sm:w-[400px]" key={`Indice-${index}`}>
+                  {indice}
+                </div>
+              )
+            })
+            }
+          </div>
+        </>
+        : null
+      }
     </div>
   )
 }
