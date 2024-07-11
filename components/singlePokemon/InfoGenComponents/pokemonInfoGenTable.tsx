@@ -19,7 +19,7 @@ export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProp
         // Getting pokemon info from pokeapi
         // Je fais ça que pour avoir le son du cri du pokemon (pour le moment)
         async function getPokeApiInfo() {
-            const url = `https://pokeapi.co/api/v2/pokemon/${pokemon.pokedex_id}`
+            const url = `https://pokeapi.co/api/v2/pokemon/${pokemon.pokedex_id}/`
             const response = await fetch(url, {
                 method: 'GET',
             });
@@ -28,15 +28,6 @@ export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProp
         }
         getPokeApiInfo();
     }, [])
-
-    const audioRef = useRef<HTMLAudioElement>(null);
-
-    const handlePlay = () => {
-        if (audioRef.current) {
-            audioRef.current.volume = 0.2;
-            audioRef.current.play();
-        }
-    };
 
     return (
         <Card className="m-0.5 rounded-md border border-slate-500">

@@ -10,11 +10,11 @@ type PokemonTypesComponentProps = {
 
 export default function PokemonTypesComponent({ pokemon }: PokemonTypesComponentProps) {
     return (
-        <div className="flex flex-row justify-center items-center gap-4">
+        <div className="flex flex-row justify-center items-center gap-2">
             {pokemon.types != null ?
                 pokemon.types.map((type: PokemonTypes, index: number) => {
                     return (
-                        <div key={`${pokemon.pokedex_id}_type_${index}`}>
+                        <div className="flex flex-row justify-center items-center gap-2" key={`${pokemon.pokedex_id}_type_${index}`}>
                             <TooltipProvider delayDuration={200}>
                                 <Tooltip>
                                     <TooltipTrigger>

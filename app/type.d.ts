@@ -280,3 +280,12 @@ type PoGoApiEvolution = {
     no_candy_cost_if_traded?: boolean;
     gender_required?: string;
 }
+
+type Raid = {
+    pokemon_id: number
+    boss_cp: number | undefined
+    max_cp: number | undefined
+    max_cp_boost: number | undefined
+    additional_info: string | undefined
+    tier: string
+}

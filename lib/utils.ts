@@ -55,7 +55,6 @@ export const maxStats: any = {
   vit: 200
 }
 
-
 export function isEvolution(pokemonEvols: PokemonEvolution | null) {
   if (pokemonEvols == null) return false
   if (pokemonEvols.pre == null) return false
@@ -107,3 +106,15 @@ export function ConfettiFireworks() {
     });
   }, 250);
 }
+
+export const raidTiers = [
+  "1st Tier",
+  "1st Tier Shadow Raids",
+  "3rd Tier",
+  "3rd Tier Shadow Raids",
+  "5th Tier",
+  "Legendary Shadow Raids",
+  "Mega Raids",
+  "Mega Legendary",
+  "Ultra Beast",
+];

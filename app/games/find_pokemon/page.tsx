@@ -1,21 +1,6 @@
 import { Generation, Pokemon, Types } from "@/app/type";
 import FrontPage from "./FrontPage";
-
-async function getPokemons() {
-  const url = "https://tyradex.vercel.app/api/v1/pokemon"
-  const response = await fetch(url, {
-    method: 'GET',
-  });
-  return await response.json();
-}
-
-async function getTypes() {
-  const url = "https://tyradex.tech/api/v1/types"
-  const response = await fetch(url, {
-    method: 'GET',
-  });
-  return await response.json();
-}
+import { getPokemons, getTypes } from "@/lib/fetch";
 
 async function getGenerations() {
   const url = "https://tyradex.tech/api/v1/gen"

@@ -1,25 +1,9 @@
 import { colors } from "@/lib/utils";
 import { Pokemon, PokemonColorType, PokemonTypes } from "../type";
 import FrontPage from "./FrontPage";
+import { getPokemons, getTypes } from "@/lib/fetch";
 
-async function getPokemons() {
-  const allPokemon = "https://tyradex.vercel.app/api/v1/pokemon"
-  const gen1 = "https://tyradex.vercel.app/api/v1/gen/1"
-  const response = await fetch(allPokemon, {
-    method: 'GET',
-  });
-  return await response.json();
-}
-
-async function getTypes() {
-  const url = "https://tyradex.tech/api/v1/types"
-  const response = await fetch(url, {
-    method: 'GET',
-  });
-  return await response.json();
-}
-
-function getCardBgColor(types: PokemonTypes[] | null) {
+export function getCardBgColor(types: PokemonTypes[] | null) {
 
   // Cas pour missing no ou il n'a pas de type, on renvoie un type normal en linear gradient
   if (types == null) {

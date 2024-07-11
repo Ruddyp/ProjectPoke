@@ -1,14 +1,11 @@
 'use client';
 
-import { Search } from "lucide-react";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "../ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Button } from "../ui/button";
 import { Pokemon } from "@/app/type";
 import SearchBar from "../searchBar";
 import Image from 'next/image'
-import router, { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 
 function getFilteredPokemonBySearch(pokemons: Pokemon[], searchValue: string) {
@@ -17,7 +14,6 @@ function getFilteredPokemonBySearch(pokemons: Pokemon[], searchValue: string) {
 }
 
 export default function PokemonCombobox() {
-    const [open, setOpen] = useState(false)
     const [searchValue, setSearchValue] = useState("");
     const [pokemons, setPokemons] = useState<Pokemon[]>([])
     const router = useRouter();
@@ -26,7 +22,7 @@ export default function PokemonCombobox() {
     const tabGo = searchParams.get('tab_go') ?? 'info_gen_go';
 
     useEffect(() => {
-        async function getTypes() {
+        async function getPokemon() {
             const url = "https://tyradex.vercel.app/api/v1/pokemon"
             const response = await fetch(url, {
                 method: 'GET',
@@ -34,7 +30,7 @@ export default function PokemonCombobox() {
             const pokemons: Pokemon[] = await response.json();
             setPokemons(pokemons);
         }
-        getTypes();
+        getPokemon();
     }, [])
 
     return (

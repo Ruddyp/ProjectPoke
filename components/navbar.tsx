@@ -55,6 +55,13 @@ export default function NavBar() {
                         </NavigationMenuLink>
                     </Link>
                 </NavigationMenuItem>
+                <NavigationMenuItem>
+                    <Link href="/raid" legacyBehavior passHref>
+                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                            <List /><span className="ml-2 text-lg">Liste des raids</span>
+                        </NavigationMenuLink>
+                    </Link>
+                </NavigationMenuItem>
                 <NavigationMenuItem className="relative">
                     <NavigationMenuTrigger className={navigationMenuTriggerStyle()}><Gamepad2 /><span className="ml-2 text-lg">Jouer</span></NavigationMenuTrigger>
                     <NavigationMenuContent>

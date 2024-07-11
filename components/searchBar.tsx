@@ -9,7 +9,6 @@ type SearchBarProps = {
     onChange: Dispatch<SetStateAction<string>>
     value: string
     className?: string | undefined
-
 }
 
 export default function SearchBar({ onChange, value, className }: SearchBarProps) {

@@ -59,6 +59,17 @@ export function SheetNavbar() {
                             onClick={() => setSheetOpen(false)}
                             asChild
                         >
+                            <Link href="/raid">
+                                <List /><span className="ml-2 text-lg">Liste des raids</span>
+                            </Link>
+                        </Button>
+                        <Button
+                            className="w-full bg-background text-secondary hover:bg-accent/60 p-1"
+                            size="default_responsive"
+                            variant="link"
+                            onClick={() => setSheetOpen(false)}
+                            asChild
+                        >
                             <Link href="/games/find_pokemon">
                                 <span className="ml-2 text-lg">Trouve le pokemon</span>
                             </Link>
