@@ -16,6 +16,9 @@ async function getCurrentRaids() {
     const url = "https://pokemongo.fandom.com/wiki/List_of_current_Raid_Bosses"
     const response = await fetch(url, {
       method: 'GET',
+      next: {
+        revalidate: 3600
+      }
     });
     const html = await response.text();
     // Charger le HTML avec cheerio

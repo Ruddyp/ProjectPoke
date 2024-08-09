@@ -30,7 +30,8 @@ export default function PokemonCard({ pokemon, types, indexCard }: PokemonCardPr
             <Badge className="absolute -ml-1 mt-2 p-1 px-2 bg-gradient-to-b from-[#9d9d9d] via-[#ffffff] to-[#9d9d9d] text-[#5b575a] italic shadow-lg">{badgeText}</Badge>
             <CardHeader className="relative flex flex-row p-0 py-1">
                 <CardTitle className="text-xl ml-14 sm:text-2xl text-black">{pokemon.name.fr}</CardTitle>
-                <span className="text-xs sm:text-sm text-black italic ml-1">{`(${srcSprite.text})`}</span>
+                {/* srcSprite.text == forme sélectionné (normal, shiny, gigamax etc.. ) */}
+                <span className="text-xs sm:text-sm text-black italic ml-1">{`(${pokemon.name.en})`}</span>
                 {pokemon.stats != null ?
                     <>
                         <span className="ml-auto text-sm sm:text-base text-black self-center sm:self-end">PV</span>

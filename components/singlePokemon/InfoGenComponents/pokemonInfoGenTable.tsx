@@ -46,6 +46,10 @@ export default function PokemonInfoGenTable({ pokemon }: PokemonInfoGenTableProp
                             <td className="p-2">N° {pokemon.pokedex_id}</td>
                         </tr>
                         <tr className="border-b border-slate-500">
+                            <td className="text-red-400 p-2 font-medium">Nom anglais :</td>
+                            <td className="p-2">{pokemon.name.en}</td>
+                        </tr>
+                        <tr className="border-b border-slate-500">
                             <td className="text-red-400 p-2 font-medium">Génération :</td>
                             <td className="p-2">{pokemon.generation}</td>
                         </tr>
