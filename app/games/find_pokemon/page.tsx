@@ -3,9 +3,9 @@ import FrontPage from "./FrontPage";
 import { getPokemons, getTypes } from "@/lib/fetch";
 
 async function getGenerations() {
-  const url = "https://tyradex.tech/api/v1/gen"
+  const url = "https://tyradex.app/api/v1/gen";
   const response = await fetch(url, {
-    method: 'GET',
+    method: "GET",
   });
   return await response.json();
 }
