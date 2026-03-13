@@ -2,9 +2,9 @@ import { getTypes } from "@/lib/fetch";
 import FrontPage from "./FrontPage";
 
 async function getPokemonInfo(id: number) {
-  const pokemon = `https://tyradex.vercel.app/api/v1/pokemon/${id}`
+  const pokemon = `https://tyradex.app/api/v1/pokemon/${id}`;
   const response = await fetch(pokemon, {
-    method: 'GET',
+    method: "GET",
   });
   return await response.json();
 }

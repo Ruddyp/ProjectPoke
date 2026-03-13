@@ -7,8 +7,8 @@ export async function getTypes() {
 }
 
 export async function getPokemons() {
-  const allPokemon = "https://tyradex.vercel.app/api/v1/pokemon";
-  const gen1 = "https://tyradex.vercel.app/api/v1/gen/1";
+  const allPokemon = "https://tyradex.app/api/v1/pokemon";
+  const gen1 = "https://tyradex.app/api/v1/gen/1";
   const response = await fetch(allPokemon, {
     method: "GET",
   });
