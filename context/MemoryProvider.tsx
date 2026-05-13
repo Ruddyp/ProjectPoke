@@ -65,6 +65,7 @@ export function MemoryProvider({
     setGameStatus("ongoing");
     setTuiles(shuffle(tuiles));
     setFlipCardQueue([]);
+    setNbClick(0);
   }
 
   function flipCard(tuile: MemoryTuileType) {
