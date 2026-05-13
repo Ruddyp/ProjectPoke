@@ -24,11 +24,11 @@ export default function RootLayout({
     <html lang="fr">
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased",
+          "relative h-screen flex flex-col font-sans bg-background antialiased",
           fontSans.variable,
         )}
       >
-        <div className="relative flex min-h-screen flex-col bg-transparent">
+        <div className="relative flex flex-1 flex-col bg-transparent">
           <header className="sticky top-0 z-50 w-full border-b-2 border-secondary bg-background/85 backdrop-blur">
             <div className="hidden sm:block">
               <Navbar />

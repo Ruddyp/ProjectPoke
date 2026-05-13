@@ -14,3 +14,11 @@ export async function getPokemons() {
   });
   return await response.json();
 }
+
+export async function getGen1() {
+  const gen1 = "https://tyradex.app/api/v1/gen/1";
+  const response = await fetch(gen1, {
+    method: "GET",
+  });
+  return await response.json();
+}

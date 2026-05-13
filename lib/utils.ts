@@ -1,10 +1,16 @@
-import { PokemonColorType, PokemonEvolution } from "@/app/type"
-import confetti from "canvas-confetti"
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import {
+  MemoryDifficulty,
+  MemoryTuileType,
+  Pokemon,
+  PokemonColorType,
+  PokemonEvolution,
+} from "@/app/type";
+import confetti from "canvas-confetti";
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export const colors: Record<PokemonColorType, string> = {
@@ -44,7 +50,7 @@ export const colors: Record<PokemonColorType, string> = {
   ténèbres_light: "#827371",
   dragon: "#5061e1",
   dragon_light: "#9AA5FB",
-}
+};
 
 export const maxStats: any = {
   hp: 255,
@@ -52,27 +58,27 @@ export const maxStats: any = {
   def: 250,
   spe_atk: 194,
   spe_def: 250,
-  vit: 200
-}
+  vit: 200,
+};
 
 export function isEvolution(pokemonEvols: PokemonEvolution | null) {
-  if (pokemonEvols == null) return false
-  if (pokemonEvols.pre == null) return false
-  if (pokemonEvols.pre.length > 0) return true
+  if (pokemonEvols == null) return false;
+  if (pokemonEvols.pre == null) return false;
+  if (pokemonEvols.pre.length > 0) return true;
 }
 
 export function lureToFrench(lure: string) {
   switch (lure) {
     case "Glacial Lure Module":
-      return "Leurre glaciaire"
+      return "Leurre glaciaire";
     case "Mossy Lure Module":
-      return "Leurre moussu"
+      return "Leurre moussu";
     case "Magnetic Lure Module":
-      return "Leurre magnétique"
+      return "Leurre magnétique";
     case "Rainy Lure Module":
-      return "Leurre pluvieux"
+      return "Leurre pluvieux";
     case "Golden Lure Module":
-      return "Leurre dorée"
+      return "Leurre dorée";
     default:
       break;
   }
@@ -118,3 +124,56 @@ export const raidTiers = [
   "Mega Legendary",
   "Ultra Beast",
 ];
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function shuffle(array: any[]) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1)); // random index from 0 to i
+
+    // swap elements array[i] and array[j]
+    // we use "destructuring assignment" syntax to achieve that
+    // you'll find more details about that syntax in later chapters
+    // same can be written as:
+    // let t = array[i]; array[i] = array[j]; array[j] = t
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+export function getTuiles(
+  pokemons: Pokemon[],
+  mode: MemoryDifficulty = "easy",
+) {
+  let tuiles: MemoryTuileType[] = [];
+  const pokemonsIds: number[] = [];
+
+  let nbTuile = 16;
+  if (mode === "intermediate") nbTuile = 24;
+  if (mode === "hard") nbTuile = 32;
+
+  do {
+    const randomNumber = getRandomNumber(1, 151);
+    if (!pokemonsIds.includes(randomNumber)) {
+      const pokemon = pokemons.find((pkmn) => pkmn.pokedex_id === randomNumber);
+      if (pokemon) {
+        const tuile = {
+          source: pokemon.sprites.regular,
+          flipState: false,
+          id: pokemon.pokedex_id,
+        };
+        tuiles = [...tuiles, tuile];
+        tuiles = [...tuiles, { ...tuile, id: pokemon.pokedex_id + 151 }];
+        pokemonsIds.push(pokemon.pokedex_id);
+      }
+    }
+  } while (tuiles.length !== nbTuile);
+
+  return tuiles;
+}
+
+export function getRandomNumber(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
