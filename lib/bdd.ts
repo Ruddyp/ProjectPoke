@@ -40,10 +40,14 @@ export async function replaceScoreLeaderboard(
     }
 
     // On convertit l'ID en string avant de renvoyer pour éviter les erreurs de sérialisation
-    return {
+    const result = {
       ...updatedScore,
       _id: updatedScore._id.toString(),
     };
+
+    // Forcer la revalidation du cache pour le chemin correct
+    revalidatePath("/games/memory"); // Chemin mis à jour
+    return result;
   } catch (error) {
     console.error("Erreur lors de la mise à jour du leaderboard:", error);
     throw new Error("Impossible de mettre à jour le score.");
@@ -59,10 +63,14 @@ export async function addScoreToLeaderboard(
     const newEntry = await MemoryLeaderboard.create(scoreData);
 
     // On convertit l'ID en string avant de renvoyer pour éviter les erreurs de sérialisation
-    return {
+    const result = {
       ...newEntry.toObject(),
       _id: newEntry._id.toString(),
     };
+    // Forcer la revalidation du cache pour le chemin correct
+
+    revalidatePath("/games/memory"); // Chemin mis à jour
+    return result;
   } catch (error) {
     console.error("Erreur lors de l'ajout du score:", error);
     throw new Error("Impossible de mettre à jour le score.");

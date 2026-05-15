@@ -21,6 +21,8 @@ export default function FrontPage() {
   const isWaiting = gameStatus === "waiting";
   const isEnding = gameStatus === "ending";
 
+  console.log("leaderboard", leaderboard);
+
   return (
     <div className="flex flex-col items-center min-h-screen gap-6 py-10 px-4 bg-gradient-to-b from-[#6b90c3] to-[#4a6d9b]">
       {/* Title with golden-yellow Ludic/Pokémon style */}
