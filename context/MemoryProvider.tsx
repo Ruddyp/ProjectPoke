@@ -6,9 +6,12 @@ import {
   Pokemon,
 } from "@/app/type";
 import { getTuiles, shuffle, sleep } from "@/lib/utils";
+import { IMemoryLeaderboard } from "@/models/leaderboard";
 import {
   createContext,
+  Dispatch,
   ReactNode,
+  SetStateAction,
   useContext,
   useEffect,
   useState,
@@ -17,9 +20,20 @@ import {
 type MemoryContextType = {
   tuiles: MemoryTuileType[];
   gameStatus: MemoryGameStatus;
-  nbClick: number;
+  score: number;
+  leaderboard: IMemoryLeaderboard[];
+  time: number;
+  setGameStatus: Dispatch<SetStateAction<MemoryGameStatus>>;
   startGame: (difficulty: MemoryDifficulty) => void;
+  updateLeaderboard: (idToUpdate: string, score: IMemoryLeaderboard) => void;
+  addToLeaderboard: (score: IMemoryLeaderboard) => void;
   flipCard: (tuile: MemoryTuileType) => void;
+};
+
+type MemoryProviderProps = {
+  children: ReactNode;
+  pokemons: Pokemon[];
+  memoryLeaderboard: IMemoryLeaderboard[];
 };
 
 // 2. Création du contexte
@@ -28,14 +42,14 @@ const MemoryContext = createContext<MemoryContextType | undefined>(undefined);
 export function MemoryProvider({
   children,
   pokemons,
-}: {
-  children: ReactNode;
-  pokemons: Pokemon[];
-}) {
+  memoryLeaderboard,
+}: MemoryProviderProps) {
   const [tuiles, setTuiles] = useState(getTuiles(pokemons));
   const [gameStatus, setGameStatus] = useState<MemoryGameStatus>("waiting");
   const [flipCardQueue, setFlipCardQueue] = useState<MemoryTuileType[]>([]);
-  const [nbClick, setNbClick] = useState(0);
+  const [score, setScore] = useState(0);
+  const [leaderboard, setLeaderboard] = useState(memoryLeaderboard);
+  const [time, setTime] = useState(0);
 
   // Gestion quand 2 cartes sont flips
   useEffect(() => {
@@ -60,12 +74,26 @@ export function MemoryProvider({
     }
   }, [tuiles]);
 
+  //Gestion du timer de la partie
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (gameStatus === "ongoing") {
+      interval = setInterval(() => {
+        setTime((prevTime) => prevTime + 1);
+      }, 1000);
+    }
+
+    return () => clearInterval(interval);
+  }, [gameStatus]);
+
   function startGame(mode: MemoryDifficulty = "easy") {
     const tuiles = getTuiles(pokemons, mode);
     setGameStatus("ongoing");
     setTuiles(shuffle(tuiles));
     setFlipCardQueue([]);
-    setNbClick(0);
+    setScore(0);
+    setTime(0);
   }
 
   function flipCard(tuile: MemoryTuileType) {
@@ -73,7 +101,7 @@ export function MemoryProvider({
     if (flipCardQueue.length >= 0 && flipCardQueue.length < 2) {
       setFlipCardQueue((prevFlipCard) => [...prevFlipCard, tuile]);
       updateTuile(tuile.id);
-      setNbClick((prevNb) => prevNb + 0.5);
+      setScore((prevNb) => prevNb + 0.5);
     }
   }
 
@@ -89,9 +117,39 @@ export function MemoryProvider({
     );
   }
 
+  function updateLeaderboard(
+    scoreToUpdateId: string,
+    score: IMemoryLeaderboard,
+  ) {
+    setLeaderboard((prevLeaderboard) =>
+      prevLeaderboard.map((prevLeaderboard) => {
+        if (prevLeaderboard._id === scoreToUpdateId) {
+          return { ...score };
+        } else {
+          return prevLeaderboard;
+        }
+      }),
+    );
+  }
+
+  function addToLeaderboard(score: IMemoryLeaderboard) {
+    setLeaderboard([...leaderboard, score]);
+  }
+
   return (
     <MemoryContext.Provider
-      value={{ gameStatus, tuiles, nbClick, startGame, flipCard }}
+      value={{
+        gameStatus,
+        tuiles,
+        score,
+        setGameStatus,
+        startGame,
+        flipCard,
+        updateLeaderboard,
+        addToLeaderboard,
+        leaderboard,
+        time,
+      }}
     >
       {children}
     </MemoryContext.Provider>
