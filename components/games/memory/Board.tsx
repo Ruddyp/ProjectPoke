@@ -4,14 +4,17 @@ import { useMemory } from "@/context/MemoryProvider";
 import MemoryTuile from "./Tuile";
 import { Button } from "@/components/ui/button";
 import { MemoryDifficulty } from "@/app/type";
+import { formatTime } from "@/lib/utils";
+import Waiting from "./Waiting";
+import Ending from "./Ending";
 
 type BoardProps = {
   difficulty: MemoryDifficulty;
 };
 
 export default function Board({ difficulty }: BoardProps) {
-  const { gameStatus, tuiles, nbClick, startGame } = useMemory();
-  console.log({ nbClick });
+  const { gameStatus, tuiles, score, startGame, leaderboard, time } =
+    useMemory();
 
   const gridConfig = {
     easy: "md:grid-cols-4",
@@ -21,31 +24,14 @@ export default function Board({ difficulty }: BoardProps) {
 
   const columnsClass = gridConfig[difficulty] || "grid-cols-4";
 
+  console.log("leaderboard", leaderboard);
+
   if (gameStatus === "waiting") {
-    return (
-      <div className="flex flex-col size-full items-center justify-start gap-4 mt-24">
-        <Button onClick={() => startGame(difficulty)}>
-          Démarrer la partie
-        </Button>
-      </div>
-    );
+    return <Waiting difficulty={difficulty} />;
   }
 
   if (gameStatus === "ending") {
-    return (
-      <div className="flex flex-col size-full items-center justify-start gap-4">
-        <h1 className="font-serif text-xl sm:text-2xl md:text-4xl">
-          Bravo vous avez gagné la partie !
-        </h1>
-        <p className="text-base sm:text-lg md:text-2xl">
-          Nombre de coups:{" "}
-          <span className="font-semibold text-red-400">{nbClick}</span>
-        </p>
-        <Button onClick={() => startGame(difficulty)}>
-          Démarrer une nouvelle partie
-        </Button>
-      </div>
-    );
+    return <Ending difficulty={difficulty} />;
   }
 
   return (
