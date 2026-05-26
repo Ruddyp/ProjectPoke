@@ -296,3 +296,206 @@ export type MemoryTuileType = {
 };
 
 export type MemoryDifficulty = "easy" | "intermediate" | "hard";
+
+export type PokeBattlePokemonMove = {
+  id: number;
+
+  // noms
+  name: string;
+
+  // combat
+  power: number;
+  accuracy: number;
+  pp: number;
+  priority: number;
+
+  // type / catégorie
+  type: PokeBattlePokemonType;
+  category: PokeBattleMoveCategory;
+
+  // status
+  status: PokeBattlePokemonStatus;
+  statusChance: number;
+
+  // effets secondaires
+  flinchChance: number;
+  critRate: number;
+
+  // soin / recoil
+  drain: number;
+  healing: number;
+
+  // multi hit
+  minHits: number;
+  maxHits: number;
+
+  // buffs / debuffs
+  targetBuff: string;
+  statChanges: {
+    stat: PokeBattlePokemonStatName;
+    change: number;
+  }[];
+
+  // cible
+  target: PokeBattlePokemonTarget;
+
+  // description
+  description: string;
+};
+
+export type PokeBattlePokemonStats = {
+  hp: number;
+  attack: number;
+  defense: number;
+  "special-attack": number;
+  "special-defense": number;
+  speed: number;
+  evasion: number;
+  accuracy: number;
+};
+
+export type PokeBattlePokemonSprites = {
+  front: string | null;
+  back: string | null;
+};
+
+export type PokeBattlePokemonTypeChart = {
+  name: string;
+  multiplier: number;
+};
+
+export type PokeBattlePokemonDetails = {
+  id: number;
+
+  // nom FR
+  name: string;
+
+  // cries
+  cries: string | null;
+
+  // types FR
+  types: string[];
+
+  // stats
+  stats: PokeBattlePokemonStats;
+
+  // sprites
+  sprites: PokeBattlePokemonSprites;
+  spritesFallback: PokeBattlePokemonSprites;
+
+  // résistances / faiblesses
+  typeChart: PokeBattlePokemonTypeChart[];
+
+  // attaques
+  moves: PokeBattlePokemonMove[];
+
+  isActive: boolean;
+  isFlinch: boolean;
+  isParalyze: boolean;
+  isAsleep: boolean;
+  isFrozen: boolean;
+  isBurnt: boolean;
+  isConfused: boolean;
+  isPoisoned: boolean;
+  isSeeded: boolean;
+  confusionTurns: number;
+  sleepTurns: number;
+  currentHp: number;
+};
+
+export type PokeBattleMoveCategory = "physical" | "special" | "status";
+
+export type PokeBattlePokemonStatus =
+  | "none"
+  | "paralysis"
+  | "sleep"
+  | "freeze"
+  | "burn"
+  | "poison"
+  | "confusion"
+  | "infatuation"
+  | "trap"
+  | "nightmare"
+  | "torment"
+  | "disable"
+  | "yawn"
+  | "leech-seed";
+
+export type PokeBattlePokemonTarget = "selected-pokemon" | "user";
+
+export type PokeBattlePokemonStatName =
+  | "hp"
+  | "attack"
+  | "defense"
+  | "special-attack"
+  | "special-defense"
+  | "speed"
+  | "accuracy"
+  | "evasion";
+
+export type PokeBattlePokemonType =
+  | "normal"
+  | "feu"
+  | "eau"
+  | "plante"
+  | "électrik"
+  | "glace"
+  | "combat"
+  | "poison"
+  | "sol"
+  | "vol"
+  | "psy"
+  | "insecte"
+  | "roche"
+  | "spectre"
+  | "dragon"
+  | "ténèbres"
+  | "acier"
+  | "fée";
+
+export type PokeBattleGameStatus =
+  | "waiting"
+  | "presentation"
+  | "user_turn"
+  | "ending"
+  | "enemy_turn"
+  | "intermission";
+
+export type PokeBattleSound =
+  | PokeBattlePokemonType
+  | PokeBattlePokemonStatus
+  | "poison-status"
+  | "status"
+  | "stat-up"
+  | "stat-down"
+  | "leech-seed-dgt"
+  | "effective"
+  | "weak"
+  | "normal_hit"
+  | "KO";
+
+export type PokeBattleObjectType = "heal" | "reborn" | "status";
+
+export type PokeBattleObject = {
+  name: string;
+  type: PokeBattleObjectType;
+  quantity: number;
+  src: string;
+};
+
+export type PokeBattleTrainer = {
+  pokemons: number[];
+  name: string;
+  battleAudioSrc: string;
+  victoryAudioSrc: string;
+  img: string;
+  power: number;
+};
+
+export type PokeBattleDifficulty =
+  | "Red"
+  | "Cynthia"
+  | "Blue"
+  | "Ghechis"
+  | "Steven"
+  | "Random";

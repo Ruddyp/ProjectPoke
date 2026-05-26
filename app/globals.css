@@ -12,6 +12,76 @@
   .backface-hidden {
     backface-visibility: hidden;
   }
+
+  .animate-pokemon-hit {
+    animation:
+      pokemon-hit-flash 0.15s ease-in-out 2,
+      pokemon-shake 0.25s ease-in-out;
+  }
+
+  .animate-enter-left {
+    animation: slide-in-left 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  .animate-enter-right {
+    animation: slide-in-right 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  .animate-status-paralysis {
+    filter: drop-shadow(0 0 6px rgba(255, 230, 0, 0.85)) sepia(0.2)
+      hue-rotate(15deg);
+    animation: status-paralysis-shake 0.4s infinite alternate ease-in-out;
+  }
+
+  .animate-status-poison {
+    filter: drop-shadow(0 0 6px rgba(160, 32, 240, 0.8)) hue-rotate(260deg)
+      saturate(1.6);
+    animation: status-poison-pulse 2s infinite ease-in-out;
+  }
+
+  .animate-status-freeze {
+    filter: drop-shadow(0 0 8px rgba(0, 221, 255, 0.95)) brightness(1.25)
+      saturate(0.4) hue-rotate(180deg);
+    transform: scale(0.97);
+    pointer-events: none;
+  }
+
+  .animate-status-sleep {
+    filter: brightness(0.75) saturate(0.6);
+    animation: status-sleep-breath 3.5s infinite ease-in-out;
+    transform-origin: bottom center;
+  }
+
+  .animate-status-burn {
+    filter: drop-shadow(0 0 6px rgba(255, 68, 0, 0.95)) hue-rotate(340deg)
+      saturate(2);
+    animation: status-burn-flicker 0.15s infinite alternate ease-in-out;
+  }
+
+  .animate-status-seed {
+    filter: drop-shadow(0 0 5px rgba(0, 200, 50, 0.85));
+    animation: status-seed-drain 1.5s infinite ease-in-out;
+  }
+
+  .animate-status-confusion {
+    animation: status-confusion-sway 2s infinite ease-in-out;
+  }
+
+  .animate-status-flinch {
+    animation: status-flinch-recoil 0.4s ease-out forwards;
+  }
+
+  .animate-status-lifesteal {
+    animation: status-lifesteal-flash 0.7s ease-out forwards;
+  }
+
+  .animate-attack-dash {
+    animation: attack-dash 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-attack-dash-enemy {
+    animation: attack-dash-enemy 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
 }
 
 @layer base {
@@ -59,13 +129,209 @@
     --destructive-foreground: 0 0% 100%;
     --ring: 223 45% 44%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@keyframes pokemon-hit-flash {
+  0%,
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  25%,
+  75% {
+    opacity: 0.3;
+    filter: brightness(2.5);
+  }
+}
+@keyframes pokemon-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-8px);
+  }
+  40%,
+  80% {
+    transform: translateX(8px);
+  }
+}
+
+@keyframes slide-in-left {
+  0% {
+    transform: translateX(-200%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  0% {
+    transform: translateX(200%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes status-paralysis-shake {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  20% {
+    transform: translate(-1.5px, 0.5px) rotate(-0.5deg);
+  }
+  40% {
+    transform: translate(1.5px, -1px) rotate(0.5deg);
+  }
+  60% {
+    transform: translate(-1px, -0.5px) rotate(0deg);
+  }
+  80% {
+    transform: translate(1px, 1px) rotate(-0.5deg);
+  }
+}
+
+@keyframes status-poison-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.75;
+    filter: drop-shadow(0 0 12px rgb(120, 0, 200)) hue-rotate(260deg)
+      saturate(2);
+  }
+}
+
+@keyframes status-sleep-breath {
+  0%,
+  100% {
+    transform: scaleY(1) scaleX(1);
+  }
+  50% {
+    transform: scaleY(0.92) scaleX(1.03);
+  }
+}
+
+@keyframes status-burn-flicker {
+  0% {
+    filter: drop-shadow(0 0 4px rgba(255, 68, 0, 0.6)) brightness(1);
+  }
+  100% {
+    filter: drop-shadow(0 0 9px rgba(255, 110, 0, 1)) brightness(1.25);
+  }
+}
+
+@keyframes status-seed-drain {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 3px rgba(0, 150, 30, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgba(50, 255, 100, 1)) saturate(1.4);
+  }
+}
+
+@keyframes status-confusion-sway {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+    filter: hue-rotate(0deg);
+  }
+  25% {
+    transform: translateX(-6px) rotate(-5deg) skewX(-2deg);
+    filter: hue-rotate(60deg);
+  }
+  75% {
+    transform: translateX(6px) rotate(5deg) skewX(2deg);
+    filter: hue-rotate(-60deg);
+  }
+}
+
+@keyframes status-flinch-recoil {
+  0% {
+    transform: translateX(0);
+    filter: brightness(1);
+  }
+  15% {
+    transform: translateX(-15px) scaleX(0.95);
+    filter: brightness(0.5) sepia(0.4);
+  }
+  40% {
+    transform: translateX(2px);
+  }
+  70% {
+    transform: translateX(-1px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes status-lifesteal-flash {
+  0% {
+    filter: brightness(1) drop-shadow(0 0 0 transparent);
+    transform: scale(1);
+  }
+  25% {
+    filter: brightness(1.6) drop-shadow(0 0 16px #00ff66) saturate(2);
+    transform: scale(1.06);
+  }
+  100% {
+    filter: brightness(1) drop-shadow(0 0 0 transparent);
+    transform: scale(1);
+  }
+}
+
+@keyframes attack-dash {
+  0% {
+    transform: translate(0, 0) scale(1);
+    z-index: 10;
+  }
+  20% {
+    transform: translate(-10px, 10px) scale(1.1);
+  }
+  40% {
+    transform: translate(80px, -60px) scale(1.2);
+  }
+  60% {
+    transform: translate(60px, -45px) scale(1.1);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes attack-dash-enemy {
+  0% {
+    transform: translate(0, 0) scale(1);
+    z-index: 10;
+  }
+  20% {
+    transform: translate(-10px, 10px) scale(1.1);
+  }
+  40% {
+    transform: translate(-80px, 60px) scale(1.2);
+  }
+  60% {
+    transform: translate(-60px, 45px) scale(1.1);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
   }
 }

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter as FontSans } from "next/font/google";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 import Navbar from "@/components/navbar";
@@ -21,15 +20,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
+    <html lang="fr" className="h-full">
       <body
         className={cn(
-          "relative h-screen flex flex-col font-sans bg-background antialiased",
+          "relative h-full flex flex-col font-sans bg-background antialiased",
           fontSans.variable,
         )}
       >
-        <div className="relative flex flex-1 flex-col bg-transparent">
-          <header className="sticky top-0 z-50 w-full border-b-2 border-secondary bg-background/85 backdrop-blur">
+        <div className="relative flex flex-1 flex-col bg-transparent h-full">
+          <header className="sticky top-0 z-50 w-full border-b-2 border-secondary bg-background/85 backdrop-blur shrink-0">
             <div className="hidden sm:block">
               <Navbar />
             </div>
@@ -37,7 +36,8 @@ export default function RootLayout({
               <SheetNavbar />
             </div>
           </header>
-          <main>{children}</main>
+
+          <main className="flex-1 h-full overflow-y-auto">{children}</main>
         </div>
       </body>
     </html>

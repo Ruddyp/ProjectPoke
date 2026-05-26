@@ -26,6 +26,11 @@ const games: { title: string; href: string; description: string }[] = [
     href: "/games/memory",
     description: "Jeux du memory",
   },
+  {
+    title: "PokeBattle",
+    href: "/games/PokeBattle",
+    description: "Combat de pokemon",
+  },
 ];
 
 export default function NavBar() {

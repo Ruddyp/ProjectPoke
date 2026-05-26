@@ -91,6 +91,17 @@ export function SheetNavbar() {
                 <span className="ml-2 text-lg">Memory</span>
               </Link>
             </Button>
+            <Button
+              className="w-full bg-background text-secondary hover:bg-accent/60 p-1"
+              size="default_responsive"
+              variant="link"
+              onClick={() => setSheetOpen(false)}
+              asChild
+            >
+              <Link href="/games/PokeBattle">
+                <span className="ml-2 text-lg">PokeBattle</span>
+              </Link>
+            </Button>
           </nav>
         </SheetContent>
       </Sheet>
