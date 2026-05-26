@@ -22,7 +22,7 @@ export default function usePokeBattleAnimation(
       team === "user" ? "animate-attack-dash" : "animate-attack-dash-enemy";
     setAnimation(dashAnim);
 
-    const timer = setTimeout(() => setAnimation(""), 600);
+    const timer = setTimeout(() => setAnimation(""), 400);
     return () => clearTimeout(timer);
   }, [isAttacking, gameStatus, team]);
 

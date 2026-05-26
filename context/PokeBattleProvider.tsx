@@ -351,29 +351,107 @@ export function PokeBattleProvider({
     setIsActionPending(false);
   }
 
-  // Tour Ennemie
-  async function handleEnemyTurn() {
+  function hasTwoOrMoreStatus(pokemon: PokeBattlePokemonDetails) {
+    const statusEffects: (keyof PokeBattlePokemonDetails)[] = [
+      "isParalyze",
+      "isAsleep",
+      "isFrozen",
+      "isBurnt",
+      "isPoisoned",
+      "isSeeded",
+    ];
+
+    const activeStatusCount = statusEffects.filter(
+      (status) => pokemon[status] === true,
+    ).length;
+
+    return activeStatusCount >= 2;
+  }
+
+  async function handleEnemyChoice() {
     const activeEnemy = getActivePokemon(enemyPokemons);
     const activeUser = getActivePokemon(userPokemons);
+    const isEnemyPokemonLifeUnder33Percent =
+      activeEnemy.currentHp <= activeEnemy.stats.hp / 3;
+    const isUserPokemonLifeUnder33Percent =
+      activeUser.currentHp <= activeUser.stats.hp / 3;
 
-    setTextBox(`Au tour de ${activeEnemy.name} de jouer !`);
-    await sleep(2000);
+    const enenyPokemonDead = enemyPokemons.filter((p) => p.currentHp <= 0);
+    const shouldUseAntidote = hasTwoOrMoreStatus(activeEnemy);
+    const canUseAntidote = enemyObjects.some(
+      (obj) => obj.type === "status" && obj.quantity > 0,
+    );
+    const canUsePotion = enemyObjects.some(
+      (obj) => obj.type === "heal" && obj.quantity > 0,
+    );
+    const canUseReborn = enemyObjects.some(
+      (obj) => obj.type === "reborn" && obj.quantity > 0,
+    );
 
-    // Si l'ordi a des popo de soin et que pdv < 1/3 de la vie il l'utilise
     if (
-      activeEnemy.currentHp <= activeEnemy.stats.hp / 3 &&
-      enemyObjects.some((obj) => obj.type === "heal" && obj.quantity > 0)
+      !isEnemyPokemonLifeUnder33Percent &&
+      shouldUseAntidote &&
+      canUseAntidote
+    ) {
+      setTextBox(
+        `${trainer?.name ?? "L'adversaire"} utilise une antidote sur ${activeEnemy.name} !`,
+      );
+      await sleep(1500);
+      await handleObjectUse("status", "enemy", activeEnemy.id);
+      return false;
+    }
+
+    if (
+      isEnemyPokemonLifeUnder33Percent &&
+      !isUserPokemonLifeUnder33Percent &&
+      Math.random() < 1 / 2 &&
+      canUsePotion
     ) {
       setTextBox(
         `${trainer?.name ?? "L'adversaire"} utilise une potion sur ${activeEnemy.name} !`,
       );
       await sleep(1500);
       await handleObjectUse("heal", "enemy", activeEnemy.id);
-      return;
+      return false;
     }
 
+    if (enenyPokemonDead.length >= 3 && canUseReborn && Math.random() < 1 / 2) {
+      const pokemonToReborn = enemyPokemons.find(
+        (p) => p.currentHp <= 0,
+      ) as PokeBattlePokemonDetails;
+      setTextBox(
+        `${trainer?.name ?? "L'adversaire"} utilise un rappel sur ${pokemonToReborn.name} !`,
+      );
+      await sleep(1500);
+      await handleObjectUse("reborn", "enemy", pokemonToReborn.id);
+      return false;
+    }
+
+    return true;
+  }
+
+  // Tour Ennemie
+  async function handleEnemyTurn() {
+    const activeEnemy = getActivePokemon(enemyPokemons);
+    const activeUser = getActivePokemon(userPokemons);
+
+    const isUserPokemonLifeUnder25Percent =
+      activeUser.currentHp <= activeUser.stats.hp / 4;
+    const shouldUsePhysical =
+      activeEnemy.stats.attack >= activeEnemy.stats["special-attack"];
+
+    setTextBox(`Au tour de ${activeEnemy.name} de jouer !`);
+    await sleep(2000);
+
+    const shouldAttack = await handleEnemyChoice();
+    if (!shouldAttack) return;
+
     const randomNumber = getRandomNumber(0, activeEnemy.moves.length - 1);
-    const move = activeEnemy.moves[randomNumber];
+    let move = activeEnemy.moves[randomNumber];
+    if (isUserPokemonLifeUnder25Percent) {
+      const moveCategory = shouldUsePhysical ? "physical" : "special";
+      move = activeEnemy.moves.find((m) => m.category === moveCategory) ?? move;
+    }
 
     if (await canPokemonAttack(activeEnemy, move, "enemy")) {
       await attackResolution(activeEnemy, activeUser, move, "enemy");

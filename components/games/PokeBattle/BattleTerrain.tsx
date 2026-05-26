@@ -16,7 +16,7 @@ export default function BattleTerrain({
   userPokemon,
   enemyPokemon,
 }: BattleTerrainProps) {
-  const { sound, gameStatus, isAttacking } = usePokeBattle();
+  const { sound } = usePokeBattle();
   const prevUserId = useRef<null | number>(null);
   const prevEnemyId = useRef<null | number>(null);
   const animUser = usePokeBattleAnimation(userPokemon, "user");
@@ -79,7 +79,7 @@ export default function BattleTerrain({
   }, [sound]);
 
   return (
-    <div className="relative flex-1 w-full top- overflow-hidden bg-gradient-to-b from-[#E0D090] to-[#C8B878]">
+    <div className="relative flex-1 w-full top- overflow-hidden bg-[url(/background_battle.jpg)] bg-cover">
       <div className={`${enemyPokeballTeamPos}`}>
         <Pokeball team={"enemy"} />
       </div>
