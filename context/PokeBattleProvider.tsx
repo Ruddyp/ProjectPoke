@@ -490,7 +490,11 @@ export function PokeBattleProvider({
     if (isActionPending || gameStatus !== "user_turn") return;
     const activeUser = getActivePokemon(userPokemons);
     const activeEnemy = getActivePokemon(enemyPokemons);
-    if (await isRecharging(activeUser, "user")) return;
+    if (await isRecharging(activeUser, "user")) {
+      setGameStatus("intermission");
+      setTargetTeam("user");
+      return;
+    }
     setIsActionPending(true);
 
     if (await canPokemonAttack(activeUser, move, "user")) {
