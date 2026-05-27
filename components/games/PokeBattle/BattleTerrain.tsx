@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { PokeBattlePokemonDetails } from "@/app/type";
 import PokemonHUD from "./PokemonHUD";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { sleep } from "@/lib/utils";
 import usePokeBattleAnimation from "@/hooks/usePokeBattleAnimation";
 import { usePokeBattle } from "@/context/PokeBattleProvider";
@@ -21,6 +21,10 @@ export default function BattleTerrain({
   const prevEnemyId = useRef<null | number>(null);
   const animUser = usePokeBattleAnimation(userPokemon, "user");
   const animEnemy = usePokeBattleAnimation(enemyPokemon, "enemy");
+  const backgroundUrl = useMemo(() => {
+    const randomIndex = Math.floor(Math.random() * 7);
+    return `/background_battle_${randomIndex}.png`;
+  }, []);
 
   const hasUserPokemonStatusEffect =
     userPokemon.isParalyze ||
@@ -79,7 +83,10 @@ export default function BattleTerrain({
   }, [sound]);
 
   return (
-    <div className="relative flex-1 w-full top- overflow-hidden bg-[url(/background_battle.jpg)] bg-cover">
+    <div
+      className={`relative flex-1 w-full top- overflow-hidden bg-cover`}
+      style={{ backgroundImage: `url('${backgroundUrl}')` }}
+    >
       <div className={`${enemyPokeballTeamPos}`}>
         <Pokeball team={"enemy"} />
       </div>
