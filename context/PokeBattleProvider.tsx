@@ -451,6 +451,7 @@ export function PokeBattleProvider({
     if (await isRecharging(activeEnemy, "enemy")) {
       setGameStatus("intermission");
       setTargetTeam("user");
+      return;
     }
 
     const shouldAttack = await handleEnemyChoice();
