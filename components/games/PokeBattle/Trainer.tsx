@@ -18,13 +18,13 @@ export default function Trainer({ trainer }: TrainerProps) {
         <img
           src={trainer.img}
           alt={trainer.name}
-          className="size-16 sm:size-24 object-contain group-hover:scale-110 transition-transform duration-300"
+          className="size-16 sm:size-24 object-cover rounded-full group-hover:scale-110 transition-transform duration-300"
         />
       </div>
 
       {/* Infos */}
       <div className="flex flex-col items-center w-full">
-        <h3 className="text-white font-bold tracking-wider text-base uppercase">
+        <h3 className="text-center text-white font-bold tracking-wider text-base uppercase">
           {trainer.name}
         </h3>
 

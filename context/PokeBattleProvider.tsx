@@ -404,7 +404,7 @@ export function PokeBattleProvider({
     if (
       isEnemyPokemonLifeUnder33Percent &&
       !isUserPokemonLifeUnder33Percent &&
-      Math.random() < 1 / 2 &&
+      Math.random() < 1 / 3 &&
       canUsePotion
     ) {
       setTextBox(
@@ -1367,22 +1367,27 @@ export function PokeBattleProvider({
       }
 
       if (multiplier > 1) {
-        !isMultiHit && setIsAttacking(true);
         setTextBox("C'est super efficace !");
-        setSound({ type: "effective", trigger: Date.now() });
+        if (!isMultiHit) {
+          setIsAttacking(true);
+          setSound({ type: "effective", trigger: Date.now() });
+        }
         await sleep(1500);
       } else if (multiplier < 1 && multiplier > 0) {
-        !isMultiHit && setIsAttacking(true);
         setTextBox("Ce n'est pas très efficace...");
-        setSound({ type: "weak", trigger: Date.now() });
+        if (!isMultiHit) {
+          setIsAttacking(true);
+          setSound({ type: "weak", trigger: Date.now() });
+        }
         await sleep(1500);
       } else if (multiplier === 1) {
-        !isMultiHit && setIsAttacking(true);
-        setSound({ type: "normal_hit", trigger: Date.now() });
+        if (!isMultiHit) {
+          setIsAttacking(true);
+          setSound({ type: "normal_hit", trigger: Date.now() });
+        }
         await sleep(1000);
       } else if (multiplier === 0) {
         !isMultiHit && setIsAttacking(true);
-        await sleep(600);
         setTextBox(`Ça n'affecte pas ${defender.name}...`);
         await sleep(1500);
         return;

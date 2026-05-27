@@ -5,7 +5,7 @@ import { calculatePokemonTeamPower } from "@/lib/utils";
 export default function BattlePresentation() {
   const { enemyPokemons, userPokemons } = usePokeBattle();
   const userTeamPower = calculatePokemonTeamPower(userPokemons);
-  const enemyTeamPower = calculatePokemonTeamPower(enemyPokemons);
+  const enemyTeamPower = calculatePokemonTeamPower(enemyPokemons, true);
 
   return (
     <div className="absolute inset-0 z-50 bg-background flex flex-col items-center justify-center overflow-hidden font-mono">

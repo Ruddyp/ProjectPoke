@@ -483,15 +483,6 @@ export type PokeBattleObject = {
   src: string;
 };
 
-export type PokeBattleTrainer = {
-  pokemons: number[];
-  name: string;
-  battleAudioSrc: string;
-  victoryAudioSrc: string;
-  img: string;
-  power: number;
-};
-
 export type PokeBattleDifficulty =
   | "Red"
   | "Cynthia"
@@ -499,3 +490,13 @@ export type PokeBattleDifficulty =
   | "Ghechis"
   | "Steven"
   | "Random";
+
+export type PokeBattleTrainer = {
+  name: string;
+  pokemons: number[];
+  battleAudioSrc: string;
+  victoryAudioSrc: string;
+  img: string;
+  power: number;
+  gen: number | string;
+};

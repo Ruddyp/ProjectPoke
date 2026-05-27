@@ -1,28 +1,16 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState } from "react";
 import { usePokeBattle } from "@/context/PokeBattleProvider";
-import {
-  TRAINER_BLUE,
-  TRAINER_RED,
-  TRAINER_STEVEN,
-  TRAINER_CYNTHIA,
-  TRAINER_GHECHIS,
-} from "@/lib/utils";
-import Trainer from "./Trainer";
+import { getTrainersMap, TRAINERS } from "@/lib/utils";
 import { Loader2, Trophy, X } from "lucide-react";
 import LeaderboardDisplay from "./Leaderboard";
+import TrainerGen from "./TrainerGen";
 
 export default function Waiting() {
   const { startGame, isFetching } = usePokeBattle();
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
-  const trainers = [
-    TRAINER_BLUE,
-    TRAINER_RED,
-    TRAINER_STEVEN,
-    TRAINER_CYNTHIA,
-    TRAINER_GHECHIS,
-  ];
+  const trainers = getTrainersMap(TRAINERS);
 
   return (
     <div className="bg-background flex flex-col items-center justify-start gap-2 p-4 sm:p-6 font-mono overflow-y-auto min-h-screen">
@@ -30,8 +18,12 @@ export default function Waiting() {
       <div
         className={`flex flex-row flex-wrap gap-4 justify-center transition-opacity duration-300 ${isFetching ? "opacity-30 pointer-events-none" : "opacity-100"}`}
       >
-        {trainers.map((trainer) => (
-          <Trainer key={trainer.name} trainer={trainer} />
+        {Object.entries(trainers).map(([gen, trainerList], index) => (
+          <TrainerGen
+            key={`${index}-${gen}`}
+            gen={gen}
+            trainers={trainerList}
+          />
         ))}
 
         {/* Bouton Leaderboard */}
@@ -49,7 +41,7 @@ export default function Waiting() {
       {/* Modal Leaderboard */}
       {showLeaderboard && (
         <div className="fixed w-full h-screen inset-0 z-[100] p-4 bg-black/80 backdrop-blur-sm animate-in fade-in overflow-y-auto">
-          <div className="relative h-max w-full bg-slate-900 border-2 border-[#E0A850] rounded-2xl p-6 shadow-2xl ">
+          <div className="relative h-max w-full bg-slate-900 border-2 border-[#E0A850] rounded-2xl p-4 shadow-2xl ">
             <button
               onClick={() => setShowLeaderboard(false)}
               className="absolute top-4 right-4 text-white hover:text-red-500 transition-colors"
