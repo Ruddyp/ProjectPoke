@@ -448,7 +448,10 @@ export function PokeBattleProvider({
     setTextBox(`Au tour de ${activeEnemy.name} de jouer !`);
     await sleep(2000);
 
-    if (await isRecharging(activeEnemy, "enemy")) return false;
+    if (await isRecharging(activeEnemy, "enemy")) {
+      setGameStatus("intermission");
+      setTargetTeam("user");
+    }
 
     const shouldAttack = await handleEnemyChoice();
     if (!shouldAttack) return;
