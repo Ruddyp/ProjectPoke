@@ -197,6 +197,8 @@ export async function getPokemonDetails(
           // On ne garde STRICTEMENT que les catégories gérables facilement :
           const allowedCategories = [
             "damage", // Dégâts purs (ex: Vive-Attaque)
+            "damage-raise",
+            "damage-lower",
             "damage-ailment", // Dégâts + chance d'altération (ex: Lance-Flammes)
             "damage-change", // Dégâts + chance de buff/debuff (ex: Coud'Boue, Nitrocharge)
             "damage-heal", // Dégâts + soin (ex: Giga-Sangsue)
@@ -206,6 +208,9 @@ export async function getPokemonDetails(
           ];
           const moveCategory = moveData.meta?.category?.name;
           if (!allowedCategories.includes(moveCategory)) {
+            console.log(
+              `Move rejeté : ${moveData.name} | Catégorie : ${moveData.meta?.category?.name} | Target : ${moveData.target?.name}`,
+            );
             return null; // Élimine "unique" (Dégommage), "ohko" (Abîme), "field-effect", etc.
           }
 
@@ -245,6 +250,7 @@ export async function getPokemonDetails(
       isPoisoned: false,
       isConfused: false,
       isSeeded: false,
+      isRecharging: false,
       confusionTurns: 0,
       sleepTurns: 0,
       currentHp: stats.hp,

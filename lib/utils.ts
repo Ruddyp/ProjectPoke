@@ -426,6 +426,16 @@ export const POKEBATTLE_OBJECTS: PokeBattleObject[] = [
   },
 ];
 
+export const RECHARGE_MOVES = [
+  "Ultralaser",
+  "Giga Impact",
+  "Rafale Feu",
+  "Hydroblast",
+  "Végé-Attaque",
+  "Hurle-Temps",
+  "Roc-Boulet",
+];
+
 //---------------------------- GEN 1 ----------------------------------------//
 export const TRAINER_BLUE = {
   name: "Blue",

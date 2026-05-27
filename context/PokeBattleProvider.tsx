@@ -14,6 +14,7 @@ import {
   getPokemonTeam,
   getRandomNumber,
   POKEBATTLE_OBJECTS,
+  RECHARGE_MOVES,
   sleep,
   statToFrench,
 } from "@/lib/utils";
@@ -447,6 +448,8 @@ export function PokeBattleProvider({
     setTextBox(`Au tour de ${activeEnemy.name} de jouer !`);
     await sleep(2000);
 
+    if (await isRecharging(activeEnemy, "enemy")) return false;
+
     const shouldAttack = await handleEnemyChoice();
     if (!shouldAttack) return;
 
@@ -470,6 +473,9 @@ export function PokeBattleProvider({
     if (activeEnemy.isSeeded) {
       await applyLeechSeed(activeEnemy, activeUser, "enemy");
     }
+    if (RECHARGE_MOVES.includes(move.name)) {
+      await applyRecharge(activeEnemy, "enemy");
+    }
 
     setGameStatus("intermission");
     setTargetTeam("user");
@@ -478,9 +484,10 @@ export function PokeBattleProvider({
   // TOUR DU JOUEUR
   async function handleUserAttack(move: PokeBattlePokemonMove) {
     if (isActionPending || gameStatus !== "user_turn") return;
-    setIsActionPending(true);
     const activeUser = getActivePokemon(userPokemons);
     const activeEnemy = getActivePokemon(enemyPokemons);
+    if (await isRecharging(activeUser, "user")) return;
+    setIsActionPending(true);
 
     if (await canPokemonAttack(activeUser, move, "user")) {
       await attackResolution(activeUser, activeEnemy, move, "user");
@@ -490,6 +497,8 @@ export function PokeBattleProvider({
     if (activeUser.isPoisoned) await applyPoisonDamage(activeUser, "user");
     if (activeUser.isSeeded)
       await applyLeechSeed(activeUser, activeEnemy, "user");
+    if (RECHARGE_MOVES.includes(move.name))
+      await applyRecharge(activeUser, "user");
 
     setGameStatus("intermission");
     setTargetTeam("enemy");
@@ -556,13 +565,14 @@ export function PokeBattleProvider({
       0,
       attacker.currentHp - confusionFinalDamage,
     );
-    let applyDamage = false;
+    setTextBox(`${attacker.name} se blesse dans sa confusion !`);
+    setSound({ type: "normal", trigger: Date.now() });
+    await sleep(1500);
     const updateTeam =
       attackerTeam === "user" ? setUserPokemons : setEnemyPokemons;
     updateTeam((prev) => {
       return prev.map((poke) => {
-        if (poke.id === attacker.id && poke.isConfused) {
-          applyDamage = true;
+        if (poke.id === attacker.id) {
           return {
             ...poke,
             currentHp: attackerRemainingHp,
@@ -571,11 +581,6 @@ export function PokeBattleProvider({
         return poke;
       });
     });
-    if (applyDamage) {
-      setTextBox(`${attacker.name} se blesse dans sa confusion !`);
-      setSound({ type: "normal", trigger: Date.now() });
-      await sleep(1500);
-    }
   }
 
   async function applyLeechSeed(
@@ -649,6 +654,25 @@ export function PokeBattleProvider({
     await isConfused(attacker, attackerTeam); // On retire 1 au turn de confusion (seulement si le pokemon ne dort pas et pas gelé)
 
     return true;
+  }
+
+  async function isRecharging(
+    attacker: PokeBattlePokemonDetails,
+    attackerTeam: "user" | "enemy",
+  ) {
+    if (attacker.isRecharging) {
+      const updateTeam =
+        attackerTeam === "user" ? setUserPokemons : setEnemyPokemons;
+      updateTeam((prev) =>
+        prev.map((poke) =>
+          poke.id === attacker.id ? { ...poke, isRecharging: false } : poke,
+        ),
+      );
+      setTextBox(`${attacker.name} se repose.`);
+      await sleep(1500);
+      return true;
+    }
+    return false;
   }
 
   async function isFlinch(
@@ -1018,6 +1042,9 @@ export function PokeBattleProvider({
       if (move.targetBuff === "damage-raise") {
         targetPokemon = attacker; // Exemple: Close combat
         statsToUpdate = updatedAttackerStats;
+      } else if (move.targetBuff === "damage-lower") {
+        targetPokemon = defender;
+        statsToUpdate = updatedDefenderStats;
       } else if (move.targetBuff === "net-good-stats") {
         if (change > 0) {
           targetPokemon = attacker;
@@ -1173,7 +1200,6 @@ export function PokeBattleProvider({
         return Math.floor(baseDamage * multiplier * critMultiplier);
       };
 
-      let actualHits = 0;
       let totalDamageApplied = 0;
       let hasTriggeredCrit = false;
       let shouldApplyFlinch = false;
@@ -1183,29 +1209,31 @@ export function PokeBattleProvider({
         attackerTeam === "user" ? setEnemyPokemons : setUserPokemons;
 
       if (isMultiHit) {
-        // Déterminer le nombre de coups théoriques selon les probabilités officielles
-        const hitsTable = [2, 2, 2, 3, 3, 3, 4, 5];
-        const totalHits =
-          hitsTable[Math.floor(Math.random() * hitsTable.length)];
+        // Détermination du nombre de coups
+        const totalHits = determineHitCount(move);
 
-        // Boucle pour appliquer les dégâts coup par coup à l'écran
+        let currentHp = defender.currentHp;
+        let actualHits = 0;
+
         for (let i = 0; i < totalHits; i++) {
-          if (defender.currentHp - totalDamageApplied <= 0) {
-            break;
-          }
-          const isCrit = checkIsCritical(move || 0);
-          const currentHitDamage = calculateSingleHitDamage(isCrit);
+          // Vérification de K.O. avant d'attaquer
+          if (currentHp <= 0) break;
 
+          const isCrit = checkIsCritical(move || 0);
+          const damage = calculateSingleHitDamage(isCrit);
+
+          // Mise à jour de la variable locale
+          currentHp = Math.max(0, currentHp - damage);
+          totalDamageApplied += damage;
+          actualHits++;
+
+          // Mise à jour visuelle du state pour ce coup précis
           updateTeam((prev) =>
             prev.map((poke) =>
-              poke.id === defender.id
-                ? {
-                    ...poke,
-                    currentHp: Math.max(0, poke.currentHp - currentHitDamage),
-                  }
-                : poke,
+              poke.id === defender.id ? { ...poke, currentHp } : poke,
             ),
           );
+
           setSound({ type: "normal_hit", trigger: Date.now() });
 
           if (isCrit) {
@@ -1213,21 +1241,13 @@ export function PokeBattleProvider({
             await sleep(1200);
           }
 
-          totalDamageApplied += currentHitDamage;
-          actualHits++;
-
-          // Chaque coup d'un multi-hit peut déclencher le Flinch séparément
-          if (
-            move.flinchChance > 0 &&
-            !shouldApplyFlinch &&
-            defender.currentHp - totalDamageApplied > 0
-          ) {
+          // Gestion du Flinch
+          if (move.flinchChance > 0 && !shouldApplyFlinch && currentHp > 0) {
             if (Math.random() * 100 <= move.flinchChance) {
               shouldApplyFlinch = true;
             }
           }
 
-          // On sleep que si pas de cc si cc on wait pas
           if (!isCrit) {
             await sleep(1200);
           }
@@ -1335,6 +1355,7 @@ export function PokeBattleProvider({
       ) {
         shouldApplyFlinch = Math.random() * 100 <= move.flinchChance;
       }
+
       // ---------------------------------------------------------------- //
 
       await applyBuff(attacker, defender, move, attackerTeam);
@@ -1438,6 +1459,44 @@ export function PokeBattleProvider({
     } finally {
       setIsAttacking(false);
     }
+  }
+
+  async function applyRecharge(
+    defender: PokeBattlePokemonDetails,
+    attackerTeam: "user" | "enemy",
+  ) {
+    const updateAttackerTeam =
+      attackerTeam === "user" ? setUserPokemons : setEnemyPokemons;
+    console.log("recharge ON pour", defender.name);
+    updateAttackerTeam((prev) =>
+      prev.map((poke) =>
+        poke.id === defender.id ? { ...poke, isRecharging: true } : poke,
+      ),
+    );
+    await sleep(100);
+  }
+
+  function determineHitCount(move: PokeBattlePokemonMove) {
+    // 1. Si le Pokémon a le talent "Multi-Coups" (Skill Link), 5 hits garantis
+    if (move.name === "Multi-Coups") return 5;
+
+    // 2. Si l'attaque est fixe (ex: Double Pied = 2)
+    if (move.minHits === move.maxHits) return move.minHits;
+
+    // 3. Probabilités officielles pour attaques 2-5 hits (Balle Graine, etc.)
+    if (move.minHits === 2 && move.maxHits === 5) {
+      const rand = Math.random();
+      if (rand < 0.375) return 2; // 37.5%
+      if (rand < 0.75) return 3; // 37.5%
+      if (rand < 0.875) return 4; // 12.5%
+      return 5; // 12.5%
+    }
+
+    // 4. Fallback pour des cas personnalisés (ex: 2-3 hits)
+    return (
+      Math.floor(Math.random() * (move.maxHits - move.minHits + 1)) +
+      move.minHits
+    );
   }
 
   function checkIsCritical(move: PokeBattlePokemonMove): boolean {

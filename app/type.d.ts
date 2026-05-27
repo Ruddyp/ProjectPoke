@@ -398,6 +398,7 @@ export type PokeBattlePokemonDetails = {
   isConfused: boolean;
   isPoisoned: boolean;
   isSeeded: boolean;
+  isRecharging: boolean;
   confusionTurns: number;
   sleepTurns: number;
   currentHp: number;
