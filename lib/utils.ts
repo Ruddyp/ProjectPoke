@@ -620,11 +620,11 @@ export const TRAINER_FREDO = {
 
 export const TRAINER_SANDRA = {
   name: "Sandra",
-  pokemons: [148, 148, 148, 230, 130, 371], // Draco, Draco, Draco, Hyporoi, Léviator, Draby
+  pokemons: [146, 147, 148, 230, 130, 371], // Minidraco, Draco, Dracolosse, Hyporoi, Léviator, Draby
   battleAudioSrc: "/sounds/battle_gym_gen2.mp3",
   victoryAudioSrc: "/sounds/victory_red.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/clair.png",
-  power: 2254,
+  power: 2243,
   gen: 2,
 };
 
@@ -644,11 +644,11 @@ export const TRAINER_PIERRE_ROCHARD = {
 
 export const TRAINER_ROXANNE = {
   name: "Roxanne",
-  pokemons: [74, 74, 299, 75, 345, 346], // Racaillou, Racaillou, Tarinor, Gravalanch, Anorith, Armaldo
+  pokemons: [74, 75, 299, 76, 345, 346], // Racaillou, Gravalanch, Tarinor, Grolem, Anorith, Armaldo
   battleAudioSrc: "/sounds/battle_gym_gen3.mp3",
   victoryAudioSrc: "/sounds/victory_gym_gen3.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/roxanne.png",
-  power: 1993,
+  power: 2158,
   gen: 3,
 };
 
@@ -861,11 +861,11 @@ export const TRAINER_ARTIE = {
 
 export const TRAINER_INEZIA = {
   name: "Inezia",
-  pokemons: [587, 587, 466, 523, 596, 604], // Emolga, Emolga, Elekable, Zéblytz, Mygavolt, Ohmassacre
+  pokemons: [587, 522, 466, 523, 596, 604], // Emolga, Zébibron, Elekable, Zéblytz, Mygavolt, Ohmassacre
   battleAudioSrc: "/sounds/battle_gym_gen5.mp3",
   victoryAudioSrc: "/sounds/victory_gym_gen5.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/elesa.png",
-  power: 2091,
+  power: 2002,
   gen: 5,
 };
 
