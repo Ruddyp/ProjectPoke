@@ -457,8 +457,27 @@ export function PokeBattleProvider({
     const shouldAttack = await handleEnemyChoice();
     if (!shouldAttack) return;
 
-    const randomNumber = getRandomNumber(0, activeEnemy.moves.length - 1);
-    let move = activeEnemy.moves[randomNumber];
+    const effectiveMoves = activeEnemy.moves.filter((m) => m.type !== "normal");
+    const normalMoves = activeEnemy.moves.filter((m) => m.type === "normal");
+
+    let move;
+
+    if (activeEnemy.types.includes("spectre") && effectiveMoves.length > 0) {
+      // Si c'est un Spectre, on a 70% de chances de choisir une attaque efficace
+      // et 30% de chances de choisir totalement au hasard parmi toutes les attaques
+      const shouldPlaySmart = Math.random() < 0.5;
+
+      if (shouldPlaySmart) {
+        move = effectiveMoves[getRandomNumber(0, effectiveMoves.length - 1)];
+      } else {
+        move =
+          activeEnemy.moves[getRandomNumber(0, activeEnemy.moves.length - 1)];
+      }
+    } else {
+      // Sinon, comportement normal
+      move =
+        activeEnemy.moves[getRandomNumber(0, activeEnemy.moves.length - 1)];
+    }
     if (isUserPokemonLifeUnder25Percent) {
       const moveCategory = shouldUsePhysical ? "physical" : "special";
       move = activeEnemy.moves.find((m) => m.category === moveCategory) ?? move;
