@@ -499,7 +499,7 @@ export const TRAINER_MORGAN = {
   battleAudioSrc: "/sounds/battle_gym_gen1.mp3",
   victoryAudioSrc: "/sounds/victory_blue.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/sabrina.png",
-  power: 2150,
+  power: 1992,
   gen: 1,
 };
 
