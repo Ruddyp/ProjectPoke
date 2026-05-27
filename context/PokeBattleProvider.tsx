@@ -416,9 +416,13 @@ export function PokeBattleProvider({
     }
 
     if (enenyPokemonDead.length >= 3 && canUseReborn && Math.random() < 1 / 2) {
-      const pokemonToReborn = enemyPokemons.find(
-        (p) => p.currentHp <= 0,
-      ) as PokeBattlePokemonDetails;
+      // Récupérer tous les Pokémon K.O.
+      const deadPokemons = enemyPokemons.filter((p) => p.currentHp <= 0);
+
+      // Choisir un index au hasard parmi ces Pokémon
+      const randomIndex = Math.floor(Math.random() * deadPokemons.length);
+      const pokemonToReborn = deadPokemons[randomIndex];
+
       setTextBox(
         `${trainer?.name ?? "L'adversaire"} utilise un rappel sur ${pokemonToReborn.name} !`,
       );
