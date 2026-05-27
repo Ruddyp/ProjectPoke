@@ -451,6 +451,7 @@ export function PokeBattleProvider({
     if (await isRecharging(activeEnemy, "enemy")) {
       setGameStatus("intermission");
       setTargetTeam("user");
+      await sleep(100);
       return;
     }
 
