@@ -494,9 +494,6 @@ export function PokeBattleProvider({
       if (activeEnemy.isSeeded) {
         await applyLeechSeed(activeEnemy, activeUser, "enemy");
       }
-      if (RECHARGE_MOVES.includes(move.name)) {
-        await applyRecharge(activeEnemy, "enemy");
-      }
     } finally {
       setGameStatus("intermission");
       setTargetTeam("user");
