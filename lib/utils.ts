@@ -301,8 +301,8 @@ export function getRandomMoves(moves: PokeBattlePokemonMove[]) {
 
   do {
     let randomNumber = getRandomNumber(0, moves.length - 1);
-    if (indexes.length === 0)
-      randomNumber = moves.findIndex((attack) => attack.id === 63) ?? 2;
+    // if (indexes.length === 0)
+    // randomNumber = moves.findIndex((attack) => attack.id === 63) ?? 2;
     if (!indexes.includes(randomNumber)) {
       const move = moves[randomNumber];
       results.push(move);
