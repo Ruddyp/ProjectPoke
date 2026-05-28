@@ -340,6 +340,7 @@ export function PokeBattleProvider({
           return {
             ...p,
             isActive: false,
+            isRecharging: false,
           };
         }
         return p;
@@ -448,60 +449,58 @@ export function PokeBattleProvider({
     setTextBox(`Au tour de ${activeEnemy.name} de jouer !`);
     await sleep(2000);
 
-    if (await isRecharging(activeEnemy, "enemy")) {
-      setGameStatus("intermission");
-      setTargetTeam("user");
-      await sleep(100);
-      return;
-    }
+    try {
+      const shouldAttack = await handleEnemyChoice();
+      if (!shouldAttack) return;
 
-    const shouldAttack = await handleEnemyChoice();
-    if (!shouldAttack) return;
+      const effectiveMoves = activeEnemy.moves.filter(
+        (m) => m.type !== "normal",
+      );
 
-    const effectiveMoves = activeEnemy.moves.filter((m) => m.type !== "normal");
+      let move;
 
-    let move;
+      if (activeUser.types.includes("spectre") && effectiveMoves.length > 0) {
+        // Si c'est un Spectre, on a 70% de chances de choisir une attaque efficace
+        // et 30% de chances de choisir totalement au hasard parmi toutes les attaques
+        const shouldPlaySmart = Math.random() < 0.5;
 
-    if (activeUser.types.includes("spectre") && effectiveMoves.length > 0) {
-      // Si c'est un Spectre, on a 70% de chances de choisir une attaque efficace
-      // et 30% de chances de choisir totalement au hasard parmi toutes les attaques
-      const shouldPlaySmart = Math.random() < 0.5;
-
-      if (shouldPlaySmart) {
-        move = effectiveMoves[getRandomNumber(0, effectiveMoves.length - 1)];
+        if (shouldPlaySmart) {
+          move = effectiveMoves[getRandomNumber(0, effectiveMoves.length - 1)];
+        } else {
+          move =
+            activeEnemy.moves[getRandomNumber(0, activeEnemy.moves.length - 1)];
+        }
       } else {
+        // Sinon, comportement normal
         move =
           activeEnemy.moves[getRandomNumber(0, activeEnemy.moves.length - 1)];
       }
-    } else {
-      // Sinon, comportement normal
-      move =
-        activeEnemy.moves[getRandomNumber(0, activeEnemy.moves.length - 1)];
-    }
-    if (isUserPokemonLifeUnder25Percent) {
-      const moveCategory = shouldUsePhysical ? "physical" : "special";
-      move = activeEnemy.moves.find((m) => m.category === moveCategory) ?? move;
-    }
+      if (isUserPokemonLifeUnder25Percent) {
+        const moveCategory = shouldUsePhysical ? "physical" : "special";
+        move =
+          activeEnemy.moves.find((m) => m.category === moveCategory) ?? move;
+      }
 
-    if (await canPokemonAttack(activeEnemy, move, "enemy")) {
-      await attackResolution(activeEnemy, activeUser, move, "enemy");
-    }
+      if (await canPokemonAttack(activeEnemy, move, "enemy")) {
+        await attackResolution(activeEnemy, activeUser, move, "enemy");
+      }
 
-    if (activeEnemy.isBurnt) {
-      await applyBurnDamage(activeEnemy, "enemy");
+      if (activeEnemy.isBurnt) {
+        await applyBurnDamage(activeEnemy, "enemy");
+      }
+      if (activeEnemy.isPoisoned) {
+        await applyPoisonDamage(activeEnemy, "enemy");
+      }
+      if (activeEnemy.isSeeded) {
+        await applyLeechSeed(activeEnemy, activeUser, "enemy");
+      }
+      if (RECHARGE_MOVES.includes(move.name)) {
+        await applyRecharge(activeEnemy, "enemy");
+      }
+    } finally {
+      setGameStatus("intermission");
+      setTargetTeam("user");
     }
-    if (activeEnemy.isPoisoned) {
-      await applyPoisonDamage(activeEnemy, "enemy");
-    }
-    if (activeEnemy.isSeeded) {
-      await applyLeechSeed(activeEnemy, activeUser, "enemy");
-    }
-    if (RECHARGE_MOVES.includes(move.name)) {
-      await applyRecharge(activeEnemy, "enemy");
-    }
-
-    setGameStatus("intermission");
-    setTargetTeam("user");
   }
 
   // TOUR DU JOUEUR
@@ -509,27 +508,25 @@ export function PokeBattleProvider({
     if (isActionPending || gameStatus !== "user_turn") return;
     const activeUser = getActivePokemon(userPokemons);
     const activeEnemy = getActivePokemon(enemyPokemons);
-    if (await isRecharging(activeUser, "user")) {
+
+    try {
+      if (await isRecharging(activeUser, "user")) return;
+
+      setIsActionPending(true);
+
+      if (await canPokemonAttack(activeUser, move, "user")) {
+        await attackResolution(activeUser, activeEnemy, move, "user");
+      }
+
+      if (activeUser.isBurnt) await applyBurnDamage(activeUser, "user");
+      if (activeUser.isPoisoned) await applyPoisonDamage(activeUser, "user");
+      if (activeUser.isSeeded)
+        await applyLeechSeed(activeUser, activeEnemy, "user");
+    } finally {
       setGameStatus("intermission");
-      setTargetTeam("user");
-      return;
+      setTargetTeam("enemy");
+      setIsActionPending(false);
     }
-    setIsActionPending(true);
-
-    if (await canPokemonAttack(activeUser, move, "user")) {
-      await attackResolution(activeUser, activeEnemy, move, "user");
-    }
-
-    if (activeUser.isBurnt) await applyBurnDamage(activeUser, "user");
-    if (activeUser.isPoisoned) await applyPoisonDamage(activeUser, "user");
-    if (activeUser.isSeeded)
-      await applyLeechSeed(activeUser, activeEnemy, "user");
-    if (RECHARGE_MOVES.includes(move.name))
-      await applyRecharge(activeUser, "user");
-
-    setGameStatus("intermission");
-    setTargetTeam("enemy");
-    setIsActionPending(false);
   }
 
   async function applyBurnDamage(
@@ -1381,6 +1378,10 @@ export function PokeBattleProvider({
         canApplyStatus
       ) {
         shouldApplyFlinch = Math.random() * 100 <= move.flinchChance;
+      }
+
+      if (RECHARGE_MOVES.includes(move.name)) {
+        await applyRecharge(attacker, attackerTeam);
       }
 
       // ---------------------------------------------------------------- //

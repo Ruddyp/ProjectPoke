@@ -301,8 +301,8 @@ export function getRandomMoves(moves: PokeBattlePokemonMove[]) {
 
   do {
     let randomNumber = getRandomNumber(0, moves.length - 1);
-    // if (indexes.length === 0)
-    // randomNumber = moves.findIndex((attack) => attack.id === 78) ?? 2;
+    if (indexes.length === 0)
+      randomNumber = moves.findIndex((attack) => attack.id === 63) ?? 2;
     if (!indexes.includes(randomNumber)) {
       const move = moves[randomNumber];
       results.push(move);
@@ -449,12 +449,12 @@ export const TRAINER_BLUE = {
 
 export const TRAINER_PIERRE = {
   name: "Pierre",
-  // Racaillou, Onix, Racaillou, Kabuto, Amonita, Ptéra
-  pokemons: [74, 95, 74, 140, 138, 142],
+  // Racaillou, Onix, Gravalanch, Kabuto, Amonita, Ptéra
+  pokemons: [74, 95, 75, 140, 138, 142],
   battleAudioSrc: "/sounds/battle_gym_gen1.mp3",
   victoryAudioSrc: "/sounds/victory_blue.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/brock.png",
-  power: 1875,
+  power: 1943,
   gen: 1,
 };
 
@@ -471,34 +471,34 @@ export const TRAINER_ONDINE = {
 
 export const TRAINER_MAJOR_BOB = {
   name: "Major Bob",
-  // Voltorbe, Pikechu, Raichu, Magnéti, Magnéton, Élektek
-  pokemons: [100, 25, 26, 81, 82, 125],
+  // Electrode, Pikachu, Raichu, Magnéti, Magnéton, Élektek
+  pokemons: [101, 25, 26, 81, 82, 125],
   battleAudioSrc: "/sounds/battle_gym_gen1.mp3",
   victoryAudioSrc: "/sounds/victory_blue.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/ltsurge.png",
-  power: 1802,
+  power: 1905,
   gen: 1,
 };
 
 export const TRAINER_ERIKA = {
   name: "Erika",
-  // Empiflor, Rafflesia, Saquedeneu, Joliflor, Parasect, Boustiflor
-  pokemons: [71, 45, 114, 182, 47, 70],
+  // Empiflor, Rafflesia, Saquedeneu, Noadkoko, Parasect, Boustiflor
+  pokemons: [71, 45, 114, 103, 47, 70],
   battleAudioSrc: "/sounds/battle_gym_gen1.mp3",
   victoryAudioSrc: "/sounds/victory_blue.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/erika.png",
-  power: 2220,
+  power: 2258,
   gen: 1,
 };
 
 export const TRAINER_KOGA = {
   name: "Koga",
-  // Smogo, Smogogo, Tadmorv, Grotadmorv, Nidoran, Aéromite
-  pokemons: [109, 110, 88, 89, 32, 49],
+  // Smogo, Smogogo, Tadmorv, Grotadmorv, Nidoqueen, Nidoking
+  pokemons: [109, 110, 88, 89, 31, 34],
   battleAudioSrc: "/sounds/battle_gym_gen1.mp3",
   victoryAudioSrc: "/sounds/victory_blue.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/koga.png",
-  power: 1957,
+  power: 2191,
   gen: 1,
 };
 
@@ -515,12 +515,12 @@ export const TRAINER_MORGAN = {
 
 export const TRAINER_AUGUSTE = {
   name: "Auguste",
-  // Caninos, Arcanin, Ponyta, Galopa, Magmar, Feunard
-  pokemons: [58, 59, 77, 78, 126, 38],
+  // Caninos, Arcanin, Dracaufeu, Galopa, Magmar, Feunard
+  pokemons: [58, 59, 6, 78, 126, 38],
   battleAudioSrc: "/sounds/battle_gym_gen1.mp3",
   victoryAudioSrc: "/sounds/victory_blue.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/blaine.png",
-  power: 2059,
+  power: 2166,
   gen: 1,
 };
 
@@ -684,17 +684,17 @@ export const TRAINER_ADRIANE = {
 
 export const TRAINER_NORMAN = {
   name: "Norman",
-  pokemons: [289, 288, 289, 287, 264, 52], // Monaflèmit, Vigoroth, Monaflèmit, Parecool, Linéon, Miaouss
+  pokemons: [289, 288, 53, 287, 264, 52], // Monaflèmit, Vigoroth, Persian, Parecool, Linéon, Miaouss
   battleAudioSrc: "/sounds/battle_gym_gen3.mp3",
   victoryAudioSrc: "/sounds/victory_gym_gen3.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/norman.png",
-  power: 2178,
+  power: 1918,
   gen: 3,
 };
 
 export const TRAINER_ALIZEE = {
   name: "Alizée",
-  pokemons: [277, 334, 279, 279, 227, 226], // Hélédelle, Altaria, Bekipan, Bekipan, Airmure, Démanta
+  pokemons: [277, 334, 279, 334, 227, 226], // Hélédelle, Altaria, Bekipan, Altaria, Airmure, Démanta
   battleAudioSrc: "/sounds/battle_gym_gen3.mp3",
   victoryAudioSrc: "/sounds/victory_gym_gen3.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/winona.png",
@@ -704,11 +704,11 @@ export const TRAINER_ALIZEE = {
 
 export const TRAINER_LEVY_TATIA = {
   name: "Lévy & Tatia",
-  pokemons: [344, 337, 338, 178, 122, 337], // Kaorine, Séléroc, Solaroc, Xatu, M.Mime, Lunetir
+  pokemons: [344, 337, 338, 178, 122, 346], // Kaorine, Séléroc, Solaroc, Xatu, M.Mime, Vacilys
   battleAudioSrc: "/sounds/battle_gym_gen3.mp3",
   victoryAudioSrc: "/sounds/victory_gym_gen3.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/tateandliza-gen3.png",
-  power: 2260,
+  power: 2289,
   gen: 3,
 };
 
@@ -738,11 +738,11 @@ export const TRAINER_CYNTHIA = {
 
 export const TRAINER_PIERRICK = {
   name: "Pierrick",
-  pokemons: [74, 95, 408, 111, 328, 443], // Racaillou, Onix, Kranidos, Rhinocorne, Kraknoix, Griknot
+  pokemons: [76, 95, 408, 111, 328, 443], // Grolem, Onix, Kranidos, Rhinocorne, Kraknoix, Griknot
   battleAudioSrc: "/sounds/battle_gym_gen4.mp3",
   victoryAudioSrc: "/sounds/victory_gym_gen4.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/roark.png",
-  power: 1807,
+  power: 1972,
   gen: 4,
 };
 
@@ -758,21 +758,21 @@ export const TRAINER_FLO = {
 
 export const TRAINER_MELINA = {
   name: "Mélina",
-  pokemons: [307, 67, 308, 66, 236, 448], // Méditikka, Machopeur, Charmina, Machoc, Debugant, Lucario
+  pokemons: [307, 67, 308, 68, 236, 448], // Méditikka, Machopeur, Charmina, Mackogneur, Debugant, Lucario
   battleAudioSrc: "/sounds/battle_gym_gen4.mp3",
   victoryAudioSrc: "/sounds/victory_gym_gen4.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/maylene.png",
-  power: 1675,
+  power: 1850,
   gen: 4,
 };
 
 export const TRAINER_LOVIS = {
   name: "Lovis",
-  pokemons: [130, 195, 71, 349, 340, 419], // Léviator, Maraiste, Empiflor, Hydragon, Barbicha, Mustéflott
+  pokemons: [130, 195, 457, 349, 369, 419], // Léviator, Maraiste, Luminéon, Hydragon, Relicanth, Mustéflott
   battleAudioSrc: "/sounds/battle_gym_gen4.mp3",
   victoryAudioSrc: "/sounds/victory_gym_gen4.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/crasherwake.png",
-  power: 2043,
+  power: 2064,
   gen: 4,
 };
 
@@ -788,21 +788,21 @@ export const TRAINER_KIMERA = {
 
 export const TRAINER_CHARLES = {
   name: "Charles",
-  pokemons: [208, 411, 304, 305, 306, 436], // Steelix, Bastiodon, Galekid, Galegon, Galeking, Archéomire
+  pokemons: [208, 411, 330, 305, 306, 436], // Steelix, Bastiodon, Libegon, Galegon, Galeking, Archéomire
   battleAudioSrc: "/sounds/battle_gym_gen4.mp3",
   victoryAudioSrc: "/sounds/victory_gym_gen4.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/byron.png",
-  power: 2332,
+  power: 2451,
   gen: 4,
 };
 
 export const TRAINER_GLADYS = {
   name: "Gladys",
-  pokemons: [459, 215, 460, 478, 221, 471], // Blizzi, Farfuret, Blizzaroi, Momartik, Cochignon, Givrali
+  pokemons: [459, 215, 460, 478, 473, 471], // Blizzi, Farfuret, Blizzaroi, Momartik, Mammochon, Givrali
   battleAudioSrc: "/sounds/battle_gym_gen4.mp3",
   victoryAudioSrc: "/sounds/victory_gym_gen4.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/candice.png",
-  power: 2164,
+  power: 2219,
   gen: 4,
 };
 
@@ -841,11 +841,11 @@ export const TRAINER_ARMANDO = {
 
 export const TRAINER_ALOE = {
   name: "Aloé",
-  pokemons: [510, 569, 506, 507, 572, 505], // Leopardus, Miasmax, Ponchien, Mastouffe, Nanméouïe, Miradar
+  pokemons: [510, 569, 626, 507, 572, 505], // Leopardus, Miasmax, Frison, Mastouffe, Nanméouïe, Miradar
   battleAudioSrc: "/sounds/battle_gym_gen5.mp3",
   victoryAudioSrc: "/sounds/victory_gym_gen5.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/lenora.png",
-  power: 1758,
+  power: 1983,
   gen: 5,
 };
 
@@ -871,7 +871,7 @@ export const TRAINER_INEZIA = {
 
 export const TRAINER_BARDANE = {
   name: "Bardane",
-  pokemons: [535, 536, 551, 552, 529, 530], // Rototaupe, Minotaupe, Mascaïman, Escroco, Rototaupe, Rototaupe
+  pokemons: [535, 536, 551, 552, 529, 530], // Tritonde, Caiman, Mascaïman, Escroco, Rototaupe, Minotaupe
   battleAudioSrc: "/sounds/battle_gym_gen5.mp3",
   victoryAudioSrc: "/sounds/victory_gym_gen5.mp3",
   img: "https://play.pokemonshowdown.com/sprites/trainers/clay.png",
