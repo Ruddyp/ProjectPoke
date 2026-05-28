@@ -5,7 +5,6 @@ import {
   addScoreToPokeBattleLeaderboard,
   replaceScoreToPokeBattleLeaderboard,
 } from "@/lib/bdd";
-import { calculatePokemonTeamPower } from "@/lib/utils";
 import { Sparkles } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -15,7 +14,8 @@ export default function Ending() {
     userPokemons,
     leaderboard,
     trainer,
-    enemyPokemons,
+    enemyScore,
+    userScore,
     addToLeaderboard,
     updateLeaderboard,
   } = usePokeBattle();
@@ -25,9 +25,8 @@ export default function Ending() {
   const [hasSaved, setHasSaved] = useState(false);
 
   const isUserWin = userPokemons.some((poke) => poke.currentHp > 0);
-  const score =
-    calculatePokemonTeamPower(enemyPokemons) -
-    calculatePokemonTeamPower(userPokemons);
+  const score = enemyScore - userScore;
+  console.log("score", score);
   const difficulty = trainer?.name ?? "Random";
 
   useEffect(() => {

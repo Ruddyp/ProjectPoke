@@ -11,6 +11,7 @@ import {
   Types,
 } from "@/app/type";
 import {
+  calculatePokemonTeamPower,
   getPokemonTeam,
   getRandomNumber,
   POKEBATTLE_OBJECTS,
@@ -38,6 +39,8 @@ type PokeBattleContextType = {
   isActionPending: boolean;
   isFetching: boolean;
   isAttacking: boolean;
+  userScore: number;
+  enemyScore: number;
   leaderboard: IPokeBatlle[];
   sound: { type: PokeBattleSound; trigger: number } | null;
   types: Types[];
@@ -93,6 +96,8 @@ export function PokeBattleProvider({
     type: PokeBattleSound;
     trigger: number;
   } | null>(null);
+  const [enemyScore, setEnemyScore] = useState(0);
+  const [userScore, setUserScore] = useState(0);
 
   const getActivePokemon = (pokemons: PokeBattlePokemonDetails[]) => {
     return (
@@ -235,6 +240,8 @@ export function PokeBattleProvider({
               const newHp = Math.round(
                 Math.min(p.currentHp + healAmount, p.stats.hp),
               );
+              setTextBox(`${p.name}, a repris des forces !`);
+              setSound({ type: "leech-seed", trigger: Date.now() });
               return {
                 ...p,
                 currentHp: newHp,
@@ -243,8 +250,6 @@ export function PokeBattleProvider({
             return p;
           });
         });
-        setTextBox(`${pokemon.name}, a repris des forces !`);
-        setSound({ type: "leech-seed", trigger: Date.now() });
         await sleep(1500);
         break;
       case "reborn":
@@ -255,6 +260,8 @@ export function PokeBattleProvider({
               const newHp = Math.round(
                 Math.min(p.currentHp + healAmount, p.stats.hp),
               );
+              setTextBox(`${p.name}, a retrouvé la forme !`);
+              setSound({ type: "leech-seed", trigger: Date.now() });
               return {
                 ...p,
                 currentHp: newHp,
@@ -263,14 +270,14 @@ export function PokeBattleProvider({
             return p;
           });
         });
-        setTextBox(`${pokemon.name}, a retrouvé la forme !`);
-        setSound({ type: "leech-seed", trigger: Date.now() });
         await sleep(1500);
         break;
       case "status":
         updateTeam((prev) => {
           return prev.map((p) => {
             if (p.id === id) {
+              setTextBox(`${p.name}, a été soigné de ses status !`);
+              setSound({ type: "leech-seed", trigger: Date.now() });
               return {
                 ...p,
                 isParalyze: false,
@@ -284,8 +291,6 @@ export function PokeBattleProvider({
             return p;
           });
         });
-        setTextBox(`${pokemon.name}, a été soigné de ses status !`);
-        setSound({ type: "leech-seed", trigger: Date.now() });
         await sleep(1500);
         break;
     }
@@ -450,6 +455,7 @@ export function PokeBattleProvider({
     await sleep(2000);
 
     try {
+      if (await isRecharging(activeEnemy, "enemy")) return;
       const shouldAttack = await handleEnemyChoice();
       if (!shouldAttack) return;
 
@@ -458,7 +464,6 @@ export function PokeBattleProvider({
       );
 
       let move;
-
       if (activeUser.types.includes("spectre") && effectiveMoves.length > 0) {
         // Si c'est un Spectre, on a 70% de chances de choisir une attaque efficace
         // et 30% de chances de choisir totalement au hasard parmi toutes les attaques
@@ -479,6 +484,10 @@ export function PokeBattleProvider({
         const moveCategory = shouldUsePhysical ? "physical" : "special";
         move =
           activeEnemy.moves.find((m) => m.category === moveCategory) ?? move;
+      }
+
+      if (RECHARGE_MOVES.includes(move.name)) {
+        await applyRecharge(activeEnemy, "enemy");
       }
 
       if (await canPokemonAttack(activeEnemy, move, "enemy")) {
@@ -507,9 +516,8 @@ export function PokeBattleProvider({
     const activeEnemy = getActivePokemon(enemyPokemons);
 
     try {
-      if (await isRecharging(activeUser, "user")) return;
-
       setIsActionPending(true);
+      if (await isRecharging(activeUser, "user")) return;
 
       if (await canPokemonAttack(activeUser, move, "user")) {
         await attackResolution(activeUser, activeEnemy, move, "user");
@@ -586,14 +594,13 @@ export function PokeBattleProvider({
       0,
       attacker.currentHp - confusionFinalDamage,
     );
-    setTextBox(`${attacker.name} se blesse dans sa confusion !`);
-    setSound({ type: "normal", trigger: Date.now() });
-    await sleep(1500);
     const updateTeam =
       attackerTeam === "user" ? setUserPokemons : setEnemyPokemons;
     updateTeam((prev) => {
       return prev.map((poke) => {
-        if (poke.id === attacker.id) {
+        if (poke.id === attacker.id && poke.isConfused) {
+          setTextBox(`${attacker.name} se blesse dans sa confusion !`);
+          setSound({ type: "normal", trigger: Date.now() });
           return {
             ...poke,
             currentHp: attackerRemainingHp,
@@ -602,6 +609,7 @@ export function PokeBattleProvider({
         return poke;
       });
     });
+    await sleep(1500);
   }
 
   async function applyLeechSeed(
@@ -1574,6 +1582,8 @@ export function PokeBattleProvider({
       : await getPokemonTeam();
 
     trainer !== undefined ? setTrainer(trainer) : setTrainer(null);
+    setUserScore(calculatePokemonTeamPower(myTeam));
+    setEnemyScore(calculatePokemonTeamPower(enemyTeam));
     setEnemyObjects(POKEBATTLE_OBJECTS);
     setUserObjects(POKEBATTLE_OBJECTS);
     setIsFetching(false);
@@ -1624,6 +1634,8 @@ export function PokeBattleProvider({
         isActionPending,
         isAttacking,
         isFetching,
+        userScore,
+        enemyScore,
         userPokemons,
         enemyPokemons,
         enemyObjects,

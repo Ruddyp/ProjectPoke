@@ -1,11 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 import { usePokeBattle } from "@/context/PokeBattleProvider";
-import { calculatePokemonTeamPower } from "@/lib/utils";
 
 export default function BattlePresentation() {
-  const { enemyPokemons, userPokemons } = usePokeBattle();
-  const userTeamPower = calculatePokemonTeamPower(userPokemons);
-  const enemyTeamPower = calculatePokemonTeamPower(enemyPokemons, true);
+  const { userScore, enemyScore, enemyPokemons, userPokemons } =
+    usePokeBattle();
 
   return (
     <div className="absolute inset-0 z-50 bg-background flex flex-col items-center justify-center overflow-hidden font-mono">
@@ -34,7 +32,7 @@ export default function BattlePresentation() {
           ))}
         </div>
         <span className="text-red-400 text-xs font-bold tracking-widest bg-red-950/80 px-3 py-1 rounded-full border border-red-800">
-          PUISSANCE: {enemyTeamPower.toLocaleString()}
+          PUISSANCE: {enemyScore.toLocaleString()}
         </span>
       </div>
 
@@ -65,7 +63,7 @@ export default function BattlePresentation() {
           ))}
         </div>
         <span className="text-blue-400 text-xs font-bold tracking-widest bg-blue-950/80 px-3 py-1 rounded-full border border-blue-800">
-          PUISSANCE: {userTeamPower.toLocaleString()}
+          PUISSANCE: {userScore.toLocaleString()}
         </span>
       </div>
 

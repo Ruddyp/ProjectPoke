@@ -315,7 +315,6 @@ export function getRandomMoves(moves: PokeBattlePokemonMove[]) {
 
 export function calculatePokemonTeamPower(
   team: PokeBattlePokemonDetails[],
-  display?: boolean,
 ): number {
   const totalPower = team.reduce((total, pokemon) => {
     const s = pokemon.stats;
@@ -336,11 +335,10 @@ export function calculatePokemonTeamPower(
 
     // Application de la formule SEC
     const pokemonSEC = 1.5 * offense + defense;
-    display && console.log("pokemon", pokemon.name, "score:", pokemonSEC);
 
     return total + pokemonSEC;
   }, 0);
-
+  console.log("Puissance team", team, ":", Math.round(totalPower));
   return Math.round(totalPower);
 }
 

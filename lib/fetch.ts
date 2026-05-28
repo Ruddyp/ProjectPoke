@@ -208,9 +208,9 @@ export async function getPokemonDetails(
           ];
           const moveCategory = moveData.meta?.category?.name;
           if (!allowedCategories.includes(moveCategory)) {
-            console.log(
-              `Move rejeté : ${moveData.name} | Catégorie : ${moveData.meta?.category?.name} | Target : ${moveData.target?.name}`,
-            );
+            // console.log(
+            //   `Move rejeté : ${moveData.name} | Catégorie : ${moveData.meta?.category?.name} | Target : ${moveData.target?.name}`,
+            // );
             return null; // Élimine "unique" (Dégommage), "ohko" (Abîme), "field-effect", etc.
           }
 
