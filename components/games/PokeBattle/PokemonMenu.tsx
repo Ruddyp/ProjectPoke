@@ -12,12 +12,12 @@ type ChangeMenuProps = {
 type CurrentMenuType = "main" | "moves" | "pokemon" | "object" | "retreat";
 
 export default function PokemonMenu({ setCurrentMenu }: ChangeMenuProps) {
-  const { userPokemons, isActionPending, handlePokemonReplacement } =
-    usePokeBattle();
+  const { userPokemons, isActionPending, handleUserSwitch } = usePokeBattle();
 
   const handlePokemonChoice = (pokemon: PokeBattlePokemonDetails) => {
+    if (isActionPending) return;
     setCurrentMenu("main");
-    handlePokemonReplacement(pokemon.id, "user");
+    handleUserSwitch(pokemon.id);
   };
 
   return (

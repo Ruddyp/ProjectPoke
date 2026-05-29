@@ -5,28 +5,33 @@ import {
   addScoreToPokeBattleLeaderboard,
   replaceScoreToPokeBattleLeaderboard,
 } from "@/lib/bdd";
-import { Sparkles } from "lucide-react";
+import { Sparkles, HeartCrack } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function Ending() {
   const {
-    goToWaitingScreen,
     userPokemons,
     leaderboard,
     trainer,
     enemyScore,
     userScore,
+    rematchProposed,
+    opponentWantsRematch,
+    battleMode,
+    opponentForfait,
+    goToWaitingScreen,
     addToLeaderboard,
     updateLeaderboard,
+    handleRequestRematch,
   } = usePokeBattle();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [name, setName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
 
-  const isUserWin = userPokemons.some((poke) => poke.currentHp > 0);
+  const isUserWin =
+    opponentForfait || userPokemons.some((poke) => poke.currentHp > 0);
   const score = enemyScore - userScore;
-  console.log("score", score);
   const difficulty = trainer?.name ?? "Random";
 
   useEffect(() => {
@@ -61,10 +66,10 @@ export default function Ending() {
   const lastScore = difficultyLeaderboard[difficultyLeaderboard.length - 1];
 
   const canBeSaveToLeaderboard = useMemo(() => {
-    if (!isUserWin) return false;
+    if (battleMode === "pvp" || !isUserWin) return false;
     if (difficultyLeaderboard.length < 5) return true;
     return score > lastScore.score;
-  }, [difficultyLeaderboard, lastScore, isUserWin, score]);
+  }, [difficultyLeaderboard, lastScore, isUserWin, score, battleMode]);
 
   const handleScoreUpdate = async () => {
     if (!name.trim()) return;
@@ -94,17 +99,25 @@ export default function Ending() {
       <div className="absolute w-[150%] h-2 bg-red-600 rotate-[-15deg] z-0 shadow-[0_0_20px_rgba(220,38,38,0.8)]" />
 
       <div className="z-10 flex flex-col items-center gap-2 sm:gap-4 p-6 sm:p-10 bg-slate-900/90 backdrop-blur-sm rounded-2xl border border-slate-700 shadow-2xl">
-        <h1 className="text-5xl sm:text-8xl font-black text-white italic tracking-tighter drop-shadow-[0_4px_0_rgba(220,38,38,1)]">
-          {isUserWin ? "VICTOIRE !" : "DEFAITE !"}
+        <h1 className="text-4xl sm:text-7xl font-black text-white italic tracking-tighter drop-shadow-[0_4px_0_rgba(220,38,38,1)] text-center uppercase">
+          {opponentForfait
+            ? "VICTOIRE PAR FORFAIT !"
+            : isUserWin
+              ? "VICTOIRE !"
+              : "DEFAITE !"}
         </h1>
 
         <div className="h-px w-32 bg-red-600 my-2" />
 
-        <p className="text-base sm:text-xl text-slate-300 font-bold tracking-[0.2em] uppercase">
-          {isUserWin ? "Le combat est remporté" : "Le combat est perdu"}
+        <p className="text-base sm:text-xl text-slate-300 font-bold tracking-[0.2em] uppercase text-center max-w-md">
+          {opponentForfait
+            ? "L'adversaire a fui le combat."
+            : isUserWin
+              ? "Le combat est remporté"
+              : "Le combat est perdu"}
         </p>
 
-        {isUserWin && (
+        {isUserWin && battleMode === "pve" && (
           <div className="bg-slate-800/50 border-2 border-red-600 rounded-xl p-4 text-slate-200 text-center font-semibold tracking-widest uppercase text-sm">
             Votre score:{" "}
             <span className="font-extrabold text-base text-slate-50">
@@ -112,7 +125,8 @@ export default function Ending() {
             </span>
           </div>
         )}
-        {/* Section Record */}
+
+        {/* Section Record  */}
         <div className="mt-8 w-full max-w-2xl">
           {canBeSaveToLeaderboard && (
             <div className="bg-slate-800 border-2 border-[#E0A850] rounded-xl p-4 flex items-center justify-center gap-3 shadow-lg">
@@ -123,7 +137,15 @@ export default function Ending() {
               <Sparkles className="text-[#E0A850] size-5" />
             </div>
           )}
-          {!canBeSaveToLeaderboard && (
+
+          {battleMode === "pvp" && opponentForfait && (
+            <div className="bg-slate-950/80 border border-red-900/60 rounded-xl p-4 flex items-center justify-center gap-3 shadow-inner text-red-400 font-bold text-xs uppercase tracking-widest animate-pulse">
+              <HeartCrack className="size-4 text-red-500" />
+              Pas de pitié pour les lâches !
+            </div>
+          )}
+
+          {battleMode === "pve" && !canBeSaveToLeaderboard && (
             <div className="text-slate-400 text-center font-bold tracking-widest uppercase text-sm">
               Dommage ! Il en faut plus pour détrôner les meilleurs...
             </div>
@@ -161,12 +183,35 @@ export default function Ending() {
           </div>
         )}
 
-        <button
-          onClick={goToWaitingScreen}
-          className="mt-6 sm:mt-8 px-8 sm:px-10 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-lg rounded border-2 border-slate-600 hover:border-slate-400 transition-all hover:scale-105 active:scale-95"
-        >
-          REVENIR AU MENU
-        </button>
+        <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-4 w-full justify-center">
+          {/* BOUTON REMATCH (Uniquement en PvP et si l'adversaire n'a pas ragequit) */}
+          {battleMode === "pvp" && !opponentForfait && (
+            <button
+              onClick={handleRequestRematch}
+              disabled={rematchProposed}
+              className={`px-8 sm:px-10 py-3 font-black text-lg rounded border-2 transition-all active:scale-95 uppercase tracking-wider ${
+                opponentWantsRematch
+                  ? "bg-[#E0A850] text-slate-900 border-[#c6943f] animate-pulse hover:scale-105"
+                  : rematchProposed
+                    ? "bg-slate-800 text-slate-500 border-slate-700 pointer-events-none"
+                    : "bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-700 hover:scale-105"
+              }`}
+            >
+              {rematchProposed
+                ? "Attente de l'adversaire..."
+                : opponentWantsRematch
+                  ? "Accepter la Revanche !"
+                  : "Proposer une Revanche"}
+            </button>
+          )}
+
+          <button
+            onClick={goToWaitingScreen}
+            className="px-8 sm:px-10 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-lg rounded border-2 border-slate-600 hover:border-slate-400 transition-all hover:scale-105 active:scale-95"
+          >
+            REVENIR AU MENU
+          </button>
+        </div>
       </div>
 
       <div className="absolute inset-0 pointer-events-none opacity-20 bg-[radial-gradient(circle_at_50%_50%,_rgba(220,38,38,0.2),_transparent)] animate-pulse" />

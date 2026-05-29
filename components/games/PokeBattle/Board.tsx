@@ -5,9 +5,19 @@ import BattlePresentation from "./BattlePresentation";
 import { useEffect, useRef } from "react";
 
 export default function Board() {
-  const { enemyPokemons, userPokemons, gameStatus, startBattle, trainer } =
-    usePokeBattle();
+  const {
+    enemyPokemons,
+    userPokemons,
+    gameStatus,
+    startBattle,
+    trainer,
+    socket,
+    opponentSocketId,
+  } = usePokeBattle();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  console.log("userPokemon", userPokemons);
+  console.log("enemyPokemons", enemyPokemons);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -47,13 +57,13 @@ export default function Board() {
 
     if (gameStatus === "presentation") {
       timer = setTimeout(() => {
-        startBattle();
+        startBattle(socket?.id, opponentSocketId ?? undefined);
       }, 4500);
     }
 
     // Cleanup : si le composant est démonté avant la fin, on annule le timer
     return () => clearTimeout(timer);
-  }, [gameStatus, startBattle]);
+  }, [gameStatus, startBattle, socket?.id, opponentSocketId]);
 
   const activeUserPokemon =
     userPokemons.find((poke) => poke.isActive) ?? userPokemons[0];

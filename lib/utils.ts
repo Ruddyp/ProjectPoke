@@ -1,7 +1,6 @@
 import {
   MemoryDifficulty,
   MemoryTuileType,
-  PokeBattleDifficulty,
   PokeBattleMoveCategory,
   PokeBattleObject,
   PokeBattlePokemonDetails,

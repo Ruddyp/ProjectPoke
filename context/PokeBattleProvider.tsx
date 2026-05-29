@@ -1,6 +1,7 @@
 "use client";
 import {
   PokeBattleGameStatus,
+  PokeBattleMode,
   PokeBattleObject,
   PokeBattleObjectType,
   PokeBattlePokemonDetails,
@@ -29,6 +30,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { io, Socket } from "socket.io-client";
 
 type PokeBattleContextType = {
   gameStatus: PokeBattleGameStatus;
@@ -39,26 +41,38 @@ type PokeBattleContextType = {
   isActionPending: boolean;
   isFetching: boolean;
   isAttacking: boolean;
+  opponentForfait: boolean;
+  rematchProposed: boolean;
+  opponentWantsRematch: boolean;
   userScore: number;
   enemyScore: number;
+  roomActuelle: string;
   leaderboard: IPokeBatlle[];
+  battleMode: PokeBattleMode;
   sound: { type: PokeBattleSound; trigger: number } | null;
   types: Types[];
-  startGame: (trainer?: PokeBattleTrainer) => void;
-  startBattle: () => void;
   trainer: PokeBattleTrainer | null;
+  textBox: string;
+  socket: Socket | null;
+  opponentSocketId: string | null;
+  setSocket: (socket: any | null) => void;
+  setOpponentSocketId: (id: string | null) => void;
+  startGame: (trainer?: PokeBattleTrainer) => void;
+  startBattle: (socketId?: string, opponentSocketId?: string) => Promise<void>;
+  setEnemyScore: Dispatch<SetStateAction<number>>;
+  setGameStatus: Dispatch<SetStateAction<PokeBattleGameStatus>>;
+  setEnemyPokemons: Dispatch<SetStateAction<PokeBattlePokemonDetails[]>>;
+  preparePvPBattle: (socket: Socket, roomId: string) => void;
   goToWaitingScreen: () => void;
+  handleRequestRematch: () => void;
   addToLeaderboard: (score: IPokeBatlle) => void;
   updateLeaderboard: (idToUpdate: string, score: IPokeBatlle) => void;
   handleUserAttack: (move: PokeBattlePokemonMove) => Promise<void>;
-  handlePokemonReplacement: (id: number, team: "user" | "enemy") => void;
-  handleObjectUse: (
-    type: PokeBattleObjectType,
-    team: "user" | "enemy",
-    id: number,
-  ) => void;
-  textBox: string;
+  handleUserSwitch: (id: number) => void;
+  handleUserObjectUse: (type: PokeBattleObjectType, id: number) => void;
   setTextBox: Dispatch<SetStateAction<string>>;
+  setBattleMode: Dispatch<SetStateAction<PokeBattleMode>>;
+  setRoomActuelle: Dispatch<SetStateAction<string>>;
 };
 
 export const PokeBattleContext = createContext<
@@ -98,6 +112,14 @@ export function PokeBattleProvider({
   } | null>(null);
   const [enemyScore, setEnemyScore] = useState(0);
   const [userScore, setUserScore] = useState(0);
+  const [battleMode, setBattleMode] = useState<PokeBattleMode>("pve");
+  const [socket, setSocket] = useState<any | null>(null);
+  const [opponentSocketId, setOpponentSocketId] = useState<string | null>(null);
+  const [roomActuelle, setRoomActuelle] = useState<string>("");
+  const [opponentForfait, setOpponentForfait] = useState<boolean>(false);
+  const [rematchProposed, setRematchProposed] = useState<boolean>(false);
+  const [opponentWantsRematch, setOpponentWantsRematch] =
+    useState<boolean>(false);
 
   const getActivePokemon = (pokemons: PokeBattlePokemonDetails[]) => {
     return (
@@ -108,14 +130,123 @@ export function PokeBattleProvider({
   };
 
   const getPokemon = (pokemons: PokeBattlePokemonDetails[], id: number) => {
-    return pokemons.find((poke) => poke.id && id);
+    return pokemons.find((poke) => poke.id === id);
   };
+  const URL_SERVEUR = process.env.NEXT_PUBLIC_ADDRESS;
+
+  useEffect(() => {
+    if (!URL_SERVEUR) return;
+
+    const nouveauSocket = io(URL_SERVEUR);
+    setSocket(nouveauSocket);
+
+    // Nettoyage à la fermeture de l'application
+    return () => {
+      nouveauSocket.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handlePlayerJoined = (data: { playerId: string }) => {
+      setOpponentSocketId(data.playerId);
+    };
+
+    const handleOpponentRequestedRematch = () => {
+      setOpponentWantsRematch(true);
+    };
+
+    const handleRematchStart = async () => {
+      setOpponentForfait(false);
+      setRematchProposed(false);
+      setOpponentWantsRematch(false);
+      setGameStatus("waiting");
+      preparePvPBattle(socket, roomActuelle);
+    };
+
+    const handleBattleReady = async () => {
+      if (roomActuelle) {
+        console.log("🎯 Lancement unique pour la room :", roomActuelle);
+        preparePvPBattle(socket, roomActuelle);
+      }
+    };
+
+    const handleTeamsSynchronized = async (data: {
+      enemyTeam: any;
+      opponentId: string;
+    }) => {
+      setEnemyPokemons(data.enemyTeam);
+      setOpponentSocketId(data.opponentId);
+      setEnemyObjects(POKEBATTLE_OBJECTS);
+      setEnemyScore(calculatePokemonTeamPower(data.enemyTeam));
+      await sleep(5500);
+      setGameStatus("presentation");
+    };
+
+    const handleReceiveMove = async (data: any) => {
+      console.log("📥 Action reçue en temps réel :", data);
+      if (data.actionType === "attack") {
+        // L'adversaire a attaqué, on exécute l'action côté "enemy"
+        await executeAttackAction(data.detail, "enemy", data.randomPool);
+      }
+
+      if (data.actionType === "switch") {
+        // L'adversaire a changé de Pokémon, on exécute l'action côté "enemy"
+        await handlePokemonReplacement(data.detail, "enemy");
+      }
+
+      if (data.actionType === "object") {
+        // L'adversaire a utilisé un objet, on exécute l'action côté "enemy"
+        const { objectType, id } = data.detail;
+        await handleObjectUse(objectType, "enemy", id);
+      }
+    };
+
+    const handlePlayerLeft = () => {
+      console.log("🚪 L'adversaire a quitté la session.");
+
+      // Si on est en écran de présentation ou en plein combat
+      if (
+        gameStatus === "presentation" ||
+        gameStatus === "user_turn" ||
+        gameStatus === "enemy_turn" ||
+        gameStatus === "intermission"
+      ) {
+        setOpponentForfait(true);
+        setGameStatus("ending");
+      } else {
+        // Si on était juste dans le salon d'attente, on reset juste l'adversaire
+        setOpponentSocketId(null);
+      }
+    };
+
+    // On attache les écouteurs
+    socket.on("player_joined", handlePlayerJoined);
+    socket.on("battle_ready", handleBattleReady);
+    socket.on("teams_synchronized", handleTeamsSynchronized);
+    socket.on("receive_move", handleReceiveMove);
+    socket.on("player_left", handlePlayerLeft);
+    socket.on("opponent_requested_rematch", handleOpponentRequestedRematch);
+    socket.on("rematch_start", handleRematchStart);
+
+    // Supprime les anciens écouteurs pour éviter les doublons
+    return () => {
+      socket.off("player_joined", handlePlayerJoined);
+      socket.off("battle_ready", handleBattleReady);
+      socket.off("teams_synchronized", handleTeamsSynchronized);
+      socket.off("receive_move", handleReceiveMove);
+      socket.off("player_left", handlePlayerLeft);
+      socket.off("opponent_requested_rematch", handleOpponentRequestedRematch);
+      socket.off("rematch_start", handleRematchStart);
+    };
+  }, [socket, roomActuelle, userPokemons, enemyPokemons, gameStatus]);
 
   // TOUR DE L'ENNEMI
   useEffect(() => {
-    if (gameStatus !== "enemy_turn") return;
+    if (gameStatus !== "enemy_turn" || battleMode === "pvp") return;
     handleEnemyTurn();
-  }, [gameStatus]);
+  }, [gameStatus, battleMode]);
 
   // Gestion de l'intermission (Vérification des KO)
   useEffect(() => {
@@ -152,14 +283,20 @@ export function PokeBattleProvider({
         targetTeam === "enemy" ? "enemy_turn" : "user_turn";
       setGameStatus(nextTurnStatus);
 
-      const activeUser = getActivePokemon(userPokemons);
-      if (nextTurnStatus === "user_turn" && activeUser.currentHp > 0) {
-        setTextBox(`Que doit faire ${activeUser.name} ?`);
+      if (nextTurnStatus === "user_turn") {
+        const activeUser = getActivePokemon(userPokemons);
+        if (activeUser && activeUser.currentHp > 0) {
+          setTextBox(`Que doit faire ${activeUser.name} ?`);
+        }
+      } else {
+        if (battleMode === "pvp") {
+          setTextBox("C'est au tour de l'adversaire...");
+        }
       }
     }
 
     runIntermissionPhase();
-  }, [gameStatus, targetTeam]);
+  }, [gameStatus, targetTeam, enemyPokemons, userPokemons, battleMode]);
 
   // Gestion des KO
   async function checkTeamKO(
@@ -211,7 +348,15 @@ export function PokeBattleProvider({
           return p;
         });
       });
-      setTextBox(`Que doit faire ${nextPokemon.name} ?`);
+
+      if (!isEnemy) {
+        setTextBox(`Que doit faire ${nextPokemon.name} ?`);
+      } else {
+        if (battleMode === "pvp") {
+          setTextBox("C'est au tour de l'adversaire...");
+        }
+      }
+
       return "replaced";
     }
 
@@ -375,6 +520,49 @@ export function PokeBattleProvider({
     return activeStatusCount >= 2;
   }
 
+  async function handleUserObjectUse(
+    objectType: PokeBattleObjectType,
+    id: number,
+  ) {
+    if (isActionPending || gameStatus !== "user_turn") return;
+
+    if (battleMode === "pvp") {
+      if (!socket || !roomActuelle) return;
+
+      socket.emit("send_move", {
+        roomId: roomActuelle,
+        senderId: socket.id,
+        actionType: "object",
+        detail: {
+          objectType,
+          id,
+        },
+      });
+    }
+
+    await handleObjectUse(objectType, "user", id);
+  }
+
+  async function handleUserSwitch(id: number) {
+    // Sécurité pour éviter le spam ou changer de Pokémon hors de son tour
+    if (isActionPending || gameStatus !== "user_turn") return;
+
+    if (battleMode === "pvp") {
+      if (!socket || !roomActuelle) return;
+
+      // Même format de payload que pour l'attaque, mais avec l'action "switch" 🔄
+      socket.emit("send_move", {
+        roomId: roomActuelle,
+        senderId: socket.id,
+        actionType: "switch",
+        detail: id, // On envoie juste l'ID du Pokémon qui entre au combat
+      });
+    }
+
+    // On lance l'exécution des animations et du changement d'état chez le joueur
+    await handlePokemonReplacement(id, "user");
+  }
+
   async function handleEnemyChoice() {
     const activeEnemy = getActivePokemon(enemyPokemons);
     const activeUser = getActivePokemon(userPokemons);
@@ -441,15 +629,10 @@ export function PokeBattleProvider({
     return true;
   }
 
-  // Tour Ennemie
+  // TOUR DE L'ENNEMI (PVE)
   async function handleEnemyTurn() {
     const activeEnemy = getActivePokemon(enemyPokemons);
     const activeUser = getActivePokemon(userPokemons);
-
-    const isUserPokemonLifeUnder25Percent =
-      activeUser.currentHp <= activeUser.stats.hp / 4;
-    const shouldUsePhysical =
-      activeEnemy.stats.attack >= activeEnemy.stats["special-attack"];
 
     setTextBox(`Au tour de ${activeEnemy.name} de jouer !`);
     await sleep(2000);
@@ -459,50 +642,34 @@ export function PokeBattleProvider({
       const shouldAttack = await handleEnemyChoice();
       if (!shouldAttack) return;
 
+      // --- IA : Sélection du move ---
       const effectiveMoves = activeEnemy.moves.filter(
         (m) => m.type !== "normal",
       );
-
       let move;
-      if (activeUser.types.includes("spectre") && effectiveMoves.length > 0) {
-        // Si c'est un Spectre, on a 70% de chances de choisir une attaque efficace
-        // et 30% de chances de choisir totalement au hasard parmi toutes les attaques
-        const shouldPlaySmart = Math.random() < 0.5;
 
-        if (shouldPlaySmart) {
-          move = effectiveMoves[getRandomNumber(0, effectiveMoves.length - 1)];
-        } else {
-          move =
-            activeEnemy.moves[getRandomNumber(0, activeEnemy.moves.length - 1)];
-        }
+      if (activeUser.types.includes("spectre") && effectiveMoves.length > 0) {
+        const shouldPlaySmart = Math.random() < 0.5;
+        move = shouldPlaySmart
+          ? effectiveMoves[getRandomNumber(0, effectiveMoves.length - 1)]
+          : activeEnemy.moves[getRandomNumber(0, activeEnemy.moves.length - 1)];
       } else {
-        // Sinon, comportement normal
         move =
           activeEnemy.moves[getRandomNumber(0, activeEnemy.moves.length - 1)];
       }
+
+      const isUserPokemonLifeUnder25Percent =
+        activeUser.currentHp <= activeUser.stats.hp / 4;
       if (isUserPokemonLifeUnder25Percent) {
+        const shouldUsePhysical =
+          activeEnemy.stats.attack >= activeEnemy.stats["special-attack"];
         const moveCategory = shouldUsePhysical ? "physical" : "special";
         move =
           activeEnemy.moves.find((m) => m.category === moveCategory) ?? move;
       }
+      // --- Fin de l'IA ---
 
-      if (RECHARGE_MOVES.includes(move.name)) {
-        await applyRecharge(activeEnemy, "enemy");
-      }
-
-      if (await canPokemonAttack(activeEnemy, move, "enemy")) {
-        await attackResolution(activeEnemy, activeUser, move, "enemy");
-      }
-
-      if (activeEnemy.isBurnt) {
-        await applyBurnDamage(activeEnemy, "enemy");
-      }
-      if (activeEnemy.isPoisoned) {
-        await applyPoisonDamage(activeEnemy, "enemy");
-      }
-      if (activeEnemy.isSeeded) {
-        await applyLeechSeed(activeEnemy, activeUser, "enemy");
-      }
+      await executeAttackAction(move, "enemy");
     } finally {
       setGameStatus("intermission");
       setTargetTeam("user");
@@ -512,25 +679,93 @@ export function PokeBattleProvider({
   // TOUR DU JOUEUR
   async function handleUserAttack(move: PokeBattlePokemonMove) {
     if (isActionPending || gameStatus !== "user_turn") return;
-    const activeUser = getActivePokemon(userPokemons);
-    const activeEnemy = getActivePokemon(enemyPokemons);
+
+    if (battleMode === "pvp") {
+      if (!socket || !roomActuelle) return;
+
+      // Génération d'un pool de RNG
+      const randomPool = Array.from({ length: 100 }, () => Math.random());
+
+      // On envoie le move ET le pool de dés à l'adversaire
+      socket.emit("send_move", {
+        roomId: roomActuelle,
+        senderId: socket.id,
+        actionType: "attack",
+        detail: move,
+        randomPool: randomPool, // 🆕 Ajouté au payload
+      });
+
+      // On exécute chez nous avec notre pool
+      await executeAttackAction(move, "user", randomPool);
+    } else {
+      await executeAttackAction(move, "user");
+    }
+  }
+
+  // MOTEUR DE RÉSOLUTION (Exécute les calculs et animations de statut)
+  async function executeAttackAction(
+    move: PokeBattlePokemonMove,
+    attackerSide: "user" | "enemy",
+    receivedRandomPool?: number[],
+  ) {
+    const isUserAttacking = attackerSide === "user";
+    const attackerTeam = isUserAttacking ? userPokemons : enemyPokemons;
+    const defenderTeam = isUserAttacking ? enemyPokemons : userPokemons;
+    const activeAttacker = getActivePokemon(attackerTeam);
+    const activeDefender = getActivePokemon(defenderTeam);
+
+    const poolCopy = receivedRandomPool ? [...receivedRandomPool] : [];
+    const rollDice = () => {
+      if (poolCopy.length > 0) {
+        return poolCopy.shift()!; // Pioche le premier nombre du pool partagé
+      }
+      return Math.random();
+    };
 
     try {
       setIsActionPending(true);
-      if (await isRecharging(activeUser, "user")) return;
 
-      if (await canPokemonAttack(activeUser, move, "user")) {
-        await attackResolution(activeUser, activeEnemy, move, "user");
+      // Vérification de la recharge
+      if (await isRecharging(activeAttacker, attackerSide)) return;
+
+      // Lancement de l'attaque si possible
+      if (
+        await canPokemonAttack(activeAttacker, move, attackerSide, rollDice)
+      ) {
+        await attackResolution(
+          activeAttacker,
+          activeDefender,
+          move,
+          attackerSide,
+          rollDice,
+        );
       }
 
-      if (activeUser.isBurnt) await applyBurnDamage(activeUser, "user");
-      if (activeUser.isPoisoned) await applyPoisonDamage(activeUser, "user");
-      if (activeUser.isSeeded)
-        await applyLeechSeed(activeUser, activeEnemy, "user");
+      // Application des altérations de statut de fin de tour
+      if (activeAttacker.isBurnt) {
+        await applyBurnDamage(activeAttacker, attackerSide);
+      }
+      if (activeAttacker.isPoisoned) {
+        await applyPoisonDamage(activeAttacker, attackerSide);
+      }
+      if (activeAttacker.isSeeded) {
+        await applyLeechSeed(activeAttacker, activeDefender, attackerSide);
+      }
     } finally {
-      setGameStatus("intermission");
-      setTargetTeam("enemy");
       setIsActionPending(false);
+
+      // 🌐 ORIENTATION DES TOURS ET INTERMISSION (PvE & PvP)
+      if (battleMode === "pvp") {
+        // Si c'est moi qui ai attaqué ("user"), la cible (targetTeam) est l'ennemi ("enemy")
+        // Si c'est l'adversaire qui a attaqué ("enemy"), la cible est mon équipe ("user")
+        setTargetTeam(isUserAttacking ? "enemy" : "user");
+      } else {
+        // Mode Solo classique
+        setTargetTeam("enemy");
+      }
+
+      // On envoie TOUJOURS le jeu en intermission pour vérifier les statuts et les K.O.
+      setGameStatus("intermission");
     }
   }
 
@@ -676,10 +911,11 @@ export function PokeBattleProvider({
     attacker: PokeBattlePokemonDetails,
     move: PokeBattlePokemonMove,
     attackerTeam: "user" | "enemy",
+    rollDice: () => number,
   ): Promise<boolean> {
     if (await isFlinch(attacker, attackerTeam)) return false;
     if (await isSleeping(attacker, attackerTeam)) return false;
-    if (await isFrozen(attacker, move, attackerTeam)) return false;
+    if (await isFrozen(attacker, move, attackerTeam, rollDice)) return false;
     await isConfused(attacker, attackerTeam); // On retire 1 au turn de confusion (seulement si le pokemon ne dort pas et pas gelé)
 
     return true;
@@ -798,8 +1034,11 @@ export function PokeBattleProvider({
     }
   }
 
-  async function isParalyze(attacker: PokeBattlePokemonDetails) {
-    if (attacker.isParalyze && Math.random() * 100 <= 25) {
+  async function isParalyze(
+    attacker: PokeBattlePokemonDetails,
+    rollDice: () => number,
+  ) {
+    if (attacker.isParalyze && rollDice() * 100 <= 25) {
       setTextBox(
         `${attacker.name} est totalement paralysé ! Il ne peut pas attaquer !`,
       );
@@ -814,9 +1053,10 @@ export function PokeBattleProvider({
     attacker: PokeBattlePokemonDetails,
     move: PokeBattlePokemonMove,
     attackerTeam: "user" | "enemy",
+    rollDice: () => number,
   ) {
     if (!attacker.isFrozen) return false;
-    const iceMelts = Math.random() * 100 <= 20;
+    const iceMelts = rollDice() * 100 <= 20;
     const isFireAttack = move.type === "feu";
 
     if (iceMelts || isFireAttack) {
@@ -843,6 +1083,7 @@ export function PokeBattleProvider({
     defender: PokeBattlePokemonDetails,
     move: PokeBattlePokemonMove,
     attackerTeam: "user" | "enemy",
+    rollDice: () => number,
   ) {
     setTextBox(`${attacker.name} utilise ${move.name} !`);
     move.category !== "status"
@@ -854,19 +1095,20 @@ export function PokeBattleProvider({
     // Ensuite on vérifie si le joueur n'est pas paralyser
     // De plus on regarde si l'attaque n'échoue pas
     // Finalement le pokemon peut attaquer
-    if (attacker.isConfused && Math.random() < 1 / 3) {
+    if (attacker.isConfused && rollDice() < 1 / 3) {
       await applyConfusionDamage(attacker, attackerTeam);
       return;
     }
 
-    if (attacker.isParalyze && (await isParalyze(attacker)) === true) return;
+    if (attacker.isParalyze && (await isParalyze(attacker, rollDice)) === true)
+      return;
 
     if (move.category === "status") {
-      await applyStatus(attacker, defender, move, attackerTeam);
+      await applyStatus(attacker, defender, move, attackerTeam, rollDice);
       return;
     }
 
-    await applyDamage(attacker, defender, move, attackerTeam);
+    await applyDamage(attacker, defender, move, attackerTeam, rollDice);
   }
 
   async function applyStatus(
@@ -874,8 +1116,14 @@ export function PokeBattleProvider({
     defender: PokeBattlePokemonDetails,
     move: PokeBattlePokemonMove,
     attackerTeam: "user" | "enemy",
+    rollDice: () => number,
   ) {
-    const isAttackSuccess = await attackSuccess(attacker, defender, move);
+    const isAttackSuccess = await attackSuccess(
+      attacker,
+      defender,
+      move,
+      rollDice,
+    );
     if (!isAttackSuccess) return;
 
     if (
@@ -934,7 +1182,7 @@ export function PokeBattleProvider({
     await sleep(150);
 
     const statusChance = move.statusChance === 0 ? 100 : move.statusChance;
-    const applyStatus = Math.random() * 100 <= statusChance;
+    const applyStatus = rollDice() * 100 <= statusChance;
 
     if (!applyStatus) {
       setTextBox(`Mais cela échoue !`);
@@ -958,7 +1206,7 @@ export function PokeBattleProvider({
         break;
 
       case "sleep":
-        const sleepTurns = Math.floor(Math.random() * 3) + 1;
+        const sleepTurns = Math.floor(rollDice() * 3) + 1;
         updateTeam((prev) =>
           prev.map((poke) =>
             poke.id === defender.id
@@ -1005,7 +1253,7 @@ export function PokeBattleProvider({
         break;
 
       case "confusion":
-        const randomTurns = Math.floor(Math.random() * 4) + 2;
+        const randomTurns = Math.floor(rollDice() * 4) + 2;
         updateTeam((prev) =>
           prev.map((poke) =>
             poke.id === defender.id
@@ -1204,8 +1452,14 @@ export function PokeBattleProvider({
     defender: PokeBattlePokemonDetails,
     move: PokeBattlePokemonMove,
     attackerTeam: "user" | "enemy",
+    rollDice: () => number,
   ) {
-    const isAttackSuccess = await attackSuccess(attacker, defender, move);
+    const isAttackSuccess = await attackSuccess(
+      attacker,
+      defender,
+      move,
+      rollDice,
+    );
     if (!isAttackSuccess) return;
 
     try {
@@ -1239,7 +1493,7 @@ export function PokeBattleProvider({
 
       if (isMultiHit) {
         // Détermination du nombre de coups
-        const totalHits = determineHitCount(move);
+        const totalHits = determineHitCount(move, rollDice);
 
         let currentHp = defender.currentHp;
         let actualHits = 0;
@@ -1248,7 +1502,7 @@ export function PokeBattleProvider({
           // Vérification de K.O. avant d'attaquer
           if (currentHp <= 0) break;
 
-          const isCrit = checkIsCritical(move || 0);
+          const isCrit = checkIsCritical(move || 0, rollDice);
           const damage = calculateSingleHitDamage(isCrit);
 
           // Mise à jour de la variable locale
@@ -1272,7 +1526,7 @@ export function PokeBattleProvider({
 
           // Gestion du Flinch
           if (move.flinchChance > 0 && !shouldApplyFlinch && currentHp > 0) {
-            if (Math.random() * 100 <= move.flinchChance) {
+            if (rollDice() * 100 <= move.flinchChance) {
               shouldApplyFlinch = true;
             }
           }
@@ -1288,7 +1542,7 @@ export function PokeBattleProvider({
         }
       } else {
         // Attaque classique les dégâts totaux correspondent au finalDamage
-        const isCrit = checkIsCritical(move || 0);
+        const isCrit = checkIsCritical(move || 0, rollDice);
         if (isCrit) hasTriggeredCrit = true;
 
         totalDamageApplied = calculateSingleHitDamage(isCrit);
@@ -1312,7 +1566,7 @@ export function PokeBattleProvider({
       ) {
         const paralyzeChance =
           move.statusChance === 0 ? 100 : move.statusChance;
-        shouldApplyParalysis = Math.random() * 100 <= paralyzeChance;
+        shouldApplyParalysis = rollDice() * 100 <= paralyzeChance;
       }
 
       // Gestion de l'endormissement
@@ -1320,9 +1574,9 @@ export function PokeBattleProvider({
       let sleepTurns = 0;
       if (move.status === "sleep" && !defender.isAsleep && canApplyStatus) {
         const sleepChance = move.statusChance === 0 ? 100 : move.statusChance;
-        shouldApplySleep = Math.random() * 100 <= sleepChance;
+        shouldApplySleep = rollDice() * 100 <= sleepChance;
         if (shouldApplySleep) {
-          sleepTurns = Math.floor(Math.random() * 3) + 1;
+          sleepTurns = Math.floor(rollDice() * 3) + 1;
         }
       }
 
@@ -1330,21 +1584,21 @@ export function PokeBattleProvider({
       let shouldApplyFreeze = false;
       if (move.status === "freeze" && !defender.isFrozen && canApplyStatus) {
         const freezeChance = move.statusChance === 0 ? 100 : move.statusChance;
-        shouldApplyFreeze = Math.random() * 100 <= freezeChance;
+        shouldApplyFreeze = rollDice() * 100 <= freezeChance;
       }
 
       // Gestion de la brulure
       let shouldApplyBurn = false;
       if (move.status === "burn" && !defender.isBurnt && canApplyStatus) {
         const burnChance = move.statusChance === 0 ? 100 : move.statusChance;
-        shouldApplyBurn = Math.random() * 100 <= burnChance;
+        shouldApplyBurn = rollDice() * 100 <= burnChance;
       }
 
       // Gestion du poison
       let shouldApplyPoison = false;
       if (move.status === "poison" && !defender.isPoisoned && canApplyStatus) {
         const poisonChance = move.statusChance === 0 ? 100 : move.statusChance;
-        shouldApplyPoison = Math.random() * 100 <= poisonChance;
+        shouldApplyPoison = rollDice() * 100 <= poisonChance;
       }
 
       // Gestion de la confusion
@@ -1357,9 +1611,9 @@ export function PokeBattleProvider({
       ) {
         const confusionChance =
           move.statusChance === 0 ? 100 : move.statusChance;
-        shouldApplyConfusion = Math.random() * 100 <= confusionChance;
+        shouldApplyConfusion = rollDice() * 100 <= confusionChance;
         if (shouldApplyConfusion) {
-          confusionTurns = Math.floor(Math.random() * 4) + 2;
+          confusionTurns = Math.floor(rollDice() * 4) + 2;
         }
       }
 
@@ -1372,7 +1626,7 @@ export function PokeBattleProvider({
       ) {
         const leechSeedChance =
           move.statusChance === 0 ? 100 : move.statusChance;
-        shouldApplyLeechSeed = Math.random() * 100 <= leechSeedChance;
+        shouldApplyLeechSeed = rollDice() * 100 <= leechSeedChance;
       }
 
       // Gestion de flinch (Seulement pour les attaques monocoups, les multi-hits sont gérés dans la boucle)
@@ -1382,7 +1636,7 @@ export function PokeBattleProvider({
         !defender.isFlinch &&
         canApplyStatus
       ) {
-        shouldApplyFlinch = Math.random() * 100 <= move.flinchChance;
+        shouldApplyFlinch = rollDice() * 100 <= move.flinchChance;
       }
 
       if (RECHARGE_MOVES.includes(move.name)) {
@@ -1500,7 +1754,6 @@ export function PokeBattleProvider({
   ) {
     const updateAttackerTeam =
       attackerTeam === "user" ? setUserPokemons : setEnemyPokemons;
-    console.log("recharge ON pour", defender.name);
     updateAttackerTeam((prev) =>
       prev.map((poke) =>
         poke.id === defender.id ? { ...poke, isRecharging: true } : poke,
@@ -1509,34 +1762,36 @@ export function PokeBattleProvider({
     await sleep(100);
   }
 
-  function determineHitCount(move: PokeBattlePokemonMove) {
-    // 1. Si le Pokémon a le talent "Multi-Coups" (Skill Link), 5 hits garantis
-    if (move.name === "Multi-Coups") return 5;
-
-    // 2. Si l'attaque est fixe (ex: Double Pied = 2)
+  function determineHitCount(
+    move: PokeBattlePokemonMove,
+    rollDice: () => number,
+  ) {
+    // Si l'attaque est fixe (ex: Double Pied = 2)
     if (move.minHits === move.maxHits) return move.minHits;
 
-    // 3. Probabilités officielles pour attaques 2-5 hits (Balle Graine, etc.)
+    // Probabilités officielles pour attaques 2-5 hits (Balle Graine, etc.)
     if (move.minHits === 2 && move.maxHits === 5) {
-      const rand = Math.random();
+      const rand = rollDice();
       if (rand < 0.375) return 2; // 37.5%
       if (rand < 0.75) return 3; // 37.5%
       if (rand < 0.875) return 4; // 12.5%
       return 5; // 12.5%
     }
 
-    // 4. Fallback pour des cas personnalisés (ex: 2-3 hits)
+    // Fallback pour des cas personnalisés (ex: 2-3 hits)
     return (
-      Math.floor(Math.random() * (move.maxHits - move.minHits + 1)) +
-      move.minHits
+      Math.floor(rollDice() * (move.maxHits - move.minHits + 1)) + move.minHits
     );
   }
 
-  function checkIsCritical(move: PokeBattlePokemonMove): boolean {
+  function checkIsCritical(
+    move: PokeBattlePokemonMove,
+    rollDice: () => number,
+  ): boolean {
     // Ici, on part du principe que l'étage de base est le crit_rate du move.
     // Tu pourras y ajouter +1 ou +2 plus tard si tu implémentes les objets/talents.
 
-    const rand = Math.random();
+    const rand = rollDice();
     if (move.critRate === 0) return rand < 1 / 24; // ~4.17%
     if (move.critRate === 1) return rand < 1 / 8; // 12.5%
     if (move.critRate === 2) return rand < 1 / 2; // 50%
@@ -1547,6 +1802,7 @@ export function PokeBattleProvider({
     attacker: PokeBattlePokemonDetails,
     defender: PokeBattlePokemonDetails,
     move: PokeBattlePokemonMove,
+    rollDice: () => number,
   ) {
     let applyAttack = true;
 
@@ -1561,7 +1817,7 @@ export function PokeBattleProvider({
       const finalAccuracy = Math.min(100, move.accuracy * statRatio);
 
       // Jet de dés
-      applyAttack = Math.random() * 100 <= finalAccuracy;
+      applyAttack = rollDice() * 100 <= finalAccuracy;
     }
 
     if (!applyAttack) {
@@ -1592,22 +1848,82 @@ export function PokeBattleProvider({
     setGameStatus("presentation");
   }
 
-  async function startBattle() {
-    const isMyPokemonFaster =
-      userPokemons[0].stats.speed >= enemyPokemons[0].stats.speed;
+  async function startBattle(socketId?: string, opponentSocketId?: string) {
+    const activeUser = userPokemons[0];
+    const activeEnemy = enemyPokemons[0];
+
+    let isMyPokemonFaster = activeUser.stats.speed > activeEnemy.stats.speed;
+
+    // Gestion des égalités parfaites de vitesse en PvP
+    if (activeUser.stats.speed === activeEnemy.stats.speed) {
+      if (battleMode === "pvp" && socketId && opponentSocketId) {
+        // Le joueur qui a le socket ID le plus petit alphabétiquement commence
+        isMyPokemonFaster = socketId < opponentSocketId;
+      } else {
+        // En PvE, le joueur humain garde la priorité
+        isMyPokemonFaster = true;
+      }
+    }
 
     if (isMyPokemonFaster) {
       setGameStatus("user_turn");
       setTargetTeam("enemy");
-      setTextBox(`Que doit faire ${userPokemons[0].name} ?`);
+      setTextBox(`Que doit faire ${activeUser.name} ?`);
     } else {
       setGameStatus("enemy_turn");
       setTargetTeam("user");
+      setTextBox(`C'est au tour de l'adversaire...`);
+    }
+  }
+
+  async function preparePvPBattle(activeSocket: Socket, roomId: string) {
+    setIsFetching(true);
+    setTrainer(null);
+
+    try {
+      const myTeam = await getPokemonTeam(6);
+      setUserPokemons(myTeam);
+      setUserObjects(POKEBATTLE_OBJECTS);
+      setUserScore(calculatePokemonTeamPower(myTeam));
+
+      // Force la conversion en string
+      const cleanRoomId =
+        typeof roomId === "object" ? (roomId as any).roomId : roomId;
+
+      // On émet explicitement la string, puis la team
+      activeSocket.emit("share_team", cleanRoomId, myTeam);
+    } catch (error) {
+      console.error("Erreur lors de la génération de l'équipe PvP :", error);
+    } finally {
+      setIsFetching(false);
     }
   }
 
   async function goToWaitingScreen() {
+    if (socket && roomActuelle) {
+      socket.emit("leave_room", roomActuelle);
+    }
+
+    // Reset des flags de combat/revanche
+    setOpponentForfait(false);
+    setRematchProposed(false);
+    setOpponentWantsRematch(false);
+
+    // Reset des données de la session passée
+    setOpponentSocketId(null);
+    setRoomActuelle("");
+    setEnemyPokemons([]);
+    setBattleMode("pve");
+
+    // Retour au menu
     setGameStatus("waiting");
+  }
+
+  function handleRequestRematch() {
+    if (socket && roomActuelle) {
+      setRematchProposed(true);
+      socket.emit("request_rematch", roomActuelle);
+    }
   }
 
   async function addToLeaderboard(score: IPokeBatlle) {
@@ -1644,14 +1960,30 @@ export function PokeBattleProvider({
         types,
         textBox,
         trainer,
+        battleMode,
+        socket,
+        opponentSocketId,
+        roomActuelle,
+        opponentForfait,
+        rematchProposed,
+        opponentWantsRematch,
+        setBattleMode,
+        setRoomActuelle,
         startGame,
         addToLeaderboard,
         updateLeaderboard,
+        setEnemyPokemons,
+        setGameStatus,
         startBattle,
+        setEnemyScore,
+        setSocket,
+        setOpponentSocketId,
+        preparePvPBattle,
+        handleRequestRematch,
         goToWaitingScreen,
         handleUserAttack,
-        handlePokemonReplacement,
-        handleObjectUse,
+        handleUserSwitch,
+        handleUserObjectUse,
         setTextBox,
       }}
     >

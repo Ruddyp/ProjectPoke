@@ -16,10 +16,11 @@ export default function ObjectMenu({ setCurrentMenu }: ChangeMenuProps) {
   const [objectChoice, setObjectChoice] = useState<null | PokeBattleObjectType>(
     null,
   );
+
   const {
     userObjects,
     isActionPending,
-    handleObjectUse,
+    handleUserObjectUse,
     userPokemons,
     setTextBox,
   } = usePokeBattle();
@@ -33,6 +34,8 @@ export default function ObjectMenu({ setCurrentMenu }: ChangeMenuProps) {
   };
 
   const handlePokemonChoice = async (pokemon: PokeBattlePokemonDetails) => {
+    if (isActionPending) return;
+
     const activePokemon = getActivePokemon(userPokemons);
     const hasStatusEffect =
       pokemon.isParalyze ||
@@ -40,7 +43,8 @@ export default function ObjectMenu({ setCurrentMenu }: ChangeMenuProps) {
       pokemon.isFrozen ||
       pokemon.isBurnt ||
       pokemon.isPoisoned;
-    // Cas ou on veut soigner un pokemon qui a tous ses points de vie
+
+    // Cas où on veut soigner un pokémon qui a tous ses points de vie
     if (
       objectChoice === "heal" &&
       (pokemon.currentHp === pokemon.stats.hp || pokemon.currentHp <= 0)
@@ -52,7 +56,7 @@ export default function ObjectMenu({ setCurrentMenu }: ChangeMenuProps) {
       return;
     }
 
-    // Cas ou on veut ressuciter un pokemon qui n'est pas K.O
+    // Cas où on veut ressusciter un pokémon qui n'est pas K.O
     if (objectChoice === "reborn" && pokemon.currentHp > 0) {
       setTextBox(`${pokemon.name} n'est pas K.O. !`);
       await sleep(1500);
@@ -61,7 +65,7 @@ export default function ObjectMenu({ setCurrentMenu }: ChangeMenuProps) {
       return;
     }
 
-    // Cas ou on veut soigner les status d'un pokemon qui n'a aucun status
+    // Cas où on veut soigner les status d'un pokémon qui n'a aucun status
     if (objectChoice === "status" && !hasStatusEffect) {
       setTextBox(`${pokemon.name} ne souffre d'aucune altération de statut.`);
       await sleep(1500);
@@ -69,8 +73,9 @@ export default function ObjectMenu({ setCurrentMenu }: ChangeMenuProps) {
       setObjectChoice(null);
       return;
     }
+
     setCurrentMenu("main");
-    handleObjectUse(objectChoice as PokeBattleObjectType, "user", pokemon.id);
+    handleUserObjectUse(objectChoice as PokeBattleObjectType, pokemon.id);
   };
 
   if (objectChoice !== null) {

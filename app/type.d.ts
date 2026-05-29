@@ -484,14 +484,6 @@ export type PokeBattleObject = {
   src: string;
 };
 
-export type PokeBattleDifficulty =
-  | "Red"
-  | "Cynthia"
-  | "Blue"
-  | "Ghechis"
-  | "Steven"
-  | "Random";
-
 export type PokeBattleTrainer = {
   name: string;
   pokemons: number[];
@@ -501,3 +493,5 @@ export type PokeBattleTrainer = {
   power: number;
   gen: number | string;
 };
+
+export type PokeBattleMode = "pve" | "pvp";
