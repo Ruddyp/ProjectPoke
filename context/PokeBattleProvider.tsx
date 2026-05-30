@@ -341,6 +341,9 @@ export function PokeBattleProvider({
               isBurnt: false,
               isPoisoned: false,
               isSeeded: false,
+              isRecharging: false,
+              isConfused: false,
+              isFlinch: false,
             };
           if (p.id === nextPokemon.id) return { ...p, isActive: true };
           return p;
