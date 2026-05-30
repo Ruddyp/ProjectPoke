@@ -1982,12 +1982,10 @@ export function PokeBattleProvider({
   async function startGame(trainer?: PokeBattleTrainer) {
     const nbPokemon = 6;
     setIsFetching(true);
-    const myTeam = trainer?.pokemons
-      ? await getPokemonTeam(nbPokemon)
-      : await getPokemonTeam();
+    const myTeam = await getPokemonTeam(nbPokemon);
     const enemyTeam = trainer?.pokemons
       ? await getPokemonTeam(nbPokemon, trainer.pokemons)
-      : await getPokemonTeam();
+      : await getPokemonTeam(nbPokemon);
 
     trainer !== undefined ? setTrainer(trainer) : setTrainer(null);
     setUserScore(calculatePokemonTeamPower(myTeam));
