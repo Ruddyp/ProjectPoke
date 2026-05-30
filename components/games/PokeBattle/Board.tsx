@@ -16,9 +16,6 @@ export default function Board() {
   } = usePokeBattle();
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  console.log("userPokemon", userPokemons);
-  console.log("enemyPokemons", enemyPokemons);
-
   useEffect(() => {
     let timer: NodeJS.Timeout;
 

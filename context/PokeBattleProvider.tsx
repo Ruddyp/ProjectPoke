@@ -14,11 +14,13 @@ import {
 import {
   calculatePokemonTeamPower,
   getPokemonTeam,
+  getRandomMoves,
   getRandomNumber,
   POKEBATTLE_OBJECTS,
   RECHARGE_MOVES,
   sleep,
   statToFrench,
+  TYPE_DEFENSE_MULTIPLIERS,
 } from "@/lib/utils";
 import { IPokeBatlle } from "@/models/pokebattle_leaderboard";
 import {
@@ -167,7 +169,6 @@ export function PokeBattleProvider({
 
     const handleBattleReady = async () => {
       if (roomActuelle) {
-        console.log("🎯 Lancement unique pour la room :", roomActuelle);
         preparePvPBattle(socket, roomActuelle);
       }
     };
@@ -185,7 +186,6 @@ export function PokeBattleProvider({
     };
 
     const handleReceiveMove = async (data: any) => {
-      console.log("📥 Action reçue en temps réel :", data);
       if (data.actionType === "attack") {
         // L'adversaire a attaqué, on exécute l'action côté "enemy"
         await executeAttackAction(data.detail, "enemy", data.randomPool);
@@ -204,8 +204,6 @@ export function PokeBattleProvider({
     };
 
     const handlePlayerLeft = () => {
-      console.log("🚪 L'adversaire a quitté la session.");
-
       // Si on est en écran de présentation ou en plein combat
       if (
         gameStatus === "presentation" ||
@@ -503,7 +501,7 @@ export function PokeBattleProvider({
     setIsActionPending(false);
   }
 
-  function hasTwoOrMoreStatus(pokemon: PokeBattlePokemonDetails) {
+  function hasStatus(pokemon: PokeBattlePokemonDetails) {
     const statusEffects: (keyof PokeBattlePokemonDetails)[] = [
       "isParalyze",
       "isAsleep",
@@ -517,7 +515,7 @@ export function PokeBattleProvider({
       (status) => pokemon[status] === true,
     ).length;
 
-    return activeStatusCount >= 2;
+    return activeStatusCount >= 1;
   }
 
   async function handleUserObjectUse(
@@ -566,67 +564,246 @@ export function PokeBattleProvider({
   async function handleEnemyChoice() {
     const activeEnemy = getActivePokemon(enemyPokemons);
     const activeUser = getActivePokemon(userPokemons);
-    const isEnemyPokemonLifeUnder33Percent =
-      activeEnemy.currentHp <= activeEnemy.stats.hp / 3;
-    const isUserPokemonLifeUnder33Percent =
-      activeUser.currentHp <= activeUser.stats.hp / 3;
 
-    const enenyPokemonDead = enemyPokemons.filter((p) => p.currentHp <= 0);
-    const shouldUseAntidote = hasTwoOrMoreStatus(activeEnemy);
-    const canUseAntidote = enemyObjects.some(
-      (obj) => obj.type === "status" && obj.quantity > 0,
+    const enemyHpPct = (activeEnemy.currentHp / activeEnemy.stats.hp) * 100;
+    const userHpPct = (activeUser.currentHp / activeUser.stats.hp) * 100;
+
+    const isEnemyInDanger = enemyHpPct <= 35;
+    const isUserKillable = userHpPct <= 25;
+
+    // Analyse des objets disponibles
+    const deadEnemyPokemons = enemyPokemons.filter((p) => p.currentHp <= 0);
+    const hasAntidote = enemyObjects.some(
+      (o) => o.type === "status" && o.quantity > 0,
     );
-    const canUsePotion = enemyObjects.some(
-      (obj) => obj.type === "heal" && obj.quantity > 0,
+    const hasPotion = enemyObjects.some(
+      (o) => o.type === "heal" && o.quantity > 0,
     );
-    const canUseReborn = enemyObjects.some(
-      (obj) => obj.type === "reborn" && obj.quantity > 0,
+    const hasReborn = enemyObjects.some(
+      (o) => o.type === "reborn" && o.quantity > 0,
     );
 
-    if (
-      !isEnemyPokemonLifeUnder33Percent &&
-      shouldUseAntidote &&
-      canUseAntidote
-    ) {
-      setTextBox(
-        `${trainer?.name ?? "L'adversaire"} utilise une antidote sur ${activeEnemy.name} !`,
-      );
-      await sleep(1500);
-      await handleObjectUse("status", "enemy", activeEnemy.id);
-      return false;
+    // ==========================================
+    // RÈGLE 1 : Finisher
+    // ==========================================
+    // Si le Pokémon joueur est presque mort, l'IA ne doit PAS gaspiller son tour
+    // à se soigner ou utiliser un objet. Elle doit attaquer pour sécuriser le KO !
+    if (isUserKillable && activeEnemy.currentHp > 0) {
+      return true; // Passe directement à la phase d'attaque
     }
 
-    if (
-      isEnemyPokemonLifeUnder33Percent &&
-      !isUserPokemonLifeUnder33Percent &&
-      Math.random() < 1 / 3 &&
-      canUsePotion
-    ) {
+    // ==========================================
+    // RÈGLE 2 : Potion
+    // ==========================================
+    // Si l'ennemi est en danger et qu'il a une potion, il se soigne à coup sûr,
+    // SAUF si le joueur est aussi à portée de KO (géré par la règle 1).
+    if (isEnemyInDanger && hasPotion) {
       setTextBox(
-        `${trainer?.name ?? "L'adversaire"} utilise une potion sur ${activeEnemy.name} !`,
+        `${trainer?.name ?? "L'adversaire"} utilise une Potion sur ${activeEnemy.name} !`,
       );
       await sleep(1500);
       await handleObjectUse("heal", "enemy", activeEnemy.id);
       return false;
     }
 
-    if (enenyPokemonDead.length >= 3 && canUseReborn && Math.random() < 1 / 2) {
-      // Récupérer tous les Pokémon K.O.
-      const deadPokemons = enemyPokemons.filter((p) => p.currentHp <= 0);
+    // ==========================================
+    // RÈGLE 3 : RAPPEL
+    // ==========================================
+    if (deadEnemyPokemons.length >= 3 && hasReborn) {
+      const AI_INTELLIGENCE = trainer?.intelligence ?? 0.5;
 
-      // Choisir un index au hasard parmi ces Pokémon
-      const randomIndex = Math.floor(Math.random() * deadPokemons.length);
-      const pokemonToReborn = deadPokemons[randomIndex];
+      const getSEC = (p: PokeBattlePokemonDetails) => {
+        const s = p.stats;
+        const typeMultipliers = p.types.map(
+          (t) => TYPE_DEFENSE_MULTIPLIERS[t] || 1.0,
+        );
+        const avgTypeMultiplier =
+          typeMultipliers.reduce((a, b) => a + b, 0) / typeMultipliers.length;
+        const offense = Math.max(s.attack, s["special-attack"]);
+        const defense =
+          (s.hp + s.defense + s["special-defense"]) * avgTypeMultiplier;
+        return 1.5 * offense + defense;
+      };
 
+      function getAdvantageScore(
+        deadPokemon: PokeBattlePokemonDetails,
+        userPokemon: PokeBattlePokemonDetails,
+      ) {
+        const multipliers = deadPokemon.types.map(
+          (t) =>
+            userPokemon.typeChart?.find(
+              (ct) => ct.name.toLowerCase() === t.toLowerCase(),
+            )?.multiplier ?? 1,
+        );
+        return Math.max(...multipliers);
+      }
+
+      // 1. Calcul du score pour chaque Pokémon mort
+      const scoredDead = deadEnemyPokemons.map((p) => {
+        // Score de puissance pure (SEC)
+        const sec = getSEC(p);
+
+        // Bonus tactique : est-ce qu'il a un avantage de type contre l'adversaire actuel ?
+        const typeAdvantage = getAdvantageScore(p, activeUser); // Fonction définie précédemment
+
+        // Le score final est un mix entre puissance brute et utilité tactique
+        // Plus l'IA est intelligente, plus elle donne de poids à l'avantage de type
+        const tactiqueWeight = AI_INTELLIGENCE * 2; // Multiplicateur d'intelligence
+        return { p, score: sec + typeAdvantage * 100 * tactiqueWeight };
+      });
+
+      // 2. Choisir le Pokémon à ressusciter
+      let bestPokemonToRevive;
+
+      if (Math.random() < AI_INTELLIGENCE) {
+        // IA INTELLIGENTE : Choisit le meilleur selon le score tactique
+        bestPokemonToRevive = scoredDead.sort((a, b) => b.score - a.score)[0].p;
+      } else {
+        // IA MOINS INTELLIGENTE : Choisit purement par la force brute (SEC) ou au hasard
+        bestPokemonToRevive = scoredDead.sort(
+          (a, b) => getSEC(b.p) - getSEC(a.p),
+        )[0].p;
+      }
+
+      // 3. Condition de déclenchement
+      // Une IA intelligente attendra le moment opportun (50% HP),
+      // une IA "bourrine" peut se permettre de rappeler plus vite si elle est en panique.
+      const isSafe =
+        enemyHpPct > 50 ||
+        enemyPokemons.filter((p) => p.currentHp > 0).length === 1;
+      const isPanicking = enemyHpPct < 20 && AI_INTELLIGENCE < 0.5; // La panique rend l'IA moins patiente
+
+      if (isSafe || isPanicking) {
+        setTextBox(
+          `${trainer?.name ?? "L'adversaire"} utilise un Rappel sur ${bestPokemonToRevive.name} !`,
+        );
+        await sleep(1500);
+        await handleObjectUse("reborn", "enemy", bestPokemonToRevive.id);
+        return false;
+      }
+    }
+
+    // ==========================================
+    // RÈGLE 4 : NETTOYAGE D'ALTÉRATION (Antidote)
+    // ==========================================
+    // Si le Pokémon est altéré on clean le statut
+    // On le fait si les PV sont encore corrects (>35%) pour ne pas gâcher un tour si on est bas en PV.
+    const shouldUseAntidote = hasStatus(activeEnemy);
+
+    if (!isEnemyInDanger && shouldUseAntidote && hasAntidote) {
       setTextBox(
-        `${trainer?.name ?? "L'adversaire"} utilise un rappel sur ${pokemonToReborn.name} !`,
+        `${trainer?.name ?? "L'adversaire"} utilise un Antidote sur ${activeEnemy.name} !`,
       );
       await sleep(1500);
-      await handleObjectUse("reborn", "enemy", pokemonToReborn.id);
+      await handleObjectUse("status", "enemy", activeEnemy.id);
       return false;
     }
 
     return true;
+  }
+
+  function handleEnemyMove(
+    activeEnemy: PokeBattlePokemonDetails,
+    activeUser: PokeBattlePokemonDetails,
+  ): PokeBattlePokemonMove {
+    const AI_INTELLIGENCE = trainer?.intelligence ?? 0.5;
+
+    const movesPool = getRandomMoves(activeEnemy.moves);
+    const isPlayingSmart = Math.random() < AI_INTELLIGENCE;
+    console.log("isPlayingSmart:", isPlayingSmart);
+    // L'ennemie utilise une attaque aléatoire
+    if (!isPlayingSmart) {
+      return movesPool[Math.floor(Math.random() * movesPool.length)];
+    }
+
+    // ÉVALUATION D'UTILITÉ (Scoring de chaque attaque)
+    const scoredMoves = movesPool.map((m) => {
+      let score = 0;
+
+      // Dégâts théoriques (avec gestion multi-hit, précision et STAB/Type)
+      if (m.power > 0) {
+        // Espérance mathématique pour les multi-hits
+        let avgHits = 1;
+        if (m.minHits === m.maxHits) avgHits = m.minHits;
+        else if (m.minHits === 2 && m.maxHits === 5) avgHits = 3;
+        else avgHits = (m.minHits + m.maxHits) / 2;
+
+        const offensiveStat =
+          m.category === "physical"
+            ? activeEnemy.stats.attack
+            : activeEnemy.stats["special-attack"];
+        const multiplier =
+          activeUser.typeChart?.find(
+            (t) => t.name.toLowerCase() === m.type.toLowerCase(),
+          )?.multiplier ?? 1;
+        console.log("multiplier", multiplier);
+        console.log("offensiveStat", multiplier);
+        console.log("avgHits", avgHits);
+
+        // Calcul puissance réelle
+        let damage = m.power * avgHits * offensiveStat * multiplier;
+        if (
+          activeEnemy.types
+            .map((t) => t.toLowerCase())
+            .includes(m.type.toLowerCase())
+        )
+          damage *= 1.5; // Application du STAB
+
+        // Pénalité de précision et recoil et recharge
+        if (RECHARGE_MOVES.includes(m.name)) damage /= 2;
+        // Pénalité de RECOIL
+        // Si l'attaque a un effet de drain de type négatif
+        if (m.drain < 0) {
+          const healthPercent = activeEnemy.currentHp / activeEnemy.stats.hp;
+          if (healthPercent < 0.4) damage *= 0.5;
+        }
+        score += (damage / 10) * ((m.accuracy ?? 100) / 100);
+      }
+
+      // Effets contextuels (Soins, Statuts, Buffs)
+      if (m.healing > 0 && activeEnemy.currentHp < activeEnemy.stats.hp * 0.5)
+        score += 100;
+      if (m.status !== "none") score += 40 * (m.statusChance / 100);
+      if (m.statChanges.length > 0) score += m.statChanges.length * 20;
+      if (m.drain > 0 && activeEnemy.currentHp < activeEnemy.stats.hp * 0.6)
+        score += 30;
+
+      return {
+        move: m,
+        score,
+        theoreticalDamage:
+          m.power * (m.minHits || 1) * activeEnemy.stats.attack,
+      };
+    });
+
+    console.log("scoredMoves:", scoredMoves);
+
+    // FILTRAGE ET TRI
+    const viableMoves = scoredMoves.filter(
+      (sm) => sm.score > 0 || sm.move.power > 0,
+    );
+    const movesToAnalyze: {
+      move: PokeBattlePokemonMove;
+      score: number;
+      theoreticalDamage: number;
+    }[] = viableMoves.length > 0 ? viableMoves : scoredMoves;
+    const bestMoves = [...movesToAnalyze].sort((a, b) => b.score - a.score);
+
+    // INSTINCT DE FINISHER
+    const isUserLowHp = activeUser.currentHp <= activeUser.stats.hp / 4;
+    const canKill = bestMoves.find(
+      (m) => m.theoreticalDamage >= activeUser.currentHp,
+    );
+
+    if (isUserLowHp && canKill) {
+      return canKill.move;
+    }
+
+    // CHOIX FINAL (avec petite variance de 35% pour la crédibilité)
+    if (bestMoves.length > 1 && Math.random() < 0.35) {
+      return bestMoves[1].move;
+    }
+    return bestMoves[0].move;
   }
 
   // TOUR DE L'ENNEMI (PVE)
@@ -642,32 +819,7 @@ export function PokeBattleProvider({
       const shouldAttack = await handleEnemyChoice();
       if (!shouldAttack) return;
 
-      // --- IA : Sélection du move ---
-      const effectiveMoves = activeEnemy.moves.filter(
-        (m) => m.type !== "normal",
-      );
-      let move;
-
-      if (activeUser.types.includes("spectre") && effectiveMoves.length > 0) {
-        const shouldPlaySmart = Math.random() < 0.5;
-        move = shouldPlaySmart
-          ? effectiveMoves[getRandomNumber(0, effectiveMoves.length - 1)]
-          : activeEnemy.moves[getRandomNumber(0, activeEnemy.moves.length - 1)];
-      } else {
-        move =
-          activeEnemy.moves[getRandomNumber(0, activeEnemy.moves.length - 1)];
-      }
-
-      const isUserPokemonLifeUnder25Percent =
-        activeUser.currentHp <= activeUser.stats.hp / 4;
-      if (isUserPokemonLifeUnder25Percent) {
-        const shouldUsePhysical =
-          activeEnemy.stats.attack >= activeEnemy.stats["special-attack"];
-        const moveCategory = shouldUsePhysical ? "physical" : "special";
-        move =
-          activeEnemy.moves.find((m) => m.category === moveCategory) ?? move;
-      }
-      // --- Fin de l'IA ---
+      const move = handleEnemyMove(activeEnemy, activeUser);
 
       await executeAttackAction(move, "enemy");
     } finally {

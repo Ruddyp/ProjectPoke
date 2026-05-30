@@ -337,8 +337,80 @@ export function calculatePokemonTeamPower(
 
     return total + pokemonSEC;
   }, 0);
-  console.log("Puissance team", team, ":", Math.round(totalPower));
   return Math.round(totalPower);
+}
+
+// Calcule le multiplicateur offensif moyen de l'équipe A sur l'équipe B
+export function getTeamOffensiveMultiplier(
+  attackerTeam: PokeBattlePokemonDetails[],
+  defenderTeam: PokeBattlePokemonDetails[],
+): number {
+  let totalMultiplier = 0;
+  let checksCount = 0;
+
+  attackerTeam.forEach((attacker) => {
+    defenderTeam.forEach((defender) => {
+      // On simule que l'attaquant utilise des capacités de ses propres types
+      attacker.types.forEach((attackerType) => {
+        // On cherche le multiplicateur défensif du Pokémon cible face à ce type
+        const matchup = defender.typeChart.find(
+          (tc) => tc.name.toLowerCase() === attackerType.toLowerCase(),
+        );
+
+        // Si le type est trouvé on prend son multiplicateur (x2, x0.5, x0, etc.), sinon x1
+        const multiplier = matchup ? matchup.multiplier : 1.0;
+
+        totalMultiplier += multiplier;
+        checksCount++;
+      });
+    });
+  });
+
+  // On retourne la moyenne (Ex: 1.0 = Neutre, 2.0 = Super Efficace, 0.5 = Pas très efficace)
+  return checksCount > 0 ? totalMultiplier / checksCount : 1.0;
+}
+
+export function calculateFinalBattleScore(
+  userTeam: PokeBattlePokemonDetails[],
+  enemyTeam: PokeBattlePokemonDetails[],
+  enemyPower: number,
+  userPower: number,
+) {
+  // Calcul des multiplicateurs offensifs croisés
+  const userOffenseMult = getTeamOffensiveMultiplier(userTeam, enemyTeam);
+  const enemyOffenseMult = getTeamOffensiveMultiplier(enemyTeam, userTeam);
+
+  // Calcul des puissances effectives (Puissance brute * Avantage de type)
+  const effectiveUserPower = userPower * userOffenseMult;
+  const effectiveEnemyPower = enemyPower * enemyOffenseMult;
+
+  // Calcul du score de base
+  let finalScore = effectiveEnemyPower - effectiveUserPower;
+
+  // Calcul du bonus de survie basé sur le ratio de puissance effective
+  const alivePokemonCount = userTeam.filter(
+    (poke) => poke.currentHp > 0,
+  ).length;
+
+  // Valeur de base (ex: 50 points max par Pokémon en vie pour un match équilibré)
+  const baseBonusPerPokemon = 50;
+
+  // Plus ce ratio est élevé, plus le combat était difficile pour le joueur
+  const powerRatio = effectiveEnemyPower / effectiveUserPower;
+
+  // Application du bonus de survie pondéré
+  const survivalBonus = alivePokemonCount * baseBonusPerPokemon * powerRatio;
+
+  // Ajout du bonus au score final
+  finalScore += survivalBonus;
+
+  return {
+    userTypeMultiplier: userOffenseMult,
+    enemyTypeMultiplier: enemyOffenseMult,
+    finalScore: Math.round(finalScore),
+    survivalBonus,
+    powerRatio,
+  };
 }
 
 export const TYPE_DEFENSE_MULTIPLIERS: Record<string, number> = {
@@ -442,6 +514,7 @@ export const TRAINER_BLUE = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/blue.png",
   power: 2530,
   gen: 1,
+  intelligence: 0.95,
 };
 
 export const TRAINER_PIERRE = {
@@ -453,6 +526,7 @@ export const TRAINER_PIERRE = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/brock.png",
   power: 1943,
   gen: 1,
+  intelligence: 0.4,
 };
 
 export const TRAINER_ONDINE = {
@@ -464,6 +538,7 @@ export const TRAINER_ONDINE = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/misty.png",
   power: 1883,
   gen: 1,
+  intelligence: 0.45,
 };
 
 export const TRAINER_MAJOR_BOB = {
@@ -475,6 +550,7 @@ export const TRAINER_MAJOR_BOB = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/ltsurge.png",
   power: 1905,
   gen: 1,
+  intelligence: 0.5,
 };
 
 export const TRAINER_ERIKA = {
@@ -486,6 +562,7 @@ export const TRAINER_ERIKA = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/erika.png",
   power: 2258,
   gen: 1,
+  intelligence: 0.55,
 };
 
 export const TRAINER_KOGA = {
@@ -497,6 +574,7 @@ export const TRAINER_KOGA = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/koga.png",
   power: 2191,
   gen: 1,
+  intelligence: 0.6,
 };
 
 export const TRAINER_MORGAN = {
@@ -508,6 +586,7 @@ export const TRAINER_MORGAN = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/sabrina.png",
   power: 1992,
   gen: 1,
+  intelligence: 0.65,
 };
 
 export const TRAINER_AUGUSTE = {
@@ -519,6 +598,7 @@ export const TRAINER_AUGUSTE = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/blaine.png",
   power: 2166,
   gen: 1,
+  intelligence: 0.7,
 };
 
 export const TRAINER_GIOVANNI = {
@@ -530,6 +610,7 @@ export const TRAINER_GIOVANNI = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/giovanni.png",
   power: 2259,
   gen: 1,
+  intelligence: 0.8,
 };
 //-----------------------------------------------------------------------------//
 
@@ -543,6 +624,7 @@ export const TRAINER_RED = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/red.png",
   power: 2352,
   gen: 2,
+  intelligence: 0.95,
 };
 
 export const TRAINER_ALBERT = {
@@ -553,6 +635,7 @@ export const TRAINER_ALBERT = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/falkner.png",
   power: 1686,
   gen: 2,
+  intelligence: 0.4,
 };
 
 export const TRAINER_HECTOR = {
@@ -563,6 +646,7 @@ export const TRAINER_HECTOR = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/bugsy.png",
   power: 1720,
   gen: 2,
+  intelligence: 0.45,
 };
 
 export const TRAINER_BLANCHE = {
@@ -573,6 +657,7 @@ export const TRAINER_BLANCHE = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/whitney.png",
   power: 1923,
   gen: 2,
+  intelligence: 0.65,
 };
 
 export const TRAINER_MORTIMER = {
@@ -583,6 +668,7 @@ export const TRAINER_MORTIMER = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/morty.png",
   power: 2095,
   gen: 2,
+  intelligence: 0.55,
 };
 
 export const TRAINER_CHUCK = {
@@ -593,6 +679,7 @@ export const TRAINER_CHUCK = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/chuck.png",
   power: 2173,
   gen: 2,
+  intelligence: 0.6,
 };
 
 export const TRAINER_JASMINE = {
@@ -603,6 +690,7 @@ export const TRAINER_JASMINE = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/jasmine.png",
   power: 2238,
   gen: 2,
+  intelligence: 0.65,
 };
 
 export const TRAINER_FREDO = {
@@ -613,6 +701,7 @@ export const TRAINER_FREDO = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/pryce.png",
   power: 2165,
   gen: 2,
+  intelligence: 0.7,
 };
 
 export const TRAINER_SANDRA = {
@@ -623,6 +712,7 @@ export const TRAINER_SANDRA = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/clair.png",
   power: 2243,
   gen: 2,
+  intelligence: 0.75,
 };
 
 //-----------------------------------------------------------------------------//
@@ -637,6 +727,7 @@ export const TRAINER_PIERRE_ROCHARD = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/steven.png",
   power: 2617,
   gen: 3,
+  intelligence: 0.95,
 };
 
 export const TRAINER_ROXANNE = {
@@ -647,6 +738,7 @@ export const TRAINER_ROXANNE = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/roxanne.png",
   power: 2158,
   gen: 3,
+  intelligence: 0.4,
 };
 
 export const TRAINER_BASTIEN = {
@@ -657,6 +749,7 @@ export const TRAINER_BASTIEN = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/brawly.png",
   power: 1749,
   gen: 3,
+  intelligence: 0.45,
 };
 
 export const TRAINER_VOLTERE = {
@@ -667,6 +760,7 @@ export const TRAINER_VOLTERE = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/wattson.png",
   power: 1848,
   gen: 3,
+  intelligence: 0.5,
 };
 
 export const TRAINER_ADRIANE = {
@@ -677,6 +771,7 @@ export const TRAINER_ADRIANE = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/flannery.png",
   power: 1888,
   gen: 3,
+  intelligence: 0.55,
 };
 
 export const TRAINER_NORMAN = {
@@ -687,6 +782,7 @@ export const TRAINER_NORMAN = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/norman.png",
   power: 1918,
   gen: 3,
+  intelligence: 0.6,
 };
 
 export const TRAINER_ALIZEE = {
@@ -697,6 +793,7 @@ export const TRAINER_ALIZEE = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/winona.png",
   power: 2255,
   gen: 3,
+  intelligence: 0.65,
 };
 
 export const TRAINER_LEVY_TATIA = {
@@ -707,6 +804,7 @@ export const TRAINER_LEVY_TATIA = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/tateandliza-gen3.png",
   power: 2289,
   gen: 3,
+  intelligence: 0.7,
 };
 
 export const TRAINER_MARC = {
@@ -717,6 +815,7 @@ export const TRAINER_MARC = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/wallace.png",
   power: 2144,
   gen: 3,
+  intelligence: 0.75,
 };
 
 //-----------------------------------------------------------------------------//
@@ -731,6 +830,7 @@ export const TRAINER_CYNTHIA = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/cynthia.png",
   power: 2564,
   gen: 4,
+  intelligence: 0.95,
 };
 
 export const TRAINER_PIERRICK = {
@@ -741,6 +841,7 @@ export const TRAINER_PIERRICK = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/roark.png",
   power: 1972,
   gen: 4,
+  intelligence: 0.4,
 };
 
 export const TRAINER_FLO = {
@@ -751,6 +852,7 @@ export const TRAINER_FLO = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/gardenia.png",
   power: 1868,
   gen: 4,
+  intelligence: 0.45,
 };
 
 export const TRAINER_MELINA = {
@@ -761,6 +863,7 @@ export const TRAINER_MELINA = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/maylene.png",
   power: 1850,
   gen: 4,
+  intelligence: 0.5,
 };
 
 export const TRAINER_LOVIS = {
@@ -771,6 +874,7 @@ export const TRAINER_LOVIS = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/crasherwake.png",
   power: 2064,
   gen: 4,
+  intelligence: 0.55,
 };
 
 export const TRAINER_KIMERA = {
@@ -781,6 +885,7 @@ export const TRAINER_KIMERA = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/fantina.png",
   power: 2083,
   gen: 4,
+  intelligence: 0.6,
 };
 
 export const TRAINER_CHARLES = {
@@ -791,6 +896,7 @@ export const TRAINER_CHARLES = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/byron.png",
   power: 2451,
   gen: 4,
+  intelligence: 0.65,
 };
 
 export const TRAINER_GLADYS = {
@@ -801,6 +907,7 @@ export const TRAINER_GLADYS = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/candice.png",
   power: 2219,
   gen: 4,
+  intelligence: 0.7,
 };
 
 export const TRAINER_TANGUY = {
@@ -811,6 +918,7 @@ export const TRAINER_TANGUY = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/volkner.png",
   power: 2527,
   gen: 4,
+  intelligence: 0.75,
 };
 
 //-----------------------------------------------------------------------------//
@@ -824,6 +932,7 @@ export const TRAINER_GHECHIS = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/ghetsis.png",
   power: 2445,
   gen: 5,
+  intelligence: 0.95,
 };
 
 export const TRAINER_ARMANDO = {
@@ -834,6 +943,7 @@ export const TRAINER_ARMANDO = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/cilan.png",
   power: 1990,
   gen: 5,
+  intelligence: 0.4,
 };
 
 export const TRAINER_ALOE = {
@@ -844,6 +954,7 @@ export const TRAINER_ALOE = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/lenora.png",
   power: 1983,
   gen: 5,
+  intelligence: 0.45,
 };
 
 export const TRAINER_ARTIE = {
@@ -854,6 +965,7 @@ export const TRAINER_ARTIE = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/burgh.png",
   power: 1885,
   gen: 5,
+  intelligence: 0.5,
 };
 
 export const TRAINER_INEZIA = {
@@ -864,6 +976,7 @@ export const TRAINER_INEZIA = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/elesa.png",
   power: 2002,
   gen: 5,
+  intelligence: 0.55,
 };
 
 export const TRAINER_BARDANE = {
@@ -874,6 +987,7 @@ export const TRAINER_BARDANE = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/clay.png",
   power: 1699,
   gen: 5,
+  intelligence: 0.6,
 };
 
 export const TRAINER_CAROLINA = {
@@ -884,6 +998,7 @@ export const TRAINER_CAROLINA = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/skyla.png",
   power: 2164,
   gen: 5,
+  intelligence: 0.65,
 };
 
 export const TRAINER_ZHU = {
@@ -894,6 +1009,7 @@ export const TRAINER_ZHU = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/brycen.png",
   power: 2351,
   gen: 5,
+  intelligence: 0.7,
 };
 
 export const TRAINER_IRIS = {
@@ -904,6 +1020,7 @@ export const TRAINER_IRIS = {
   img: "https://play.pokemonshowdown.com/sprites/trainers/iris.png",
   power: 2768,
   gen: 5,
+  intelligence: 0.8,
 };
 
 //-----------------------------------------------------------------------------//
@@ -917,6 +1034,7 @@ export const TRAINER_LEG_1 = {
   img: "/leg_1.jpg",
   power: 2845,
   gen: "Légendaire",
+  intelligence: 0.95,
 };
 
 export const TRAINER_LEG_2 = {
@@ -927,6 +1045,7 @@ export const TRAINER_LEG_2 = {
   img: "/leg_2.png",
   power: 2870,
   gen: "Légendaire",
+  intelligence: 0.95,
 };
 
 export const TRAINER_LEG_3 = {
@@ -937,6 +1056,7 @@ export const TRAINER_LEG_3 = {
   img: "/leg_3.png",
   power: 3201,
   gen: "Légendaire",
+  intelligence: 0.95,
 };
 
 export const TRAINER_LEG_4 = {
@@ -947,6 +1067,7 @@ export const TRAINER_LEG_4 = {
   img: "/leg_4.png",
   power: 3253,
   gen: "Légendaire",
+  intelligence: 0.95,
 };
 
 export const TRAINER_LEG_5 = {
@@ -957,6 +1078,7 @@ export const TRAINER_LEG_5 = {
   img: "/leg_5.png",
   power: 3003,
   gen: "Légendaire",
+  intelligence: 0.95,
 };
 
 export const TRAINERS: PokeBattleTrainer[] = [

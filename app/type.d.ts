@@ -492,6 +492,7 @@ export type PokeBattleTrainer = {
   img: string;
   power: number;
   gen: number | string;
+  intelligence: number;
 };
 
 export type PokeBattleMode = "pve" | "pvp";

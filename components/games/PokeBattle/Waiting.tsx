@@ -64,7 +64,7 @@ export default function Waiting() {
       {/* BOUTON DE LANCEMENT SOLO */}
       {/* ========================================================= */}
       {!isPvPMode && (
-        <div className="z-10 w-full max-w-md mt-auto">
+        <div className="z-10 w-full max-w-md">
           <button
             disabled={isFetching}
             onClick={() => startGame()}

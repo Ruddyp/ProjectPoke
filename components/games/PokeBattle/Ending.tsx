@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @next/next/no-img-element */
 import { Button } from "@/components/ui/button";
 import { usePokeBattle } from "@/context/PokeBattleProvider";
@@ -5,12 +6,15 @@ import {
   addScoreToPokeBattleLeaderboard,
   replaceScoreToPokeBattleLeaderboard,
 } from "@/lib/bdd";
+import { calculateFinalBattleScore } from "@/lib/utils";
 import { Sparkles, HeartCrack } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import Score from "./Score";
 
 export default function Ending() {
   const {
     userPokemons,
+    enemyPokemons,
     leaderboard,
     trainer,
     enemyScore,
@@ -31,7 +35,13 @@ export default function Ending() {
 
   const isUserWin =
     opponentForfait || userPokemons.some((poke) => poke.currentHp > 0);
-  const score = enemyScore - userScore;
+  const scoreObject = calculateFinalBattleScore(
+    userPokemons,
+    enemyPokemons,
+    enemyScore,
+    userScore,
+  );
+
   const difficulty = trainer?.name ?? "Random";
 
   useEffect(() => {
@@ -68,14 +78,20 @@ export default function Ending() {
   const canBeSaveToLeaderboard = useMemo(() => {
     if (battleMode === "pvp" || !isUserWin) return false;
     if (difficultyLeaderboard.length < 5) return true;
-    return score > lastScore.score;
-  }, [difficultyLeaderboard, lastScore, isUserWin, score, battleMode]);
+    return scoreObject.finalScore > lastScore.score;
+  }, [
+    difficultyLeaderboard,
+    lastScore,
+    isUserWin,
+    scoreObject.finalScore,
+    battleMode,
+  ]);
 
   const handleScoreUpdate = async () => {
     if (!name.trim()) return;
     setIsSubmitting(true);
     try {
-      const scoreToPush = { name, difficulty, score };
+      const scoreToPush = { name, difficulty, score: scoreObject.finalScore };
       if (difficultyLeaderboard.length >= 5 && lastScore) {
         const updatedDoc = await replaceScoreToPokeBattleLeaderboard(
           lastScore._id!,
@@ -117,14 +133,7 @@ export default function Ending() {
               : "Le combat est perdu"}
         </p>
 
-        {isUserWin && battleMode === "pve" && (
-          <div className="bg-slate-800/50 border-2 border-red-600 rounded-xl p-4 text-slate-200 text-center font-semibold tracking-widest uppercase text-sm">
-            Votre score:{" "}
-            <span className="font-extrabold text-base text-slate-50">
-              {score}
-            </span>
-          </div>
-        )}
+        {isUserWin && battleMode === "pve" && <Score />}
 
         {/* Section Record  */}
         <div className="mt-8 w-full max-w-2xl">
