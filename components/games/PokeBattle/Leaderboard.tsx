@@ -21,6 +21,7 @@ export default function LeaderboardDisplay() {
         battleAudioSrc: "",
         victoryAudioSrc: "",
         power: 0,
+        intelligence: 0.5,
       },
     ];
 

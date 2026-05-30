@@ -1980,7 +1980,7 @@ export function PokeBattleProvider({
   }
 
   async function startGame(trainer?: PokeBattleTrainer) {
-    const nbPokemon = trainer ? 6 : 3;
+    const nbPokemon = 6;
     setIsFetching(true);
     const myTeam = trainer?.pokemons
       ? await getPokemonTeam(nbPokemon)
