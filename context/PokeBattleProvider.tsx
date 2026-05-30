@@ -625,10 +625,10 @@ export function PokeBattleProvider({
         return 1.5 * offense + defense;
       };
 
-      function getAdvantageScore(
+      const getAdvantageScore = (
         deadPokemon: PokeBattlePokemonDetails,
         userPokemon: PokeBattlePokemonDetails,
-      ) {
+      ) => {
         const multipliers = deadPokemon.types.map(
           (t) =>
             userPokemon.typeChart?.find(
@@ -636,7 +636,7 @@ export function PokeBattleProvider({
             )?.multiplier ?? 1,
         );
         return Math.max(...multipliers);
-      }
+      };
 
       // 1. Calcul du score pour chaque Pokémon mort
       const scoredDead = deadEnemyPokemons.map((p) => {
