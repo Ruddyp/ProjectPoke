@@ -2062,7 +2062,9 @@ export function PokeBattleProvider({
         const fetchedChoices = await Promise.all(detailsPromises);
 
         // Filtrage des éventuels échecs de l'API
-        const validChoices = fetchedChoices.filter((p) => p !== null);
+        const validChoices = fetchedChoices.filter(
+          (p) => p !== null,
+        ) as PokeBattlePokemonDetails[];
         setDraftChoices(validChoices);
         setIsFetching(false);
 
