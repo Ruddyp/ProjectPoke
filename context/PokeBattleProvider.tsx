@@ -713,7 +713,6 @@ export function PokeBattleProvider({
 
     const movesPool = getRandomMoves(activeEnemy.moves);
     const isPlayingSmart = Math.random() < AI_INTELLIGENCE;
-    console.log("isPlayingSmart:", isPlayingSmart);
     // L'ennemie utilise une attaque aléatoire
     if (!isPlayingSmart) {
       return movesPool[Math.floor(Math.random() * movesPool.length)];
@@ -739,9 +738,6 @@ export function PokeBattleProvider({
           activeUser.typeChart?.find(
             (t) => t.name.toLowerCase() === m.type.toLowerCase(),
           )?.multiplier ?? 1;
-        console.log("multiplier", multiplier);
-        console.log("offensiveStat", multiplier);
-        console.log("avgHits", avgHits);
 
         // Calcul puissance réelle
         let damage = m.power * avgHits * offensiveStat * multiplier;
@@ -778,8 +774,6 @@ export function PokeBattleProvider({
           m.power * (m.minHits || 1) * activeEnemy.stats.attack,
       };
     });
-
-    console.log("scoredMoves:", scoredMoves);
 
     // FILTRAGE ET TRI
     const viableMoves = scoredMoves.filter(

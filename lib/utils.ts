@@ -295,19 +295,23 @@ export async function getPokemonTeam(
 }
 
 export function getRandomMoves(moves: PokeBattlePokemonMove[]) {
-  let results: PokeBattlePokemonMove[] = [];
-  const indexes: number[] = [];
+  // Si le nombre de moves est inférieur ou égal à 4,
+  // on retourne simplement une copie du tableau original.
+  if (moves.length <= 4) {
+    return [...moves];
+  }
 
-  do {
-    let randomNumber = getRandomNumber(0, moves.length - 1);
-    // if (indexes.length === 0)
-    // randomNumber = moves.findIndex((attack) => attack.id === 63) ?? 2;
-    if (!indexes.includes(randomNumber)) {
-      const move = moves[randomNumber];
-      results.push(move);
-      indexes.push(randomNumber);
+  const results: PokeBattlePokemonMove[] = [];
+  const indexes = new Set<number>();
+
+  while (indexes.size < 4) {
+    const randomNumber = getRandomNumber(0, moves.length - 1);
+
+    if (!indexes.has(randomNumber)) {
+      indexes.add(randomNumber);
+      results.push(moves[randomNumber]);
     }
-  } while (indexes.length !== 4);
+  }
 
   return results;
 }
