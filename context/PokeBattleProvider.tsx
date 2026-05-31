@@ -2109,6 +2109,7 @@ export function PokeBattleProvider({
     setOpponentSocketId(null);
     setRoomActuelle("");
     setEnemyPokemons([]);
+    setUserPokemons([]);
     setBattleMode("pve");
 
     // Retour au menu

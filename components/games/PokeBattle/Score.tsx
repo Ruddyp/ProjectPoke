@@ -12,17 +12,24 @@ import { useState } from "react";
 
 export default function Score() {
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
-  const { userPokemons, enemyPokemons, enemyScore, userScore } =
-    usePokeBattle();
+  const {
+    userPokemons,
+    enemyPokemons,
+    enemyScore,
+    userScore,
+    opponentForfait,
+  } = usePokeBattle();
   const scoreObject = calculateFinalBattleScore(
     userPokemons,
     enemyPokemons,
     enemyScore,
     userScore,
   );
+  const isUserWin =
+    opponentForfait || userPokemons.some((poke) => poke.currentHp > 0);
   return (
     <div className="flex items-center gap-1 bg-slate-800/50 border-2 border-red-600 rounded-xl p-4 text-slate-200 text-center font-semibold tracking-widest uppercase text-sm">
-      Votre score:{" "}
+      Votre score {!isUserWin && "si vous aviez gagné"}:{" "}
       <span className="font-extrabold text-base text-slate-50">
         {scoreObject.finalScore}
       </span>

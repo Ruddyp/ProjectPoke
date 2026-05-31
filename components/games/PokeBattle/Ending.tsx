@@ -133,7 +133,8 @@ export default function Ending() {
               : "Le combat est perdu"}
         </p>
 
-        {isUserWin && battleMode === "pve" && <Score />}
+        {(isUserWin && battleMode === "pve") ||
+          (battleMode === "pvp" && <Score />)}
 
         {/* Section Record  */}
         <div className="mt-8 w-full max-w-2xl">
