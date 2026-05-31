@@ -6,9 +6,17 @@ import { Loader2, Trophy, X } from "lucide-react";
 import LeaderboardDisplay from "./Leaderboard";
 import TrainerGen from "./TrainerGen";
 import Room from "./Room";
+import Draft from "./Draft";
 
 export default function Waiting() {
-  const { startGame, isFetching, battleMode } = usePokeBattle();
+  const {
+    startGame,
+    isFetching,
+    battleMode,
+    isDrafting,
+    userPokemons,
+    enemyPokemons,
+  } = usePokeBattle();
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   const trainers = getTrainersMap(TRAINERS);
@@ -16,7 +24,7 @@ export default function Waiting() {
   const isPvPMode = battleMode === "pvp";
 
   return (
-    <div className="bg-background flex flex-col items-center justify-start gap-6 p-4 sm:p-6 font-mono overflow-y-auto min-h-screen">
+    <div className="bg-background flex flex-col items-center justify-center gap-6 p-4 sm:p-6 font-mono overflow-y-auto min-h-screen">
       {/* ========================================================= */}
       {/* SECTION SOLO / PVE */}
       {/* ========================================================= */}
@@ -97,12 +105,18 @@ export default function Waiting() {
         </div>
       )}
 
-      {isFetching && (
+      {isFetching && battleMode === "pve" && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
           <Loader2 className="size-16 text-red-600 animate-spin mb-4" />
           <p className="text-white text-xl font-bold tracking-widest uppercase animate-pulse">
             Récupération des équipes...
           </p>
+        </div>
+      )}
+
+      {isDrafting && (
+        <div className="fixed flex flex-wrap justify-center w-full h-screen inset-0 z-[100] p-4 bg-black/80 backdrop-blur-sm animate-in fade-in overflow-y-auto">
+          <Draft />
         </div>
       )}
     </div>

@@ -7,7 +7,6 @@ import { ArrowLeft, Radio, Sword } from "lucide-react";
 export default function Room() {
   const [roomInput, setRoomInput] = useState<string>("");
   const [statut, setStatut] = useState<string>("HORS-LIGNE");
-  const [countdown, setCountdown] = useState<number | null>(null);
 
   const {
     setBattleMode,
@@ -18,27 +17,6 @@ export default function Room() {
     setRoomActuelle,
   } = usePokeBattle();
 
-  // Écouteur 1 : Déclenche le compte à rebours dès que l'adversaire arrive
-  useEffect(() => {
-    if (opponentSocketId) {
-      setCountdown(5);
-    } else {
-      setCountdown(null); // Reset si l'adversaire quitte pendant le décompte
-    }
-  }, [opponentSocketId]);
-
-  // Écouteur 2 : Timer de début de match
-  useEffect(() => {
-    if (countdown === null) return;
-
-    if (countdown > 0) {
-      const timer = setTimeout(() => {
-        setCountdown(countdown - 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [countdown]);
-
   // Gestion de l'affichage du statut textuel en fonction des states globaux
   useEffect(() => {
     if (!socket) {
@@ -46,15 +24,11 @@ export default function Room() {
     } else if (roomActuelle && !opponentSocketId) {
       setStatut("EN ATTENTE D'UN AMI...");
     } else if (opponentSocketId) {
-      setStatut(
-        countdown !== null && countdown > 0
-          ? `COMBAT DANS ${countdown}S...`
-          : "MATCH TROUVÉ !",
-      );
+      setStatut("MATCH TROUVÉ !");
     } else {
       setStatut("CONNECTÉ AVEC SUCCÈS");
     }
-  }, [socket, roomActuelle, opponentSocketId, countdown]);
+  }, [socket, roomActuelle, opponentSocketId]);
 
   const rejoindrePartie = () => {
     if (roomInput.trim() !== "" && socket) {
@@ -122,20 +96,11 @@ export default function Room() {
           <div className="text-center py-4 flex flex-col items-center gap-6 animate-in zoom-in-95 duration-200">
             {isReadyToStart ? (
               <div className="flex flex-col items-center gap-3 text-red-500">
-                <Sword
-                  className={`size-12 stroke-[2.5] ${countdown !== null && countdown > 0 ? "animate-pulse" : "animate-bounce"}`}
-                />
+                <Sword className={`size-12 stroke-[2.5]`} />
                 <div className="space-y-1 text-center">
                   <h3 className="text-xl font-black uppercase tracking-widest">
-                    {countdown === 0
-                      ? "C'EST PARTI !"
-                      : "PRÉPARATION DU COMBAT..."}
+                    PRÉPARATION DU COMBAT...
                   </h3>
-                  {countdown !== null && countdown > 0 && (
-                    <span className="text-4xl font-extrabold text-[#E0A850] block animate-bounce drop-shadow-[0_4px_0_rgba(0,0,0,1)]">
-                      {countdown}
-                    </span>
-                  )}
                 </div>
               </div>
             ) : (

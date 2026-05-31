@@ -11,6 +11,7 @@ import {
   PokeBattleTrainer,
   Types,
 } from "@/app/type";
+import { getPokemonDetails } from "@/lib/fetch";
 import {
   calculatePokemonTeamPower,
   getPokemonTeam,
@@ -26,10 +27,12 @@ import { IPokeBatlle } from "@/models/pokebattle_leaderboard";
 import {
   createContext,
   Dispatch,
+  MutableRefObject,
   ReactNode,
   SetStateAction,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { io, Socket } from "socket.io-client";
@@ -42,6 +45,7 @@ type PokeBattleContextType = {
   enemyObjects: PokeBattleObject[];
   isActionPending: boolean;
   isFetching: boolean;
+  isDrafting: boolean;
   isAttacking: boolean;
   opponentForfait: boolean;
   rematchProposed: boolean;
@@ -57,6 +61,8 @@ type PokeBattleContextType = {
   textBox: string;
   socket: Socket | null;
   opponentSocketId: string | null;
+  draftChoices: PokeBattlePokemonDetails[];
+  nextRoundResolver: MutableRefObject<((value: any) => void) | null>;
   setSocket: (socket: any | null) => void;
   setOpponentSocketId: (id: string | null) => void;
   startGame: (trainer?: PokeBattleTrainer) => void;
@@ -108,6 +114,7 @@ export function PokeBattleProvider({
   const [isActionPending, setIsActionPending] = useState(false);
   const [isAttacking, setIsAttacking] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
+  const [isDrafting, setIsDrafting] = useState(false);
   const [sound, setSound] = useState<{
     type: PokeBattleSound;
     trigger: number;
@@ -122,6 +129,10 @@ export function PokeBattleProvider({
   const [rematchProposed, setRematchProposed] = useState<boolean>(false);
   const [opponentWantsRematch, setOpponentWantsRematch] =
     useState<boolean>(false);
+  const [draftChoices, setDraftChoices] = useState<PokeBattlePokemonDetails[]>(
+    [],
+  );
+  const nextRoundResolver = useRef<((value: any) => void) | null>(null);
 
   const getActivePokemon = (pokemons: PokeBattlePokemonDetails[]) => {
     return (
@@ -177,11 +188,11 @@ export function PokeBattleProvider({
       enemyTeam: any;
       opponentId: string;
     }) => {
+      setIsDrafting(false);
       setEnemyPokemons(data.enemyTeam);
       setOpponentSocketId(data.opponentId);
       setEnemyObjects(POKEBATTLE_OBJECTS);
       setEnemyScore(calculatePokemonTeamPower(data.enemyTeam));
-      await sleep(5500);
       setGameStatus("presentation");
     };
 
@@ -2024,25 +2035,59 @@ export function PokeBattleProvider({
   }
 
   async function preparePvPBattle(activeSocket: Socket, roomId: string) {
-    setIsFetching(true);
     setTrainer(null);
+    setIsDrafting(true);
 
     try {
-      const myTeam = await getPokemonTeam(6);
-      setUserPokemons(myTeam);
-      setUserObjects(POKEBATTLE_OBJECTS);
-      setUserScore(calculatePokemonTeamPower(myTeam));
+      const draftedTeam: PokeBattlePokemonDetails[] = [];
+      const draftIds: number[] = [];
+      // Boucle de draft : 6 rounds pour obtenir 6 Pokémon
+      for (let round = 1; round <= 6; round++) {
+        setIsFetching(true);
+        // 1. Génération de 3 IDs aléatoires uniques (Ex: Génération 1 à 151)
+        const randomIds: number[] = [];
+        while (randomIds.length < 3) {
+          const id = getRandomNumber(1, 1025);
+          if (!randomIds.includes(id) && !draftIds.includes(id)) {
+            randomIds.push(id);
+          }
+        }
 
-      // Force la conversion en string
+        // Fetch des détails des 3 Pokémon en parallèle
+        const detailsPromises = randomIds.map((id) => getPokemonDetails(id));
+        const fetchedChoices = await Promise.all(detailsPromises);
+
+        // Filtrage des éventuels échecs de l'API
+        const validChoices = fetchedChoices.filter((p) => p !== null);
+        setDraftChoices(validChoices);
+        setIsFetching(false);
+
+        // On met la boucle en pause tant que le joueur n'a pas cliqué
+        const selectedPokemon: PokeBattlePokemonDetails =
+          await new Promise<any>((resolve) => {
+            nextRoundResolver.current = resolve;
+          });
+
+        // On ajoute le Pokémon choisi à l'équipe locale
+        draftedTeam.push(selectedPokemon);
+        setUserPokemons([...draftedTeam]);
+        draftIds.push(selectedPokemon.id);
+      }
+
+      // --- FIN DE LA DRAFT ---
+      setDraftChoices([]);
+
+      // Enregistrement de l'équipe complète
+      setUserPokemons(draftedTeam);
+      setUserObjects(POKEBATTLE_OBJECTS);
+      setUserScore(calculatePokemonTeamPower(draftedTeam));
+
       const cleanRoomId =
         typeof roomId === "object" ? (roomId as any).roomId : roomId;
 
-      // On émet explicitement la string, puis la team
-      activeSocket.emit("share_team", cleanRoomId, myTeam);
+      activeSocket.emit("share_team", cleanRoomId, draftedTeam);
     } catch (error) {
-      console.error("Erreur lors de la génération de l'équipe PvP :", error);
-    } finally {
-      setIsFetching(false);
+      console.error("Erreur lors de la génération de la draft PvP :", error);
     }
   }
 
@@ -2114,6 +2159,9 @@ export function PokeBattleProvider({
         opponentForfait,
         rematchProposed,
         opponentWantsRematch,
+        isDrafting,
+        nextRoundResolver,
+        draftChoices,
         setBattleMode,
         setRoomActuelle,
         startGame,
