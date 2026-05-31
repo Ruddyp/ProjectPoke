@@ -44,7 +44,7 @@ export default function PokemonHUD({ pokemon, isEnemy = false }: HUDProps) {
           <span>{pokemon.name.toUpperCase()}</span>
           <span className="text-blue-500 text-base">♂</span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center">
           {pokemonTypes.map((type) => (
             <Image
               src={type?.sprites ?? ""}
@@ -52,7 +52,7 @@ export default function PokemonHUD({ pokemon, isEnemy = false }: HUDProps) {
               height={28}
               width={28}
               sizes="(max-width: 640px) 32px, 48px"
-              className="rounded-lg object-cover p-1 size-6 sm:size-8"
+              className="rounded-md object-cover p-0.5 size-5 sm:size-8"
               unoptimized
               key={type?.id}
             />

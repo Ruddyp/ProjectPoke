@@ -22,7 +22,7 @@ export default function BattleTerrain({
   const animUser = usePokeBattleAnimation(userPokemon, "user");
   const animEnemy = usePokeBattleAnimation(enemyPokemon, "enemy");
   const backgroundUrl = useMemo(() => {
-    const randomIndex = Math.floor(Math.random() * 7);
+    const randomIndex = Math.floor(Math.random() * 7) + 1;
     return `/background_battle_${randomIndex}.png`;
   }, []);
 
@@ -93,7 +93,7 @@ export default function BattleTerrain({
       <PokemonHUD pokemon={enemyPokemon} isEnemy />
       {/* Ennemi */}
       <div
-        className={`absolute top-4 right-4 size-24 sm:size-56 flex items-center justify-center animate-enter-right`}
+        className={`absolute top-4 right-4 size-24 sm:size-48 flex items-center justify-center animate-enter-right`}
         key={`${enemyPokemon.id}`}
       >
         {enemyPokemon.sprites.front && (
@@ -102,6 +102,9 @@ export default function BattleTerrain({
             alt={enemyPokemon.name}
             key={`${enemyPokemon.id}-${animEnemy}`}
             className={`object-contain size-full ${animEnemy}`}
+            style={{
+              imageRendering: "pixelated",
+            }}
             onError={(e) => {
               // Si le GIF Showdown échoue, on bascule vers le sprite statique de l'API
               e.currentTarget.src = enemyPokemon.spritesFallback
@@ -121,6 +124,9 @@ export default function BattleTerrain({
             alt={userPokemon.name}
             key={`${userPokemon.id}-${animUser}`}
             className={`object-contain size-full ${animUser}`}
+            style={{
+              imageRendering: "pixelated",
+            }}
             onError={(e) => {
               // Si le GIF Showdown échoue, on bascule vers le sprite statique de l'API
               e.currentTarget.src = userPokemon.spritesFallback.back as string;
