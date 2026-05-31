@@ -217,12 +217,14 @@ export function PokeBattleProvider({
     const handlePlayerLeft = () => {
       // Si on est en écran de présentation ou en plein combat
       if (
+        (gameStatus === "waiting" && isDrafting === true) ||
         gameStatus === "presentation" ||
         gameStatus === "user_turn" ||
         gameStatus === "enemy_turn" ||
         gameStatus === "intermission"
       ) {
         setOpponentForfait(true);
+        setIsDrafting(false);
         setGameStatus("ending");
       } else {
         // Si on était juste dans le salon d'attente, on reset juste l'adversaire
@@ -2037,6 +2039,8 @@ export function PokeBattleProvider({
   async function preparePvPBattle(activeSocket: Socket, roomId: string) {
     setTrainer(null);
     setIsDrafting(true);
+    setUserPokemons([]);
+    setEnemyPokemons([]);
 
     try {
       const draftedTeam: PokeBattlePokemonDetails[] = [];

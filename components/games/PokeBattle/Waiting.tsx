@@ -9,14 +9,8 @@ import Room from "./Room";
 import Draft from "./Draft";
 
 export default function Waiting() {
-  const {
-    startGame,
-    isFetching,
-    battleMode,
-    isDrafting,
-    userPokemons,
-    enemyPokemons,
-  } = usePokeBattle();
+  const { startGame, isFetching, battleMode, isDrafting, opponentForfait } =
+    usePokeBattle();
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   const trainers = getTrainersMap(TRAINERS);
