@@ -1991,19 +1991,22 @@ export function PokeBattleProvider({
 
   async function startGame(trainer?: PokeBattleTrainer) {
     const nbPokemon = 6;
+    setIsDrafting(true);
+    const draftedTeam = (await draftTeam()) as PokeBattlePokemonDetails[];
+    setIsDrafting(false);
+    await sleep(100);
     setIsFetching(true);
-    const myTeam = await getPokemonTeam(nbPokemon);
     const enemyTeam = trainer?.pokemons
       ? await getPokemonTeam(nbPokemon, trainer.pokemons)
       : await getPokemonTeam(nbPokemon);
 
     trainer !== undefined ? setTrainer(trainer) : setTrainer(null);
-    setUserScore(calculatePokemonTeamPower(myTeam));
+    setUserScore(calculatePokemonTeamPower(draftedTeam));
     setEnemyScore(calculatePokemonTeamPower(enemyTeam));
     setEnemyObjects(POKEBATTLE_OBJECTS);
     setUserObjects(POKEBATTLE_OBJECTS);
     setIsFetching(false);
-    setUserPokemons(myTeam);
+    setUserPokemons(draftedTeam);
     setEnemyPokemons(enemyTeam);
     setGameStatus("presentation");
   }
@@ -2043,12 +2046,30 @@ export function PokeBattleProvider({
     setEnemyPokemons([]);
 
     try {
+      const draftedTeam = (await draftTeam()) as PokeBattlePokemonDetails[];
+      setDraftChoices([]);
+      // Enregistrement de l'équipe complète
+      setUserPokemons(draftedTeam);
+      setUserObjects(POKEBATTLE_OBJECTS);
+      setUserScore(calculatePokemonTeamPower(draftedTeam));
+
+      const cleanRoomId =
+        typeof roomId === "object" ? (roomId as any).roomId : roomId;
+
+      activeSocket.emit("share_team", cleanRoomId, draftedTeam);
+    } catch (error) {
+      console.error("Erreur lors de la génération de la draft PvP :", error);
+    }
+  }
+
+  async function draftTeam() {
+    try {
       const draftedTeam: PokeBattlePokemonDetails[] = [];
       const draftIds: number[] = [];
       // Boucle de draft : 6 rounds pour obtenir 6 Pokémon
       for (let round = 1; round <= 6; round++) {
         setIsFetching(true);
-        // 1. Génération de 3 IDs aléatoires uniques (Ex: Génération 1 à 151)
+        // 1. Génération de 3 IDs aléatoires uniques (Ex: Génération 1 à 1025)
         const randomIds: number[] = [];
         while (randomIds.length < 3) {
           const id = getRandomNumber(1, 1025);
@@ -2080,18 +2101,7 @@ export function PokeBattleProvider({
         draftIds.push(selectedPokemon.id);
       }
 
-      // --- FIN DE LA DRAFT ---
-      setDraftChoices([]);
-
-      // Enregistrement de l'équipe complète
-      setUserPokemons(draftedTeam);
-      setUserObjects(POKEBATTLE_OBJECTS);
-      setUserScore(calculatePokemonTeamPower(draftedTeam));
-
-      const cleanRoomId =
-        typeof roomId === "object" ? (roomId as any).roomId : roomId;
-
-      activeSocket.emit("share_team", cleanRoomId, draftedTeam);
+      return draftedTeam;
     } catch (error) {
       console.error("Erreur lors de la génération de la draft PvP :", error);
     }

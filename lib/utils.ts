@@ -6,6 +6,7 @@ import {
   PokeBattlePokemonDetails,
   PokeBattlePokemonMove,
   PokeBattlePokemonStatName,
+  PokeBattlePokemonStats,
   PokeBattlePokemonStatus,
   PokeBattlePokemonTarget,
   PokeBattleTrainer,
@@ -262,7 +263,7 @@ export async function simplifyMove(moveData: any) {
 }
 
 export async function getPokemonTeam(
-  nbPokemonTeams = 3,
+  nbPokemonTeams = 6,
   initialIds: number[] = [],
 ) {
   const team = [];
@@ -320,28 +321,29 @@ export function calculatePokemonTeamPower(
   team: PokeBattlePokemonDetails[],
 ): number {
   const totalPower = team.reduce((total, pokemon) => {
-    const s = pokemon.stats;
-
-    // Calcul du multiplicateur de type moyen (si bi-type)
-    const typeMultipliers = pokemon.types.map(
-      (t) => TYPE_DEFENSE_MULTIPLIERS[t] || 1.0,
-    );
-    const avgTypeMultiplier =
-      typeMultipliers.reduce((a, b) => a + b, 0) / typeMultipliers.length;
-
-    // Calcul de la force offensive (Max entre Attaque et Attaque Spéciale)
-    const offense = Math.max(s.attack, s["special-attack"]);
-
-    // Calcul de la force défensive (HP + Défense + Défense Spéciale)
-    const defense =
-      (s.hp + s.defense + s["special-defense"]) * avgTypeMultiplier;
-
-    // Application de la formule SEC
-    const pokemonSEC = 1.5 * offense + defense;
-
-    return total + pokemonSEC;
+    return total + calculatePokemonPower(pokemon);
   }, 0);
   return Math.round(totalPower);
+}
+
+export function calculatePokemonPower(pokemon: PokeBattlePokemonDetails) {
+  const s = pokemon.stats;
+  // Calcul du multiplicateur de type moyen (si bi-type)
+  const typeMultipliers = pokemon.types.map(
+    (t) => TYPE_DEFENSE_MULTIPLIERS[t] || 1.0,
+  );
+  const avgTypeMultiplier =
+    typeMultipliers.reduce((a, b) => a + b, 0) / typeMultipliers.length;
+
+  // Calcul de la force offensive (Max entre Attaque et Attaque Spéciale)
+  const offense = Math.max(s.attack, s["special-attack"]);
+
+  // Calcul de la force défensive (HP + Défense + Défense Spéciale)
+  const defense = (s.hp + s.defense + s["special-defense"]) * avgTypeMultiplier;
+
+  // Application de la formule SEC
+  const pokemonSEC = 1.5 * offense + defense;
+  return pokemonSEC;
 }
 
 // Calcule le multiplicateur offensif moyen de l'équipe A sur l'équipe B

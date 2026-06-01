@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @next/next/no-img-element */
 import { usePokeBattle } from "@/context/PokeBattleProvider";
+import { calculatePokemonPower, calculatePokemonTeamPower } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 
@@ -41,6 +42,16 @@ export default function Draft() {
           <span className="text-[#E0A850] text-2xl font-black tracking-widest">
             {userPokemons.length}
             <span className="text-white text-lg font-normal">/6</span>
+          </span>
+        </div>
+        <div className="bg-slate-800 border-2 border-slate-600 rounded-md px-4 py-2 flex items-center gap-3 shadow-inner">
+          <span className="text-slate-400 font-bold text-xs uppercase tracking-wider">
+            Puissance de l'équipe:
+          </span>
+          <span className="text-[#E0A850] text-2xl font-black tracking-widest">
+            <span className="text-white text-lg font-normal">
+              {calculatePokemonTeamPower(userPokemons)}
+            </span>
           </span>
         </div>
       </div>
@@ -163,7 +174,8 @@ export default function Draft() {
                       <div className="bg-[#48D080] h-full w-full"></div>
                     </div>
                   </div>
-                  <div className="text-right text-xs font-black text-slate-700 mt-1">
+                  <div className="flex justify-between items-center text-xs font-black text-slate-700 mt-1">
+                    <span>Puissance: {calculatePokemonPower(pokemon)}</span>
                     <span>
                       {maxHp} / {maxHp} PV
                     </span>
