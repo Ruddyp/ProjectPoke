@@ -343,7 +343,7 @@ export function calculatePokemonPower(pokemon: PokeBattlePokemonDetails) {
 
   // Application de la formule SEC
   const pokemonSEC = 1.5 * offense + defense;
-  return pokemonSEC;
+  return Math.round(pokemonSEC);
 }
 
 // Calcule le multiplicateur offensif moyen de l'équipe A sur l'équipe B
