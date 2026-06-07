@@ -40,7 +40,7 @@ export default function Draft() {
             Choix
           </span>
           <span className="text-[#E0A850] text-2xl font-black tracking-widest">
-            {userPokemons.length}
+            {userPokemons.length + 1}
             <span className="text-white text-lg font-normal">/6</span>
           </span>
         </div>
