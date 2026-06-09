@@ -1792,7 +1792,12 @@ export function PokeBattleProvider({
       }
 
       // Gestion de flinch (Seulement pour les attaques monocoups, les multi-hits sont gérés dans la boucle)
-      if (move.flinchChance > 0 && !defender.isFlinch && canApplyStatus) {
+      if (
+        !isMultiHit &&
+        move.flinchChance > 0 &&
+        !defender.isFlinch &&
+        canApplyStatus
+      ) {
         shouldApplyFlinch = rollDice() * 100 <= move.flinchChance;
       }
 
