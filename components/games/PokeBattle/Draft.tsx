@@ -6,8 +6,14 @@ import { Loader2 } from "lucide-react";
 import Image from "next/image";
 
 export default function Draft() {
-  const { types, draftChoices, userPokemons, nextRoundResolver, isFetching } =
-    usePokeBattle();
+  const {
+    types,
+    draftChoices,
+    userPokemons,
+    nextRoundResolver,
+    isFetching,
+    battleMode,
+  } = usePokeBattle();
 
   const isUserFinished = userPokemons.length === 6;
 
@@ -30,7 +36,7 @@ export default function Draft() {
           <p className="text-slate-400 text-xs sm:text-sm uppercase tracking-wider mt-1 text-center sm:text-left">
             {isUserFinished
               ? "Votre équipe est prête pour le combat"
-              : "Composez votre équipe de 6 Pokémon"}
+              : "Composez votre équipe Pokémon"}
           </p>
         </div>
 
@@ -41,7 +47,9 @@ export default function Draft() {
           </span>
           <span className="text-[#E0A850] text-2xl font-black tracking-widest">
             {userPokemons.length + 1}
-            <span className="text-white text-lg font-normal">/6</span>
+            <span className="text-white text-lg font-normal">
+              /{battleMode === "tower" ? 3 : 6}
+            </span>
           </span>
         </div>
         <div className="bg-slate-800 border-2 border-slate-600 rounded-md px-4 py-2 flex items-center gap-3 shadow-inner">

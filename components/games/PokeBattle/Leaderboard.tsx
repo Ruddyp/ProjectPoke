@@ -25,6 +25,19 @@ export default function LeaderboardDisplay() {
       },
     ];
 
+    map["Tour de combat"] = [
+      {
+        name: "Tour de combat",
+        img: "/combat_tower.png",
+        gen: "Tour de combat",
+        pokemons: [],
+        battleAudioSrc: "",
+        victoryAudioSrc: "",
+        power: 0,
+        intelligence: 0.5,
+      },
+    ];
+
     return map;
   }, []);
 
@@ -53,7 +66,11 @@ export default function LeaderboardDisplay() {
                   }`}
                 >
                   <span className="font-black uppercase tracking-widest">
-                    {gen === "Random" ? "Mode Random" : `Génération ${gen}`}
+                    {gen === "Random"
+                      ? "Mode Random"
+                      : gen === "Tour de combat"
+                        ? "Tour de combat"
+                        : `Génération ${gen}`}
                   </span>
                   {selectedGen === gen ? (
                     <ChevronDown size={20} />

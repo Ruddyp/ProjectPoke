@@ -1,5 +1,6 @@
 "use client";
 import {
+  PokeBattleBuffOption,
   PokeBattleGameStatus,
   PokeBattleMode,
   PokeBattleObject,
@@ -13,15 +14,19 @@ import {
 } from "@/app/type";
 import { getPokemonDetails } from "@/lib/fetch";
 import {
+  BATTLE_MUSIC,
+  calculatePokemonPower,
   calculatePokemonTeamPower,
   getPokemonTeam,
   getRandomMoves,
   getRandomNumber,
+  hasStatus,
   POKEBATTLE_OBJECTS,
   RECHARGE_MOVES,
   sleep,
   statToFrench,
   TYPE_DEFENSE_MULTIPLIERS,
+  VICTORY_MUSIC,
 } from "@/lib/utils";
 import { IPokeBatlle } from "@/models/pokebattle_leaderboard";
 import {
@@ -52,6 +57,8 @@ type PokeBattleContextType = {
   opponentWantsRematch: boolean;
   userScore: number;
   enemyScore: number;
+  towerPoint: number;
+  floor: number;
   roomActuelle: string;
   leaderboard: IPokeBatlle[];
   battleMode: PokeBattleMode;
@@ -62,14 +69,24 @@ type PokeBattleContextType = {
   socket: Socket | null;
   opponentSocketId: string | null;
   draftChoices: PokeBattlePokemonDetails[];
+  towerBuff: PokeBattleBuffOption[];
   nextRoundResolver: MutableRefObject<((value: any) => void) | null>;
+  setPokemonStatsBeforeMatch: Dispatch<
+    SetStateAction<PokeBattlePokemonStats[]>
+  >;
+  setTowerBuff: Dispatch<SetStateAction<PokeBattleBuffOption[]>>;
+  loadTowerFloor(nextFloor: number): Promise<void>;
   setSocket: (socket: any | null) => void;
   setOpponentSocketId: (id: string | null) => void;
   startGame: (trainer?: PokeBattleTrainer) => void;
   startBattle: (socketId?: string, opponentSocketId?: string) => Promise<void>;
   setEnemyScore: Dispatch<SetStateAction<number>>;
+  setTowerPoint: Dispatch<SetStateAction<number>>;
+  setFloor: Dispatch<SetStateAction<number>>;
   setGameStatus: Dispatch<SetStateAction<PokeBattleGameStatus>>;
   setEnemyPokemons: Dispatch<SetStateAction<PokeBattlePokemonDetails[]>>;
+  setUserPokemons: Dispatch<SetStateAction<PokeBattlePokemonDetails[]>>;
+  setUserObjects: Dispatch<SetStateAction<PokeBattleObject[]>>;
   preparePvPBattle: (socket: Socket, roomId: string) => void;
   goToWaitingScreen: () => void;
   handleRequestRematch: () => void;
@@ -132,6 +149,12 @@ export function PokeBattleProvider({
   const [draftChoices, setDraftChoices] = useState<PokeBattlePokemonDetails[]>(
     [],
   );
+  const [floor, setFloor] = useState(1);
+  const [towerPoint, setTowerPoint] = useState(0);
+  const [pokemonStatsBeforeMatch, setPokemonStatsBeforeMatch] = useState<
+    PokeBattlePokemonStats[]
+  >([]);
+  const [towerBuff, setTowerBuff] = useState<PokeBattleBuffOption[]>([]);
   const nextRoundResolver = useRef<((value: any) => void) | null>(null);
 
   const getActivePokemon = (pokemons: PokeBattlePokemonDetails[]) => {
@@ -253,6 +276,11 @@ export function PokeBattleProvider({
     };
   }, [socket, roomActuelle, userPokemons, enemyPokemons, gameStatus]);
 
+  useEffect(() => {
+    if (battleMode !== "tower") return;
+    startGame();
+  }, [battleMode]);
+
   // TOUR DE L'ENNEMI
   useEffect(() => {
     if (gameStatus !== "enemy_turn" || battleMode === "pvp") return;
@@ -282,6 +310,24 @@ export function PokeBattleProvider({
           element.team,
           element.set,
         );
+
+        if (battleMode === "tower" && result === "ended" && element.isEnemy) {
+          setFloor((prev) => prev + 1);
+          setTowerPoint((prev) => prev + 60);
+          setUserPokemons((prevPokemons) => {
+            return prevPokemons.map((pokemon, index) => {
+              const pokemonStats = pokemonStatsBeforeMatch[index];
+              return {
+                ...pokemon,
+                stats: {
+                  ...pokemonStats,
+                },
+              };
+            });
+          });
+          setGameStatus("tower_market");
+          return;
+        }
 
         if (result === "ended") {
           setGameStatus("ending");
@@ -383,11 +429,6 @@ export function PokeBattleProvider({
     id: number,
   ) {
     setIsActionPending(true);
-    const pokemon = (
-      team === "user"
-        ? getPokemon(userPokemons, id)
-        : getPokemon(enemyPokemons, id)
-    ) as PokeBattlePokemonDetails;
 
     const updateTeam = team === "user" ? setUserPokemons : setEnemyPokemons;
     switch (objectType) {
@@ -515,23 +556,6 @@ export function PokeBattleProvider({
     setGameStatus("intermission");
     setTargetTeam(team === "user" ? "enemy" : "user");
     setIsActionPending(false);
-  }
-
-  function hasStatus(pokemon: PokeBattlePokemonDetails) {
-    const statusEffects: (keyof PokeBattlePokemonDetails)[] = [
-      "isParalyze",
-      "isAsleep",
-      "isFrozen",
-      "isBurnt",
-      "isPoisoned",
-      "isSeeded",
-    ];
-
-    const activeStatusCount = statusEffects.filter(
-      (status) => pokemon[status] === true,
-    ).length;
-
-    return activeStatusCount >= 1;
   }
 
   async function handleUserObjectUse(
@@ -1990,24 +2014,32 @@ export function PokeBattleProvider({
   }
 
   async function startGame(trainer?: PokeBattleTrainer) {
-    const nbPokemon = 6;
     setIsDrafting(true);
     const draftedTeam = (await draftTeam()) as PokeBattlePokemonDetails[];
     setIsDrafting(false);
     await sleep(100);
     setIsFetching(true);
-    const enemyTeam = trainer?.pokemons
-      ? await getPokemonTeam(nbPokemon, trainer.pokemons)
-      : await getPokemonTeam(nbPokemon);
-
-    trainer !== undefined ? setTrainer(trainer) : setTrainer(null);
-    setUserScore(calculatePokemonTeamPower(draftedTeam));
-    setEnemyScore(calculatePokemonTeamPower(enemyTeam));
-    setEnemyObjects(POKEBATTLE_OBJECTS);
-    setUserObjects(POKEBATTLE_OBJECTS);
-    setIsFetching(false);
     setUserPokemons(draftedTeam);
-    setEnemyPokemons(enemyTeam);
+    setUserScore(calculatePokemonTeamPower(draftedTeam));
+    setUserObjects(POKEBATTLE_OBJECTS);
+    if (battleMode === "tower") {
+      setPokemonStatsBeforeMatch(draftedTeam.map((pokemon) => pokemon.stats));
+      setFloor(1);
+      setTowerBuff([]);
+      await loadTowerFloor(1);
+    } else {
+      const nbPokemon = 6;
+      const enemyTeam = trainer?.pokemons
+        ? await getPokemonTeam(nbPokemon, trainer.pokemons)
+        : await getPokemonTeam(nbPokemon);
+
+      trainer !== undefined ? setTrainer(trainer) : setTrainer(null);
+      setEnemyScore(calculatePokemonTeamPower(enemyTeam));
+      setEnemyObjects(POKEBATTLE_OBJECTS);
+      setEnemyPokemons(enemyTeam);
+    }
+
+    setIsFetching(false);
     setGameStatus("presentation");
   }
 
@@ -2066,8 +2098,9 @@ export function PokeBattleProvider({
     try {
       const draftedTeam: PokeBattlePokemonDetails[] = [];
       const draftIds: number[] = [];
+      const nbRound = battleMode === "tower" ? 3 : 6;
       // Boucle de draft : 6 rounds pour obtenir 6 Pokémon
-      for (let round = 1; round <= 6; round++) {
+      for (let round = 1; round <= nbRound; round++) {
         setIsFetching(true);
         // 1. Génération de 3 IDs aléatoires uniques (Ex: Génération 1 à 1025)
         const randomIds: number[] = [];
@@ -2151,6 +2184,94 @@ export function PokeBattleProvider({
     );
   }
 
+  async function loadTowerFloor(nextFloor: number) {
+    setIsFetching(true);
+    setFloor(nextFloor);
+
+    // Progression de l'intelligence de l'IA (Max à 1.0 vers l'étage 30)
+    const intelligence = Math.min(0.1 + nextFloor * 0.03, 1.0);
+
+    // Application de tes paramètres de puissance
+    const teamSize = 3;
+    const totalTargetPower = 650 + (nextFloor - 1) * 40; // Étage 1 = 650, Étage 2 = 690...
+    const targetPowerPerPokemon = totalTargetPower / teamSize; // Puissance équitablement répartie
+
+    const newTeam: PokeBattlePokemonDetails[] = [];
+    const pokemonIds: number[] = [];
+
+    // Pioche et mise à l'échelle (Scaling) des 3 Pokémon
+    for (let i = 0; i < teamSize; i++) {
+      const randomId = Math.floor(Math.random() * 1025) + 1;
+      pokemonIds.push(randomId);
+
+      const pokemon = await getPokemonDetails(randomId);
+
+      if (pokemon) {
+        // Calcul de la puissance brute du Pokémon généré (via PokéAPI)
+        const rawPokemonPower = calculatePokemonPower(pokemon);
+
+        // Calcul du ratio d'ajustement unique pour ce Pokémon
+        const scalingRatio = targetPowerPerPokemon / rawPokemonPower;
+
+        // Mutation des statistiques selon le ratio de l'étage
+        const scaledStats = {
+          hp: Math.round(pokemon.stats.hp * scalingRatio),
+          attack: Math.round(pokemon.stats.attack * scalingRatio),
+          defense: Math.round(pokemon.stats.defense * scalingRatio),
+          "special-attack": Math.round(
+            pokemon.stats["special-attack"] * scalingRatio,
+          ),
+          "special-defense": Math.round(
+            pokemon.stats["special-defense"] * scalingRatio,
+          ),
+          speed: Math.round(pokemon.stats.speed * scalingRatio),
+          accuracy: pokemon.stats.accuracy,
+          evasion: pokemon.stats.evasion,
+        };
+
+        // Sécurité pour éviter qu'un Pokémon se retrouve avec 0 PV
+        if (scaledStats.hp < 10) scaledStats.hp = 10;
+
+        newTeam.push({
+          ...pokemon,
+          stats: scaledStats,
+          currentHp: scaledStats.hp,
+        });
+      }
+    }
+
+    // Calcul de la puissance réelle finale du groupe
+    const totalTeamPower = calculatePokemonTeamPower(newTeam);
+    const randomNumber = getRandomNumber(1, BATTLE_MUSIC.length);
+    const battleMusic = BATTLE_MUSIC[randomNumber];
+    const victoryMusic = VICTORY_MUSIC[randomNumber];
+    setIsFetching(false);
+    setTrainer({
+      name: `Dresseur Étage ${nextFloor}`,
+      pokemons: pokemonIds,
+      battleAudioSrc: battleMusic,
+      victoryAudioSrc: victoryMusic,
+      img: `https://play.pokemonshowdown.com/sprites/trainers/aaron.png`,
+      power: totalTeamPower,
+      gen: "Tour de combat",
+      intelligence: intelligence,
+    });
+
+    setEnemyPokemons(newTeam);
+    setEnemyScore(totalTeamPower);
+
+    // Distribution des objets de l'IA pour le match
+    const updatedEnemyObjects = POKEBATTLE_OBJECTS.map((obj) => {
+      let quantity = 0;
+      if (obj.type === "heal" && nextFloor > 5) quantity = 1;
+      if (obj.type === "status" && nextFloor > 15) quantity = 1;
+      if (obj.type === "reborn" && nextFloor > 25) quantity = 1;
+
+      return { ...obj, quantity };
+    });
+    setEnemyObjects(updatedEnemyObjects);
+  }
+
   return (
     <PokeBattleContext.Provider
       value={{
@@ -2179,6 +2300,16 @@ export function PokeBattleProvider({
         isDrafting,
         nextRoundResolver,
         draftChoices,
+        towerPoint,
+        floor,
+        towerBuff,
+        setTowerBuff,
+        setPokemonStatsBeforeMatch,
+        setUserObjects,
+        setUserPokemons,
+        loadTowerFloor,
+        setFloor,
+        setTowerPoint,
         setBattleMode,
         setRoomActuelle,
         startGame,

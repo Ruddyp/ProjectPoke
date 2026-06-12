@@ -1,6 +1,7 @@
 "use client";
 import Board from "@/components/games/PokeBattle/Board";
 import Ending from "@/components/games/PokeBattle/Ending";
+import TowerMarket from "@/components/games/PokeBattle/TowerMarket";
 import Waiting from "@/components/games/PokeBattle/Waiting";
 import { usePokeBattle } from "@/context/PokeBattleProvider";
 
@@ -16,6 +17,7 @@ export default function FrontPage() {
       </div>
     );
   if (gameStatus === "ending") return <Ending />;
+  if (gameStatus === "tower_market") return <TowerMarket />;
   return (
     <div className="size-full">
       <Board />
