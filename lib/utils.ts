@@ -1,6 +1,7 @@
 import {
   MemoryDifficulty,
   MemoryTuileType,
+  PokeBattleBuffOption,
   PokeBattleMoveCategory,
   PokeBattleObject,
   PokeBattlePokemonDetails,
@@ -18,6 +19,52 @@ import confetti from "canvas-confetti";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { getPokemonDetails } from "./fetch";
+import {
+  Activity,
+  Anchor,
+  Bell,
+  Biohazard,
+  Bomb,
+  Brain,
+  BrickWall,
+  Bug,
+  Circle,
+  Copy,
+  Crosshair,
+  Crown,
+  Dices,
+  Droplet,
+  EyeOff,
+  Flame,
+  FlameKindling,
+  Ghost,
+  Glasses,
+  Hammer,
+  Heart,
+  HeartCrack,
+  HeartHandshake,
+  HeartPulse,
+  HelpCircle,
+  Moon,
+  Mountain,
+  PlusCircle,
+  RefreshCw,
+  Scissors,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  ShieldPlus,
+  Skull,
+  Snowflake,
+  Sparkles,
+  Sprout,
+  Sword,
+  Swords,
+  Target,
+  Wand2,
+  Wind,
+  Zap,
+} from "lucide-react";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -1189,4 +1236,1077 @@ export const getTrainersMap = (trainersList: PokeBattleTrainer[]) => {
     },
     {},
   );
+};
+
+export const PRICES = {
+  heal_partial: 30,
+  heal_full: 60,
+  revive: 100,
+  antidote: 30,
+  buy_potion: 40,
+  buy_reborn: 80,
+  buy_antidote: 25,
+};
+
+export function hasStatus(pokemon: PokeBattlePokemonDetails) {
+  const statusEffects: (keyof PokeBattlePokemonDetails)[] = [
+    "isParalyze",
+    "isAsleep",
+    "isFrozen",
+    "isBurnt",
+    "isPoisoned",
+    "isSeeded",
+  ];
+
+  const activeStatusCount = statusEffects.filter(
+    (status) => pokemon[status] === true,
+  ).length;
+
+  return activeStatusCount >= 1;
+}
+
+export const TOWER_BUFFS: PokeBattleBuffOption[] = [
+  {
+    id: "atk_buff",
+    title: "Pilule de Force",
+    quality: "common",
+    description: "+10% Attaque & Attaque Spéciale pour toute l'équipe",
+    icon: Sword,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: {
+          ...p.stats,
+          attack: Math.round(p.stats.attack * 1.1),
+          "special-attack": Math.round(p.stats["special-attack"] * 1.1),
+        },
+      })),
+  },
+  {
+    id: "def_buff",
+    title: "Écorce Blindée",
+    quality: "common",
+    description: "+10% Défense & Défense Spéciale pour toute l'équipe",
+    icon: Shield,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: {
+          ...p.stats,
+          defense: Math.round(p.stats.defense * 1.1),
+          "special-defense": Math.round(p.stats["special-defense"] * 1.1),
+        },
+      })),
+  },
+  {
+    id: "team_heal_buff",
+    title: "Rosée Sacrée",
+    quality: "common",
+    description: "Soigne instantanément 25% des PV max de toute l'équipe",
+    icon: Heart,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => {
+        if (p.currentHp <= 0) return p;
+        return {
+          ...p,
+          currentHp: Math.min(
+            p.stats.hp,
+            p.currentHp + Math.round(p.stats.hp * 0.25),
+          ),
+        };
+      }),
+  },
+  {
+    id: "hp_boost_1",
+    title: "Pilule d'Endurance",
+    quality: "common",
+    description: "+15% PV Max pour toute l'équipe",
+    icon: Heart,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => {
+        const bonus = Math.round(p.stats.hp * 0.15);
+        return {
+          ...p,
+          stats: { ...p.stats, hp: p.stats.hp + bonus },
+          currentHp: p.currentHp > 0 ? p.currentHp + bonus : 0,
+        };
+      }),
+  },
+  {
+    id: "phys_atk_boost",
+    title: "Poignet Force",
+    quality: "common",
+    description: "+20% Attaque physique pour toute l'équipe",
+    icon: Swords,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: { ...p.stats, attack: Math.round(p.stats.attack * 1.2) },
+      })),
+  },
+  {
+    id: "spec_atk_boost",
+    title: "Lunettes tactiques",
+    quality: "common",
+    description: "+20% Attaque Spéciale pour toute l'équipe",
+    icon: Glasses,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: {
+          ...p.stats,
+          "special-attack": Math.round(p.stats["special-attack"] * 1.2),
+        },
+      })),
+  },
+  {
+    id: "phys_def_boost",
+    title: "Plastron de Fer",
+    quality: "common",
+    description: "+20% Défense physique pour toute l'équipe",
+    icon: ShieldAlert,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: { ...p.stats, defense: Math.round(p.stats.defense * 1.2) },
+      })),
+  },
+  {
+    id: "spec_def_boost",
+    title: "Cape de Brume",
+    quality: "common",
+    description: "+20% Défense Spéciale pour toute l'équipe",
+    icon: ShieldCheck,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: {
+          ...p.stats,
+          "special-defense": Math.round(p.stats["special-defense"] * 1.2),
+        },
+      })),
+  },
+  {
+    id: "evasion_boost_pure",
+    title: "Poudre Claire",
+    quality: "common",
+    description: "+10% d'Esquive globale pour toute l'équipe",
+    icon: Wind,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: { ...p.stats, evasion: Math.round(p.stats.evasion * 1.1) },
+      })),
+  },
+  {
+    id: "glass_cannon",
+    title: "Orbe de Vie",
+    quality: "epic",
+    description: "+25% Attaque & Atk Spé, mais -15% Défense & Déf Spé globale",
+    icon: Flame,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: {
+          ...p.stats,
+          attack: Math.round(p.stats.attack * 1.25),
+          "special-attack": Math.round(p.stats["special-attack"] * 1.25),
+          defense: Math.round(p.stats.defense * 0.85),
+          "special-defense": Math.round(p.stats["special-defense"] * 0.85),
+        },
+      })),
+  },
+  {
+    id: "berserker",
+    title: "Bandeau Cholérique",
+    quality: "epic",
+    description:
+      "+35% Attaque physique, mais vos capacités perdent 10% de Précision",
+    icon: Skull,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: { ...p.stats, attack: Math.round(p.stats.attack * 1.35) },
+        moves: p.moves.map((m) => ({
+          ...m,
+          accuracy: Math.max(10, m.accuracy - 10),
+        })),
+      })),
+  },
+  {
+    id: "reckless_striker",
+    title: "Viseur Instable",
+    quality: "epic",
+    description:
+      "Vos attaques font un critique à coups sur, mais -20% d'Esquive globale",
+    icon: Crosshair,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: { ...p.stats, evasion: Math.round(p.stats.evasion * 0.8) },
+        moves: p.moves.map((m: PokeBattlePokemonMove) => ({
+          ...m,
+          critRate: m.critRate + 2,
+        })),
+      })),
+  },
+  {
+    id: "kamikaze_spirit",
+    title: "Esprit Kamikaze",
+    quality: "epic",
+    description:
+      "+40% de Puissance sur toutes les attaques, mais ajoute 15% de recul",
+    icon: Bomb,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.power > 0
+            ? { ...m, power: Math.round(m.power * 1.4), drain: m.drain - 15 }
+            : m,
+        ),
+      })),
+  },
+  {
+    id: "blind_fury",
+    title: "Lentille Fêlée",
+    quality: "epic",
+    description: "+30% Attaque Spéciale, mais -15% de Précision globale",
+    icon: EyeOff,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: {
+          ...p.stats,
+          "special-attack": Math.round(p.stats["special-attack"] * 1.3),
+          accuracy: Math.round(p.stats.accuracy * 0.85),
+        },
+      })),
+  },
+  {
+    id: "iron_anchor",
+    title: "Ancre de Plomb",
+    quality: "epic",
+    description: "+30% Défense Physique, mais -15% d'Esquive globale",
+    icon: Anchor,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: {
+          ...p.stats,
+          defense: Math.round(p.stats.defense * 1.3),
+          evasion: Math.round(p.stats.evasion * 0.85),
+        },
+      })),
+  },
+  {
+    id: "emergency_heal",
+    title: "Poudre Vitalité",
+    quality: "common",
+    description:
+      "Soigne instantanément 50% des PV max du Pokémon actif uniquement",
+    icon: Activity,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) =>
+        p.isActive && p.currentHp > 0
+          ? {
+              ...p,
+              currentHp: Math.min(
+                p.stats.hp,
+                p.currentHp + Math.round(p.stats.hp * 0.5),
+              ),
+            }
+          : p,
+      ),
+  },
+  {
+    id: "phoenix_down",
+    title: "Plume de Phénix",
+    quality: "epic",
+    description: "Réanime TOUS les Pokémon K.O. avec 25% de leurs PV max",
+    icon: ShieldPlus,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) =>
+        p.currentHp <= 0
+          ? { ...p, currentHp: Math.round(p.stats.hp * 0.25) }
+          : p,
+      ),
+  },
+  {
+    id: "vampiric_touch",
+    title: "Sangsue Sanglante",
+    quality: "epic",
+    description: "Toutes les capacités offensives gagnent +15% de vol de vie",
+    icon: Droplet,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.power > 0 ? { ...m, drain: m.drain + 15 } : m,
+        ),
+      })),
+  },
+  {
+    id: "holy_blessing",
+    title: "Bénédiction Curative",
+    quality: "common",
+    description: "Augmente l'efficacité des moves de soin de l'équipe de 25%",
+    icon: PlusCircle,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.healing > 0 ? { ...m, healing: Math.round(m.healing * 1.25) } : m,
+        ),
+      })),
+  },
+  {
+    id: "last_chance_heal",
+    title: "Rosée de Survie",
+    quality: "common",
+    description:
+      "Soigne 15% des PV max pour chaque Pokémon ayant moins de 30% de ses PV",
+    icon: HeartHandshake,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => {
+        if (p.currentHp > 0 && p.currentHp < p.stats.hp * 0.3) {
+          return {
+            ...p,
+            currentHp: Math.min(
+              p.stats.hp,
+              p.currentHp + Math.round(p.stats.hp * 0.15),
+            ),
+          };
+        }
+        return p;
+      }),
+  },
+  {
+    id: "vampire_lord",
+    title: "Crocs Sanglants",
+    quality: "epic",
+    description:
+      "Les capacités qui avaient déjà du vol de vie voient leur drain doubler",
+    icon: Scissors,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.drain > 0 ? { ...m, drain: m.drain * 2 } : m,
+        ),
+      })),
+  },
+  {
+    id: "status_booster",
+    title: "Venin Dilué",
+    quality: "common",
+    description: "+20% de chances d'appliquer des altérations d'état",
+    icon: Biohazard,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.status !== "none"
+            ? { ...m, statusChance: Math.min(100, m.statusChance + 20) }
+            : m,
+        ),
+      })),
+  },
+  {
+    id: "flinch_master",
+    title: "Rorqual Assommant",
+    quality: "common",
+    description:
+      "Toutes les capacités offensives gagnent +15% de chances d'apeurer l'adversaire",
+    icon: Hammer,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.power > 0
+            ? { ...m, flinchChance: Math.min(100, m.flinchChance + 15) }
+            : m,
+        ),
+      })),
+  },
+  {
+    id: "purification",
+    title: "Clochette Pure",
+    quality: "common",
+    description:
+      "Soigne instantanément toutes les altérations d'état négatives de l'équipe",
+    icon: Bell,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        isParalyze: false,
+        isAsleep: false,
+        isFrozen: false,
+        isBurnt: false,
+        isConfused: false,
+        isPoisoned: false,
+        isSeeded: false,
+        confusionTurns: 0,
+        sleepTurns: 0,
+      })),
+  },
+  {
+    id: "hypnotic_fury",
+    title: "Sable du Marchand",
+    quality: "common",
+    description: "Les capacités infligeant le Sommeil durent 1 tour de plus",
+    icon: Moon,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        sleepTurns: p.sleepTurns > 0 ? p.sleepTurns + 1 : 0,
+      })),
+  },
+  {
+    id: "confuse_ray",
+    title: "Miroir Brisé",
+    quality: "common",
+    description: "Les capacités infligeant la Confusion durent 1 tour de plus",
+    icon: HelpCircle,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        confusionTurns: p.confusionTurns > 0 ? p.confusionTurns + 1 : 0,
+      })),
+  },
+  {
+    id: "physical_mastery",
+    title: "Gantelets de Choc",
+    quality: "common",
+    description: "+15% de dégâts sur toutes les attaques Physiques",
+    icon: Swords,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.category === "physical"
+            ? { ...m, power: Math.round(m.power * 1.15) }
+            : m,
+        ),
+      })),
+  },
+  {
+    id: "special_mastery",
+    title: "Grimoire Ancien",
+    quality: "common",
+    description: "+15% de dégâts sur toutes les attaques Spéciales",
+    icon: Wand2,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.category === "special"
+            ? { ...m, power: Math.round(m.power * 1.15) }
+            : m,
+        ),
+      })),
+  },
+  {
+    id: "multi_hit_fury",
+    title: "Bandeau Rafale",
+    quality: "common",
+    description:
+      "Les attaques à coups multiples frappent au moins 1 fois de plus",
+    icon: Dices,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.maxHits > 1
+            ? { ...m, minHits: Math.min(m.maxHits, m.minHits + 1) }
+            : m,
+        ),
+      })),
+  },
+  {
+    id: "perfect_accuracy",
+    title: "Viseur Laser",
+    quality: "common",
+    description:
+      "Toutes les capacités de l'équipe gagnent +20 de Précision fixe",
+    icon: Target,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) => ({
+          ...m,
+          accuracy: Math.min(100, m.accuracy + 20),
+        })),
+      })),
+  },
+  {
+    id: "elemental_starter_boost",
+    title: "Trilogie Élémentaire",
+    quality: "common",
+    description:
+      "+25% de puissance pour toutes les attaques de type Feu, Eau et Plante",
+    icon: Sparkles,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.type === "feu" || m.type === "eau" || m.type === "plante"
+            ? { ...m, power: Math.round(m.power * 1.25) }
+            : m,
+        ),
+      })),
+  },
+  {
+    id: "elemental_electric_fury",
+    title: "Orage Surchargé",
+    quality: "common",
+    description:
+      "Les attaques de type Éléctrik infligent +30% de dégâts et ont +15% de chances de paralyser",
+    icon: Zap,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.type === "électrik"
+            ? {
+                ...m,
+                power: Math.round(m.power * 1.3),
+                statusChance:
+                  m.status === "paralysis"
+                    ? Math.min(100, m.statusChance + 15)
+                    : m.statusChance,
+              }
+            : m,
+        ),
+      })),
+  },
+  {
+    id: "elemental_ice_freeze",
+    title: "Zéro Absolu",
+    quality: "common",
+    description:
+      "Les capacités de type Glace gagnent +30% de dégâts et ont +15% de chances de gelée",
+    icon: Snowflake,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.type === "glace"
+            ? {
+                ...m,
+                power: Math.round(m.power * 1.3),
+                statusChance:
+                  m.status === "freeze"
+                    ? Math.min(100, m.statusChance + 15)
+                    : m.statusChance,
+              }
+            : m,
+        ),
+      })),
+  },
+  {
+    id: "elemental_dragon_rage",
+    title: "Colère Draconique",
+    quality: "common",
+    description:
+      "Les moves de type Dragon voient leurs attaques automatiqument faire un critique",
+    icon: FlameKindling,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.type === "dragon" ? { ...m, critRate: m.critRate + 2 } : m,
+        ),
+      })),
+  },
+  {
+    id: "elemental_dark_ghost",
+    title: "Ombre Malveillante",
+    quality: "common",
+    description:
+      "+30% de puissance sur toutes les attaques de type Spectre et Ténèbres",
+    icon: Moon,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.type === "spectre" || m.type === "ténèbres"
+            ? { ...m, power: Math.round(m.power * 1.3) }
+            : m,
+        ),
+      })),
+  },
+  {
+    id: "elemental_fight_steel",
+    title: "Alliage de Combat",
+    quality: "common",
+    description: "Augmente de +25% la Défense physique",
+    icon: Shield,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => {
+        return {
+          ...p,
+          stats: {
+            ...p.stats,
+            defense: Math.round(p.stats.defense * 1.25),
+          },
+        };
+      }),
+  },
+  {
+    id: "elemental_normal_tactician",
+    title: "Normalité Brute",
+    quality: "common",
+    description: "Les attaques de type Normal gagnent +50% de puissance",
+    icon: Circle,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.type === "normal" ? { ...m, power: Math.round(m.power * 1.5) } : m,
+        ),
+      })),
+  },
+  {
+    id: "elemental_poison_drain",
+    title: "Toxine Vampirique",
+    quality: "common",
+    description:
+      "Toutes les capacités de type Poison gagnent +30% de vol de vie",
+    icon: Skull,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.type === "poison" ? { ...m, drain: m.drain + 30 } : m,
+        ),
+      })),
+  },
+  {
+    id: "elemental_psy_confusion",
+    title: "Surcharge Psychique",
+    quality: "common",
+    description:
+      "Les attaques de type Psy infligent +30% de dégâts et ont +20% de chances de rendre confus",
+    icon: Brain,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.type === "psy"
+            ? {
+                ...m,
+                power: Math.round(m.power * 1.3),
+                statusChance:
+                  m.status === "confusion"
+                    ? Math.min(100, m.statusChance + 20)
+                    : m.statusChance,
+              }
+            : m,
+        ),
+      })),
+  },
+  {
+    id: "elemental_combat_shatter",
+    title: "Ceinture Noire",
+    quality: "common",
+    description: "Les capacités de type Combat infligent +30% de dégâts",
+    icon: Swords,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.type === "combat" ? { ...m, power: Math.round(m.power * 1.3) } : m,
+        ),
+      })),
+  },
+  {
+    id: "elemental_acier_titan",
+    title: "Blindage Alliage",
+    quality: "common",
+    description:
+      "Les capacités de type Acier infligent +30% de dégâts et boost de votre défense physique de 20%",
+    icon: ShieldAlert,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: { ...p.stats, defense: Math.round(p.stats.defense * 1.2) },
+        moves: p.moves.map((m) =>
+          m.type === "acier" ? { ...m, power: Math.round(m.power * 1.3) } : m,
+        ),
+      })),
+  },
+  {
+    id: "elemental_fee_pixie",
+    title: "Poudre de Fée",
+    quality: "common",
+    description:
+      "Les attaques de type Fée gagnent +25% de puissance et augmentent l'esquive du lanceur de 10%",
+    icon: Sparkles,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: { ...p.stats, evasion: Math.round(p.stats.evasion * 1.1) },
+        moves: p.moves.map((m) =>
+          m.type === "fée" ? { ...m, power: Math.round(m.power * 1.25) } : m,
+        ),
+      })),
+  },
+  {
+    id: "elemental_sol_earthquake",
+    title: "Fissure Sismique",
+    quality: "common",
+    description: "Les attaques de type Sol infligent +35% de dégâts",
+    icon: Mountain,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.type === "sol" ? { ...m, power: Math.round(m.power * 1.35) } : m,
+        ),
+      })),
+  },
+  {
+    id: "elemental_vol_hurricane",
+    title: "Courant Porteur",
+    quality: "common",
+    description:
+      "Les attaques de type Vol ont désormais +25 de Précision fixe et infligent +20% de dégâts",
+    icon: Wind,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.type === "vol"
+            ? {
+                ...m,
+                power: Math.round(m.power * 1.2),
+                accuracy: Math.min(100, m.accuracy + 25),
+              }
+            : m,
+        ),
+      })),
+  },
+  {
+    id: "elemental_insecte_swarm",
+    title: "Nuée de Guêpes",
+    quality: "common",
+    description:
+      "Les capacités de type Insecte frappent automatiqument avec un critique",
+    icon: Bug,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.type === "insecte" ? { ...m, critRate: m.critRate + 2 } : m,
+        ),
+      })),
+  },
+  {
+    id: "elemental_roche_fortress",
+    title: "Polymérisation Rocheuse",
+    quality: "common",
+    description:
+      "+35% de puissance sur les moves de type Roche et augmente la Défense physique de 15%",
+    icon: BrickWall,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: { ...p.stats, defense: Math.round(p.stats.defense * 1.15) },
+        moves: p.moves.map((m) =>
+          m.type === "roche" ? { ...m, power: Math.round(m.power * 1.35) } : m,
+        ),
+      })),
+  },
+  {
+    id: "cheat_exodia_strike",
+    title: "Extermination Totale",
+    quality: "legendary",
+    description: "Multiplie par 2 la puissance de TOUTES les attaques",
+    icon: Flame,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.category !== "status" ? { ...m, power: m.power * 3 } : m,
+        ),
+      })),
+  },
+  {
+    id: "cheat_immortal_vampire",
+    title: "Pacte Sanglant d'Yveltal",
+    quality: "legendary",
+    description:
+      "Octroie un vol de vie de 75% sur toutes les capacités infligeant des dégâts",
+    icon: Droplet,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) => (m.power > 0 ? { ...m, drain: 75 } : m)),
+      })),
+  },
+  {
+    id: "cheat_status_apocalypse",
+    title: "Fléau de Nécrozma",
+    quality: "legendary",
+    description:
+      "Toutes les capacités de l'équipe ont désormais 100% de chances d'appliquer leur statut",
+    icon: Biohazard,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.status !== "none" ? { ...m, statusChance: 100 } : m,
+        ),
+      })),
+  },
+  {
+    id: "cheat_flinch_lock",
+    title: "Onde de Choc Absolue",
+    quality: "legendary",
+    description:
+      "Toutes les attaques offensives ont 50% de chances d'apeurer et d'empêcher l'ennemi d'agir",
+    icon: Hammer,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.power > 0
+            ? { ...m, flinchChance: Math.max(m.flinchChance, 50) }
+            : m,
+        ),
+      })),
+  },
+  {
+    id: "cheat_miracle_guard",
+    title: "Garde Mystik Suprême",
+    quality: "legendary",
+    description:
+      "Augmente la Défense et la Défense Spéciale de toute l'équipe de +100%",
+    icon: ShieldCheck,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: {
+          ...p.stats,
+          defense: p.stats.defense * 2,
+          "special-defense": p.stats["special-defense"] * 2,
+        },
+      })),
+  },
+  {
+    id: "cheat_multihit_god",
+    title: "Mitrailleuse Infinie",
+    quality: "legendary",
+    description:
+      "Toutes les attaques à coups multiples frappent désormais TOUJOURS le nombre maximum de fois",
+    icon: Dices,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.maxHits > 1 ? { ...m, minHits: m.maxHits } : m,
+        ),
+      })),
+  },
+  {
+    id: "cheat_titan_hp",
+    title: "Énergie Infinie d'Eternatus",
+    quality: "legendary",
+    description:
+      "Double les PV Max de toute l'équipe et soigne instantanément l'intégralité des PV",
+    icon: HeartPulse,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => {
+        const newMaxHp = p.stats.hp * 2;
+        return {
+          ...p,
+          stats: { ...p.stats, hp: newMaxHp },
+          currentHp: newMaxHp,
+        };
+      }),
+  },
+  {
+    id: "cheat_god_mode",
+    title: "Bénédiction d'Arceus",
+    quality: "rare",
+    description:
+      "+20% à ABSOLUMENT TOUTES les statistiques globales de l'équipe",
+    icon: Crown,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: {
+          hp: Math.round(p.stats.hp * 1.2),
+          attack: Math.round(p.stats.attack * 1.2),
+          defense: Math.round(p.stats.defense * 1.2),
+          "special-attack": Math.round(p.stats["special-attack"] * 1.2),
+          "special-defense": Math.round(p.stats["special-defense"] * 1.2),
+          speed: p.stats.speed,
+          evasion: Math.round(p.stats.evasion * 1.2),
+          accuracy: Math.round(p.stats.accuracy * 1.2),
+        },
+        currentHp:
+          p.currentHp > 0 ? p.currentHp + Math.round(p.stats.hp * 0.2) : 0,
+      })),
+  },
+  {
+    id: "cheat_full_revive_heal",
+    title: "Larme de Célébi",
+    quality: "rare",
+    description:
+      "Soigne à 100% les PV de toute l'équipe ET réanime tous les morts à 100% des PV",
+    icon: HeartHandshake,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({ ...p, currentHp: p.stats.hp })),
+  },
+  {
+    id: "cheat_ultra_evasion",
+    title: "Ultra Instinct",
+    quality: "rare",
+    description: "Augmente l'esquive de 15% pour toute l'équipe",
+    icon: Ghost,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: { ...p.stats, evasion: p.stats.evasion * 1.15 },
+      })),
+  },
+  {
+    id: "cheat_leech_seed_curse",
+    title: "Symbiose Sylvestre",
+    quality: "rare",
+    description:
+      "Toutes les capacités de catégorie 'status' appliquent désormais Vampigraine à la place du status de base",
+    icon: Sprout,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.category === "status"
+            ? { ...m, status: "leech-seed" as const, statusChance: 100 }
+            : m,
+        ),
+      })),
+  },
+  {
+    id: "rare_type_coverage",
+    title: "Maîtrise Caméléon",
+    quality: "rare",
+    description:
+      "Vos attaques de type Normal prennent désormais le type principal du Pokémon qui les utilise",
+    icon: RefreshCw,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.type === "normal" && p.types.length > 0
+            ? { ...m, type: p.types[0] as any }
+            : m,
+        ),
+      })),
+  },
+  {
+    id: "rare_comeback_kid",
+    title: "Esprit de Révolte",
+    quality: "rare",
+    description: "Augmente les attaques Physiques et Spéciales de +50% dégâts",
+    icon: Flame,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => {
+        return {
+          ...p,
+          moves: p.moves.map((m) =>
+            m.power > 0 ? { ...m, power: Math.round(m.power * 1.5) } : m,
+          ),
+        };
+      }),
+  },
+  {
+    id: "rare_calculated_risk",
+    title: "Lentille Zoom",
+    quality: "rare",
+    description:
+      "Si une capacité a moins de 80% de Précision, elle gagne +25% de Précision fixe et +1 au taux de Critique",
+    icon: Target,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        moves: p.moves.map((m) =>
+          m.accuracy < 80
+            ? {
+                ...m,
+                accuracy: Math.min(100, m.accuracy + 25),
+                critRate: m.critRate + 1,
+              }
+            : m,
+        ),
+      })),
+  },
+];
+
+export const BATTLE_MUSIC = [
+  "/sounds/battle_blue.mp3",
+  "/sounds/battle_cynthia.mp3",
+  "/sounds/battle_ghechis.mp3",
+  "/sounds/battle_gym_gen1.mp3",
+  "/sounds/battle_gym_gen2.mp3",
+  "/sounds/battle_gym_gen3.mp3",
+  "/sounds/battle_gym_gen4.mp3",
+  "/sounds/battle_gym_gen5.mp3",
+  "/sounds/battle_leg_gen2.mp3",
+  "/sounds/battle_leg_gen3.mp3",
+  "/sounds/battle_leg_gen4.mp3",
+  "/sounds/battle_leg_gen5.mp3",
+  "/sounds/battle_red.mp3",
+  "/sounds/battle_steven.mp3",
+  "/sounds/battle.mp3",
+];
+
+export const VICTORY_MUSIC = [
+  "/sounds/victory_blue.mp3",
+  "/sounds/victory_cynthia.mp3",
+  "/sounds/victory_ghechis.mp3",
+  "/sounds/victory_gym_gen3.mp3",
+  "/sounds/victory_gym_gen4.mp3",
+  "/sounds/victory_gym_gen5.mp3",
+  "/sounds/victory_red.mp3",
+  "/sounds/victory_steven.mp3",
+  "/sounds/victory.mp3",
+];
+
+export function isEven(n: number) {
+  return n % 2 == 0;
+}
+
+export const QUALITY_CONFIG = {
+  common: {
+    border: "border-slate-800 bg-slate-950/40",
+    iconBg: "bg-slate-900 border-slate-700",
+    iconColor: "text-slate-400",
+    badge: "bg-slate-800 text-slate-400 border-slate-700",
+    label: "Commun",
+  },
+  rare: {
+    border: "border-blue-900/50 bg-blue-950/10",
+    iconBg: "bg-blue-950 border-blue-500/30",
+    iconColor: "text-blue-400",
+    badge: "bg-blue-950 text-blue-400 border-blue-500/30",
+    label: "Rare",
+  },
+  epic: {
+    border: "border-purple-900/60 bg-purple-950/10",
+    iconBg: "bg-purple-950 border-purple-500/30",
+    iconColor: "text-purple-400",
+    badge: "bg-purple-950 text-purple-400 border-purple-500/30",
+    label: "Épique",
+  },
+  legendary: {
+    border:
+      "border-amber-500/30 bg-amber-950/20 shadow-[0_0_15px_rgba(245,158,11,0.05)]",
+    iconBg: "bg-amber-950 border-amber-500/40 animate-pulse",
+    iconColor: "text-amber-400",
+    badge: "bg-amber-500/20 text-amber-300 border-amber-500/40 font-black",
+    label: "Légendaire",
+  },
 };

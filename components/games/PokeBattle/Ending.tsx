@@ -23,6 +23,7 @@ export default function Ending() {
     opponentWantsRematch,
     battleMode,
     opponentForfait,
+    floor,
     goToWaitingScreen,
     addToLeaderboard,
     updateLeaderboard,
@@ -42,7 +43,8 @@ export default function Ending() {
     userScore,
   );
 
-  const difficulty = trainer?.name ?? "Random";
+  let difficulty = trainer?.name ?? "Random";
+  if (battleMode === "tower") difficulty = "Tour de combat";
 
   useEffect(() => {
     let timer = setTimeout(() => {
@@ -76,10 +78,13 @@ export default function Ending() {
   const lastScore = difficultyLeaderboard[difficultyLeaderboard.length - 1];
 
   const canBeSaveToLeaderboard = useMemo(() => {
-    if (battleMode === "pvp" || !isUserWin) return false;
+    if (battleMode === "pvp" || (!isUserWin && battleMode !== "tower"))
+      return false;
     if (difficultyLeaderboard.length < 5) return true;
+    if (battleMode === "tower" && floor > lastScore.score) return true;
     return scoreObject.finalScore > lastScore.score;
   }, [
+    floor,
     difficultyLeaderboard,
     lastScore,
     isUserWin,
@@ -91,7 +96,11 @@ export default function Ending() {
     if (!name.trim()) return;
     setIsSubmitting(true);
     try {
-      const scoreToPush = { name, difficulty, score: scoreObject.finalScore };
+      const scoreToPush = {
+        name,
+        difficulty,
+        score: battleMode === "tower" ? floor : scoreObject.finalScore,
+      };
       if (difficultyLeaderboard.length >= 5 && lastScore) {
         const updatedDoc = await replaceScoreToPokeBattleLeaderboard(
           lastScore._id!,
@@ -135,6 +144,14 @@ export default function Ending() {
 
         {((isUserWin && battleMode === "pve") || battleMode === "pvp") && (
           <Score />
+        )}
+        {battleMode === "tower" && (
+          <div className="flex items-center gap-1 bg-slate-800/50 border-2 border-red-600 rounded-xl p-4 text-slate-200 text-center font-semibold tracking-widest uppercase text-sm">
+            Votre score :
+            <span className="font-extrabold text-base text-slate-50">
+              Etage {floor}
+            </span>
+          </div>
         )}
 
         {/* Section Record  */}

@@ -460,6 +460,7 @@ export type PokeBattleGameStatus =
   | "user_turn"
   | "ending"
   | "enemy_turn"
+  | "tower_market"
   | "intermission";
 
 export type PokeBattleSound =
@@ -495,4 +496,13 @@ export type PokeBattleTrainer = {
   intelligence: number;
 };
 
-export type PokeBattleMode = "pve" | "pvp";
+export type PokeBattleMode = "pve" | "pvp" | "tower";
+
+export type PokeBattleBuffOption = {
+  id: string;
+  title: string;
+  description: string;
+  quality: "common" | "rare" | "epic" | "legendary";
+  icon: any;
+  action: (pokemons: any[]) => any[];
+};

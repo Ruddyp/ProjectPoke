@@ -4,7 +4,7 @@ import { usePokeBattle } from "@/context/PokeBattleProvider";
 import { Button } from "@/components/ui/button";
 import { PokeBattleObjectType, PokeBattlePokemonDetails } from "@/app/type";
 import PokemonButton from "./PokemonButton";
-import { sleep } from "@/lib/utils";
+import { hasStatus, sleep } from "@/lib/utils";
 
 type ChangeMenuProps = {
   setCurrentMenu: Dispatch<SetStateAction<CurrentMenuType>>;
@@ -37,12 +37,6 @@ export default function ObjectMenu({ setCurrentMenu }: ChangeMenuProps) {
     if (isActionPending) return;
 
     const activePokemon = getActivePokemon(userPokemons);
-    const hasStatusEffect =
-      pokemon.isParalyze ||
-      pokemon.isAsleep ||
-      pokemon.isFrozen ||
-      pokemon.isBurnt ||
-      pokemon.isPoisoned;
 
     // Cas où on veut soigner un pokémon qui a tous ses points de vie
     if (
@@ -66,7 +60,7 @@ export default function ObjectMenu({ setCurrentMenu }: ChangeMenuProps) {
     }
 
     // Cas où on veut soigner les status d'un pokémon qui n'a aucun status
-    if (objectChoice === "status" && !hasStatusEffect) {
+    if (objectChoice === "status" && !hasStatus(pokemon)) {
       setTextBox(`${pokemon.name} ne souffre d'aucune altération de statut.`);
       await sleep(1500);
       setTextBox(`Que doit faire ${activePokemon.name} ?`);
