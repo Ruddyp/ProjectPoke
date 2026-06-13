@@ -1390,12 +1390,12 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     id: "evasion_boost_pure",
     title: "Poudre Claire",
     quality: "common",
-    description: "+10% d'Esquive globale pour toute l'équipe",
+    description: "+5% d'Esquive globale pour toute l'équipe",
     icon: Wind,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
         ...p,
-        stats: { ...p.stats, evasion: Math.round(p.stats.evasion * 1.1) },
+        stats: { ...p.stats, evasion: Math.round(p.stats.evasion * 1.05) },
       })),
   },
   {
@@ -1446,7 +1446,7 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
         stats: { ...p.stats, evasion: Math.round(p.stats.evasion * 0.8) },
         moves: p.moves.map((m: PokeBattlePokemonMove) => ({
           ...m,
-          critRate: m.critRate + 2,
+          critRate: m.critRate + 5,
         })),
       })),
   },
@@ -1471,7 +1471,7 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     id: "blind_fury",
     title: "Lentille Fêlée",
     quality: "epic",
-    description: "+30% Attaque Spéciale, mais -15% de Précision globale",
+    description: "+30% Attaque Spéciale, mais -10% de Précision globale",
     icon: EyeOff,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
@@ -1479,7 +1479,7 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
         stats: {
           ...p.stats,
           "special-attack": Math.round(p.stats["special-attack"] * 1.3),
-          accuracy: Math.round(p.stats.accuracy * 0.85),
+          accuracy: Math.round(p.stats.accuracy * 0.9),
         },
       })),
   },
@@ -1487,7 +1487,7 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     id: "iron_anchor",
     title: "Ancre de Plomb",
     quality: "epic",
-    description: "+30% Défense Physique, mais -15% d'Esquive globale",
+    description: "+30% Défense Physique, mais -5% d'Esquive globale",
     icon: Anchor,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
@@ -1495,7 +1495,7 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
         stats: {
           ...p.stats,
           defense: Math.round(p.stats.defense * 1.3),
-          evasion: Math.round(p.stats.evasion * 0.85),
+          evasion: Math.round(p.stats.evasion * 0.95),
         },
       })),
   },
@@ -1523,12 +1523,12 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     id: "phoenix_down",
     title: "Plume de Phénix",
     quality: "epic",
-    description: "Réanime TOUS les Pokémon K.O. avec 25% de leurs PV max",
+    description: "Réanime TOUS les Pokémon K.O. avec 75% de leurs PV max",
     icon: ShieldPlus,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) =>
         p.currentHp <= 0
-          ? { ...p, currentHp: Math.round(p.stats.hp * 0.25) }
+          ? { ...p, currentHp: Math.round(p.stats.hp * 0.75) }
           : p,
       ),
   },
@@ -1564,21 +1564,17 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     id: "last_chance_heal",
     title: "Rosée de Survie",
     quality: "common",
-    description:
-      "Soigne 15% des PV max pour chaque Pokémon ayant moins de 30% de ses PV",
+    description: "Soigne de 30% pour chaque Pokémon",
     icon: HeartHandshake,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => {
-        if (p.currentHp > 0 && p.currentHp < p.stats.hp * 0.3) {
-          return {
-            ...p,
-            currentHp: Math.min(
-              p.stats.hp,
-              p.currentHp + Math.round(p.stats.hp * 0.15),
-            ),
-          };
-        }
-        return p;
+        return {
+          ...p,
+          currentHp: Math.min(
+            p.stats.hp,
+            p.currentHp + Math.round(p.stats.hp * 0.3),
+          ),
+        };
       }),
   },
   {
@@ -1728,14 +1724,14 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     title: "Viseur Laser",
     quality: "common",
     description:
-      "Toutes les capacités de l'équipe gagnent +20 de Précision fixe",
+      "Toutes les capacités de l'équipe gagnent +10 de Précision fixe",
     icon: Target,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
         ...p,
         moves: p.moves.map((m) => ({
           ...m,
-          accuracy: Math.min(100, m.accuracy + 20),
+          accuracy: Math.min(100, m.accuracy + 10),
         })),
       })),
   },
@@ -1815,7 +1811,7 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
       pokes.map((p) => ({
         ...p,
         moves: p.moves.map((m) =>
-          m.type === "dragon" ? { ...m, critRate: m.critRate + 2 } : m,
+          m.type === "dragon" ? { ...m, critRate: m.critRate + 5 } : m,
         ),
       })),
   },
@@ -1941,7 +1937,7 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     title: "Poudre de Fée",
     quality: "common",
     description:
-      "Les attaques de type Fée gagnent +25% de puissance et augmentent l'esquive du lanceur de 10%",
+      "Les attaques de type Fée gagnent +25% de puissance et augmentent l'esquive de 10%",
     icon: Sparkles,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
@@ -2028,7 +2024,7 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
       pokes.map((p) => ({
         ...p,
         moves: p.moves.map((m) =>
-          m.category !== "status" ? { ...m, power: m.power * 3 } : m,
+          m.category !== "status" ? { ...m, power: m.power * 2 } : m,
         ),
       })),
   },
@@ -2037,12 +2033,12 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     title: "Pacte Sanglant d'Yveltal",
     quality: "legendary",
     description:
-      "Octroie un vol de vie de 75% sur toutes les capacités infligeant des dégâts",
+      "Octroie un vol de vie de 25% sur toutes les capacités infligeant des dégâts",
     icon: Droplet,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
         ...p,
-        moves: p.moves.map((m) => (m.power > 0 ? { ...m, drain: 75 } : m)),
+        moves: p.moves.map((m) => (m.power > 0 ? { ...m, drain: 25 } : m)),
       })),
   },
   {
@@ -2114,7 +2110,7 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     title: "Énergie Infinie d'Eternatus",
     quality: "legendary",
     description:
-      "Double les PV Max de toute l'équipe et soigne instantanément l'intégralité des PV",
+      "Double les PV Max de toute l'équipe et soigne/réanime instantanément l'intégralité des PV",
     icon: HeartPulse,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => {
@@ -2131,7 +2127,7 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     title: "Bénédiction d'Arceus",
     quality: "rare",
     description:
-      "+20% à ABSOLUMENT TOUTES les statistiques globales de l'équipe",
+      "+20% à toutes les statistiques de l'équipe, +5% pour la précision et l'esquive",
     icon: Crown,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
@@ -2143,8 +2139,8 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
           "special-attack": Math.round(p.stats["special-attack"] * 1.2),
           "special-defense": Math.round(p.stats["special-defense"] * 1.2),
           speed: p.stats.speed,
-          evasion: Math.round(p.stats.evasion * 1.2),
-          accuracy: Math.round(p.stats.accuracy * 1.2),
+          evasion: Math.round(p.stats.evasion * 1.05),
+          accuracy: Math.round(p.stats.accuracy * 1.05),
         },
         currentHp:
           p.currentHp > 0 ? p.currentHp + Math.round(p.stats.hp * 0.2) : 0,
@@ -2155,10 +2151,14 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     title: "Larme de Célébi",
     quality: "rare",
     description:
-      "Soigne à 100% les PV de toute l'équipe ET réanime tous les morts à 100% des PV",
+      "Soigne à 100% les PV de toute l'équipe ET réanime tous les morts à 20% des PV",
     icon: HeartHandshake,
     action: (pokes: PokeBattlePokemonDetails[]) =>
-      pokes.map((p) => ({ ...p, currentHp: p.stats.hp })),
+      pokes.map((p) =>
+        p.currentHp <= 0
+          ? { ...p, currentHp: Math.round(p.stats.hp * 0.2) }
+          : { ...p, currentHp: p.stats.hp },
+      ),
   },
   {
     id: "cheat_ultra_evasion",
@@ -2227,7 +2227,7 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     title: "Lentille Zoom",
     quality: "rare",
     description:
-      "Si une capacité a moins de 80% de Précision, elle gagne +25% de Précision fixe et +1 au taux de Critique",
+      "Si une capacité a moins de 80% de Précision, elle gagne +25 de Précision fixe et +1 au taux de Critique",
     icon: Target,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
@@ -2281,32 +2281,30 @@ export function isEven(n: number) {
 
 export const QUALITY_CONFIG = {
   common: {
-    border: "border-slate-800 bg-slate-950/40",
-    iconBg: "bg-slate-900 border-slate-700",
-    iconColor: "text-slate-400",
-    badge: "bg-slate-800 text-slate-400 border-slate-700",
     label: "Commun",
+    button: "border-teal-700 bg-teal-950 shadow-[0_0_15px_rgba(71,85,105,0.1)]",
+    badge: "bg-teal-800 text-teal-300 border-teal-600",
+    icon: "bg-teal-950 border-teal-700 text-teal-400",
   },
   rare: {
-    border: "border-blue-900/50 bg-blue-950/10",
-    iconBg: "bg-blue-950 border-blue-500/30",
-    iconColor: "text-blue-400",
-    badge: "bg-blue-950 text-blue-400 border-blue-500/30",
     label: "Rare",
+    button:
+      "border-blue-500 bg-gradient-to-b from-blue-800 to-slate-900 shadow-[0_0_15px_rgba(59,130,246,0.3)]",
+    badge: "bg-blue-900 text-blue-200 border-blue-400",
+    icon: "bg-gradient-to-b from-blue-500 to-blue-950 border-blue-300 text-blue-300 drop-shadow-[0_0_6px_rgba(59,130,246,0.6)]",
   },
   epic: {
-    border: "border-purple-900/60 bg-purple-950/10",
-    iconBg: "bg-purple-950 border-purple-500/30",
-    iconColor: "text-purple-400",
-    badge: "bg-purple-950 text-purple-400 border-purple-500/30",
     label: "Épique",
+    button:
+      "border-purple-500 bg-gradient-to-b from-purple-800 to-slate-900 shadow-[0_0_15px_rgba(168,85,247,0.3)]",
+    badge: "bg-purple-900 text-purple-200 border-purple-400",
+    icon: "bg-gradient-to-b from-purple-500 to-purple-950 border-purple-300 text-purple-300 drop-shadow-[0_0_6px_rgba(168,85,247,0.6)]",
   },
   legendary: {
-    border:
-      "border-amber-500/30 bg-amber-950/20 shadow-[0_0_15px_rgba(245,158,11,0.05)]",
-    iconBg: "bg-amber-950 border-amber-500/40 animate-pulse",
-    iconColor: "text-amber-400",
-    badge: "bg-amber-500/20 text-amber-300 border-amber-500/40 font-black",
     label: "Légendaire",
+    button:
+      "border-amber-400 bg-gradient-to-b from-amber-800 to-slate-900 shadow-[0_0_25px_rgba(245,158,11,0.4)]",
+    badge: "bg-amber-500 text-slate-950 border-amber-300 font-black",
+    icon: "bg-gradient-to-b from-amber-500 to-amber-950 border-amber-300 text-amber-300 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]",
   },
 };

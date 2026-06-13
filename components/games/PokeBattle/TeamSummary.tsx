@@ -48,6 +48,8 @@ export const STAT_CONFIG: Record<
   },
 };
 
+const CONFIG = QUALITY_CONFIG;
+
 export function PokemonCard({ pokemon }: { pokemon: any }) {
   return (
     <div className="flex flex-col p-3 sm:p-4 rounded-md border border-slate-800 bg-slate-950/60 gap-2">
@@ -93,19 +95,17 @@ export function PokemonCard({ pokemon }: { pokemon: any }) {
 
 function BuffCard({ buff }: { buff: PokeBattleBuffOption }) {
   const BuffIcon = buff.icon || Award;
-  const quality =
-    QUALITY_CONFIG[buff.quality as keyof typeof QUALITY_CONFIG] ||
-    QUALITY_CONFIG.common;
+  const quality = CONFIG[buff.quality as keyof typeof CONFIG] || CONFIG.common;
 
   return (
     <div
-      className={`flex items-start gap-3 p-3 sm:p-4 rounded border transition-all duration-200 ${quality.border}`}
+      className={`flex items-start gap-3 p-3 sm:p-4 rounded border transition-all duration-200 ${quality.button}`}
     >
       {/* Box d'icône colorée */}
       <div
-        className={`p-1.5 sm:p-2 border rounded mt-0.5 shadow-sm ${quality.iconBg}`}
+        className={`p-1.5 sm:p-2 border rounded mt-0.5 shadow-sm ${quality.icon}`}
       >
-        <BuffIcon className={`size-4 sm:size-5 ${quality.iconColor}`} />
+        <BuffIcon className={`size-4 sm:size-5`} />
       </div>
 
       {/* Contenu textuel */}

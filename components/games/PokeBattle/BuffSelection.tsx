@@ -28,6 +28,8 @@ type BuffSelectionProps = {
   onSelect: (buff: PokeBattleBuffOption) => void;
 };
 
+const CONFIG = QUALITY_CONFIG;
+
 // ==========================================
 // SOUS-COMPOSANT : APERÇU DE L'ÉQUIPE (COMPACT)
 // ==========================================
@@ -113,40 +115,55 @@ function BuffOptionButton({
   onSelect: (buff: PokeBattleBuffOption) => void;
 }) {
   const Icon = buff.icon || Award;
-  const quality =
-    QUALITY_CONFIG[buff.quality as keyof typeof QUALITY_CONFIG] ||
-    QUALITY_CONFIG.common;
-
   const cleanDescription = buff.description.replace(/^\[.*?\]\s*/, "");
+
+  // Sécurité anti-bug de casse (ex: "LÉGENDAIRE" -> "legendary")
+  const rawQuality = String(buff.quality || "common")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+  const qualityKey = rawQuality === "legendaire" ? "legendary" : rawQuality;
+
+  const quality = CONFIG[qualityKey as keyof typeof CONFIG] || CONFIG.common;
 
   return (
     <button
       onClick={() => onSelect(buff)}
-      className={`border-2 rounded-xl p-5 flex flex-col items-center text-center gap-4 transition-all duration-200 group relative overflow-hidden ${quality.border}`}
+      className={`border-[3px] rounded-2xl p-6 flex flex-col items-center text-center gap-5 transition-all duration-300 group relative overflow-hidden h-full min-h-[320px] hover:-translate-y-1 ${quality.button}`}
     >
-      {/* Badge de Qualité/Rareté */}
+      {/* Halo de lumière en tâche de fond (optionnel mais stylé) */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-40 rounded-full blur-3xl opacity-20 bg-current pointer-events-none" />
+
+      {/* --- PARTIE BADGE --- */}
       <span
-        className={`absolute top-3 right-3 text-[9px] uppercase px-1.5 py-0.5 rounded border tracking-widest font-bold shadow-sm ${quality.badge}`}
+        className={`absolute top-0 left-1/2 -translate-x-1/2 text-[10px] uppercase px-3 py-1 rounded-b-xl border-x border-b tracking-widest font-black shadow-md z-10 ${quality.badge}`}
       >
         {quality.label}
       </span>
 
-      {/* Conteneur d'icône */}
+      {/* --- PARTIE ICÔNE --- */}
       <div
-        className={`p-3.5 border rounded-full group-hover:scale-110 transition-transform shadow-inner mt-2 ${quality.iconBg}`}
+        className={`p-4 border-2 rounded-full group-hover:scale-110 transition-transform duration-300 shadow-lg relative z-10 mt-4 ${quality.icon}`}
       >
-        <Icon className="size-7" />
+        <Icon className="size-8 stroke-[2.5]" />
       </div>
 
       {/* Contenu textuel */}
-      <div className="flex flex-col gap-2 flex-1">
-        <h3 className="font-extrabold uppercase tracking-wider text-sm sm:text-base text-slate-100 group-hover:text-amber-400 transition-colors">
-          {buff.title}
-        </h3>
-        <p className="text-xs text-slate-400 leading-relaxed font-medium">
+      <div className="flex flex-col gap-3 flex-1 justify-between w-full relative z-10 mt-2">
+        <div className="flex flex-col gap-2">
+          <h3 className="font-black uppercase tracking-wider text-base sm:text-lg text-slate-100">
+            {buff.title}
+          </h3>
+          <div className="w-12 h-[2px] bg-slate-700 mx-auto rounded group-hover:w-20 transition-all duration-300" />
+        </div>
+
+        <p className="text-xs text-slate-300 font-medium leading-relaxed px-2 flex-1 flex items-center justify-center">
           {cleanDescription}
         </p>
       </div>
+
+      {/* Effet brillant de carte TCG au survol */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
     </button>
   );
 }

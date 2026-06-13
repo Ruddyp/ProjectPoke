@@ -2188,12 +2188,12 @@ export function PokeBattleProvider({
     setIsFetching(true);
     setFloor(nextFloor);
 
-    // Progression de l'intelligence de l'IA (Max à 1.0 vers l'étage 30)
-    const intelligence = Math.min(0.1 + nextFloor * 0.03, 1.0);
+    // Progression de l'intelligence de l'IA (Max à 1.0 vers l'étage 20)
+    const intelligence = Math.min(0.05 + nextFloor * 0.05, 1.0);
 
     // Application de tes paramètres de puissance
     const teamSize = 3;
-    const totalTargetPower = 650 + (nextFloor - 1) * 40; // Étage 1 = 650, Étage 2 = 690...
+    const totalTargetPower = 650 + (nextFloor - 1) * 50; // Étage 1 = 650, Étage 2 = 690...
     const targetPowerPerPokemon = totalTargetPower / teamSize; // Puissance équitablement répartie
 
     const newTeam: PokeBattlePokemonDetails[] = [];
@@ -2263,9 +2263,9 @@ export function PokeBattleProvider({
     // Distribution des objets de l'IA pour le match
     const updatedEnemyObjects = POKEBATTLE_OBJECTS.map((obj) => {
       let quantity = 0;
-      if (obj.type === "heal" && nextFloor > 5) quantity = 1;
-      if (obj.type === "status" && nextFloor > 15) quantity = 1;
-      if (obj.type === "reborn" && nextFloor > 25) quantity = 1;
+      if (obj.type === "heal" && nextFloor >= 5) quantity = 1;
+      if (obj.type === "status" && nextFloor >= 10) quantity = 1;
+      if (obj.type === "reborn" && nextFloor >= 15) quantity = 1;
 
       return { ...obj, quantity };
     });
