@@ -2,7 +2,7 @@
 import { useMemo } from "react";
 import { PokeBattleBuffOption } from "@/app/type";
 import { usePokeBattle } from "@/context/PokeBattleProvider";
-import { QUALITY_CONFIG, TOWER_BUFFS } from "@/lib/utils";
+import { TOWER_BUFFS } from "@/lib/utils";
 import {
   Award,
   Heart,
@@ -28,7 +28,35 @@ type BuffSelectionProps = {
   onSelect: (buff: PokeBattleBuffOption) => void;
 };
 
-const CONFIG = QUALITY_CONFIG;
+const QUALITY_CONFIG = {
+  common: {
+    label: "Commun",
+    button: "border-teal-700 bg-teal-950 shadow-[0_0_15px_rgba(71,85,105,0.1)]",
+    badge: "bg-teal-800 text-teal-300 border-teal-600",
+    icon: "bg-teal-950 border-teal-700 text-teal-400",
+  },
+  rare: {
+    label: "Rare",
+    button:
+      "border-blue-500 bg-gradient-to-b from-blue-800 to-slate-900 shadow-[0_0_15px_rgba(59,130,246,0.3)]",
+    badge: "bg-blue-900 text-blue-200 border-blue-400",
+    icon: "bg-gradient-to-b from-blue-500 to-blue-950 border-blue-300 text-blue-300 drop-shadow-[0_0_6px_rgba(59,130,246,0.6)]",
+  },
+  epic: {
+    label: "Épique",
+    button:
+      "border-purple-500 bg-gradient-to-b from-purple-800 to-slate-900 shadow-[0_0_15px_rgba(168,85,247,0.3)]",
+    badge: "bg-purple-900 text-purple-200 border-purple-400",
+    icon: "bg-gradient-to-b from-purple-500 to-purple-950 border-purple-300 text-purple-300 drop-shadow-[0_0_6px_rgba(168,85,247,0.6)]",
+  },
+  legendary: {
+    label: "Légendaire",
+    button:
+      "border-amber-400 bg-gradient-to-b from-amber-800 to-slate-900 shadow-[0_0_25px_rgba(245,158,11,0.4)]",
+    badge: "bg-amber-500 text-slate-950 border-amber-300 font-black",
+    icon: "bg-gradient-to-b from-amber-500 to-amber-950 border-amber-300 text-amber-300 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]",
+  },
+};
 
 // ==========================================
 // SOUS-COMPOSANT : APERÇU DE L'ÉQUIPE (COMPACT)
@@ -124,7 +152,9 @@ function BuffOptionButton({
     .replace(/[\u0300-\u036f]/g, "");
   const qualityKey = rawQuality === "legendaire" ? "legendary" : rawQuality;
 
-  const quality = CONFIG[qualityKey as keyof typeof CONFIG] || CONFIG.common;
+  const quality =
+    QUALITY_CONFIG[qualityKey as keyof typeof QUALITY_CONFIG] ||
+    QUALITY_CONFIG.common;
 
   return (
     <button
