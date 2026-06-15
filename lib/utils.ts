@@ -1320,15 +1320,14 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     id: "hp_boost_1",
     title: "Pilule d'Endurance",
     quality: "common",
-    description: "+15% PV Max pour toute l'équipe",
+    description: "+100 PV Max pour toute l'équipe",
     icon: Heart,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => {
-        const bonus = Math.round(p.stats.hp * 0.15);
         return {
           ...p,
-          stats: { ...p.stats, hp: p.stats.hp + bonus },
-          currentHp: p.currentHp > 0 ? p.currentHp + bonus : 0,
+          stats: { ...p.stats, hp: p.stats.hp + 100 },
+          currentHp: p.currentHp > 0 ? p.currentHp + 100 : 0,
         };
       }),
   },
@@ -1402,17 +1401,17 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     id: "glass_cannon",
     title: "Orbe de Vie",
     quality: "epic",
-    description: "+25% Attaque & Atk Spé, mais -15% Défense & Déf Spé globale",
+    description: "+50% Attaque & Atk Spé, mais -10% Défense & Déf Spé globale",
     icon: Flame,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
         ...p,
         stats: {
           ...p.stats,
-          attack: Math.round(p.stats.attack * 1.25),
-          "special-attack": Math.round(p.stats["special-attack"] * 1.25),
-          defense: Math.round(p.stats.defense * 0.85),
-          "special-defense": Math.round(p.stats["special-defense"] * 0.85),
+          attack: Math.round(p.stats.attack * 1.5),
+          "special-attack": Math.round(p.stats["special-attack"] * 1.5),
+          defense: Math.round(p.stats.defense * 0.9),
+          "special-defense": Math.round(p.stats["special-defense"] * 0.9),
         },
       })),
   },
@@ -1550,13 +1549,13 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     id: "holy_blessing",
     title: "Bénédiction Curative",
     quality: "common",
-    description: "Augmente l'efficacité des moves de soin de l'équipe de 25%",
+    description: "Augmente l'efficacité des moves de soin de l'équipe de 50%",
     icon: PlusCircle,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
         ...p,
         moves: p.moves.map((m) =>
-          m.healing > 0 ? { ...m, healing: Math.round(m.healing * 1.25) } : m,
+          m.healing > 0 ? { ...m, healing: Math.round(m.healing * 1.5) } : m,
         ),
       })),
   },
@@ -1564,18 +1563,12 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     id: "last_chance_heal",
     title: "Rosée de Survie",
     quality: "common",
-    description: "Soigne de 30% pour chaque Pokémon",
+    description: "Soigne de 50% chaque Pokémon vivant",
     icon: HeartHandshake,
     action: (pokes: PokeBattlePokemonDetails[]) =>
-      pokes.map((p) => {
-        return {
-          ...p,
-          currentHp: Math.min(
-            p.stats.hp,
-            p.currentHp + Math.round(p.stats.hp * 0.3),
-          ),
-        };
-      }),
+      pokes.map((p) =>
+        p.currentHp > 0 ? { ...p, currentHp: Math.round(p.stats.hp * 0.5) } : p,
+      ),
   },
   {
     id: "vampire_lord",
@@ -1613,14 +1606,18 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     title: "Rorqual Assommant",
     quality: "common",
     description:
-      "Toutes les capacités offensives gagnent +15% de chances d'apeurer l'adversaire",
+      "Toutes les capacités offensives gagnent +15% de chances d'apeurer l'adversaire (max 60%)",
     icon: Hammer,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
         ...p,
         moves: p.moves.map((m) =>
           m.power > 0
-            ? { ...m, flinchChance: Math.min(100, m.flinchChance + 15) }
+            ? {
+                ...m,
+                flinchChance:
+                  m.flinchChance + 15 > 60 ? 60 : m.flinchChance + 15,
+              }
             : m,
         ),
       })),
@@ -1714,7 +1711,7 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
         ...p,
         moves: p.moves.map((m) =>
           m.maxHits > 1
-            ? { ...m, minHits: Math.min(m.maxHits, m.minHits + 1) }
+            ? { ...m, minHits: m.minHits + 1, maxHits: m.maxHits + 1 }
             : m,
         ),
       })),
@@ -1820,14 +1817,14 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     title: "Ombre Malveillante",
     quality: "common",
     description:
-      "+30% de puissance sur toutes les attaques de type Spectre et Ténèbres",
+      "+40% de puissance sur toutes les attaques de type Spectre et Ténèbres",
     icon: Moon,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
         ...p,
         moves: p.moves.map((m) =>
           m.type === "spectre" || m.type === "ténèbres"
-            ? { ...m, power: Math.round(m.power * 1.3) }
+            ? { ...m, power: Math.round(m.power * 1.4) }
             : m,
         ),
       })),
@@ -1906,13 +1903,13 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     id: "elemental_combat_shatter",
     title: "Ceinture Noire",
     quality: "common",
-    description: "Les capacités de type Combat infligent +30% de dégâts",
+    description: "Les capacités de type Combat infligent +40% de dégâts",
     icon: Swords,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
         ...p,
         moves: p.moves.map((m) =>
-          m.type === "combat" ? { ...m, power: Math.round(m.power * 1.3) } : m,
+          m.type === "combat" ? { ...m, power: Math.round(m.power * 1.4) } : m,
         ),
       })),
   },
@@ -1994,7 +1991,7 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
       pokes.map((p) => ({
         ...p,
         moves: p.moves.map((m) =>
-          m.type === "insecte" ? { ...m, critRate: m.critRate + 2 } : m,
+          m.type === "insecte" ? { ...m, critRate: m.critRate + 5 } : m,
         ),
       })),
   },
@@ -2061,14 +2058,18 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     title: "Onde de Choc Absolue",
     quality: "legendary",
     description:
-      "Toutes les attaques offensives ont 50% de chances d'apeurer et d'empêcher l'ennemi d'agir",
+      "Toutes les attaques offensives voient leurs chances d'appliquer l'état d'apeurer augmenter de 50% (max 60%)",
     icon: Hammer,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
         ...p,
         moves: p.moves.map((m) =>
           m.power > 0
-            ? { ...m, flinchChance: Math.max(m.flinchChance, 50) }
+            ? {
+                ...m,
+                flinchChance:
+                  m.flinchChance + 50 > 60 ? 60 : m.flinchChance + 50,
+              }
             : m,
         ),
       })),
@@ -2078,15 +2079,15 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     title: "Garde Mystik Suprême",
     quality: "legendary",
     description:
-      "Augmente la Défense et la Défense Spéciale de toute l'équipe de +100%",
+      "Augmente la Défense et la Défense Spéciale de toute l'équipe de 150",
     icon: ShieldCheck,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
         ...p,
         stats: {
           ...p.stats,
-          defense: p.stats.defense * 2,
-          "special-defense": p.stats["special-defense"] * 2,
+          defense: p.stats.defense + 150,
+          "special-defense": p.stats["special-defense"] + 150,
         },
       })),
   },
@@ -2110,11 +2111,11 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     title: "Énergie Infinie d'Eternatus",
     quality: "legendary",
     description:
-      "Double les PV Max de toute l'équipe et soigne/réanime instantanément l'intégralité des PV",
+      "Augmente de 120 les PV Max de toute l'équipe et soigne/réanime instantanément l'intégralité des PV",
     icon: HeartPulse,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => {
-        const newMaxHp = p.stats.hp * 2;
+        const newMaxHp = p.stats.hp + 120;
         return {
           ...p,
           stats: { ...p.stats, hp: newMaxHp },
@@ -2127,17 +2128,17 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     title: "Bénédiction d'Arceus",
     quality: "rare",
     description:
-      "+20% à toutes les statistiques de l'équipe, +5% pour la précision et l'esquive",
+      "+25% à toutes les statistiques de l'équipe, +5% pour la précision et l'esquive",
     icon: Crown,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
         ...p,
         stats: {
-          hp: Math.round(p.stats.hp * 1.2),
-          attack: Math.round(p.stats.attack * 1.2),
-          defense: Math.round(p.stats.defense * 1.2),
-          "special-attack": Math.round(p.stats["special-attack"] * 1.2),
-          "special-defense": Math.round(p.stats["special-defense"] * 1.2),
+          hp: Math.round(p.stats.hp * 1.25),
+          attack: Math.round(p.stats.attack * 1.25),
+          defense: Math.round(p.stats.defense * 1.25),
+          "special-attack": Math.round(p.stats["special-attack"] * 1.25),
+          "special-defense": Math.round(p.stats["special-defense"] * 1.25),
           speed: p.stats.speed,
           evasion: Math.round(p.stats.evasion * 1.05),
           accuracy: Math.round(p.stats.accuracy * 1.05),
@@ -2164,29 +2165,12 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     id: "cheat_ultra_evasion",
     title: "Ultra Instinct",
     quality: "rare",
-    description: "Augmente l'esquive de 15% pour toute l'équipe",
+    description: "Augmente l'esquive de 10% pour toute l'équipe",
     icon: Ghost,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
         ...p,
-        stats: { ...p.stats, evasion: p.stats.evasion * 1.15 },
-      })),
-  },
-  {
-    id: "cheat_leech_seed_curse",
-    title: "Symbiose Sylvestre",
-    quality: "rare",
-    description:
-      "Toutes les capacités de catégorie 'status' appliquent désormais Vampigraine à la place du status de base",
-    icon: Sprout,
-    action: (pokes: PokeBattlePokemonDetails[]) =>
-      pokes.map((p) => ({
-        ...p,
-        moves: p.moves.map((m) =>
-          m.category === "status"
-            ? { ...m, status: "leech-seed" as const, statusChance: 100 }
-            : m,
-        ),
+        stats: { ...p.stats, evasion: p.stats.evasion * 1.1 },
       })),
   },
   {
@@ -2210,14 +2194,14 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     id: "rare_comeback_kid",
     title: "Esprit de Révolte",
     quality: "rare",
-    description: "Augmente les attaques Physiques et Spéciales de +50% dégâts",
+    description: "Augmente les attaques Physiques et Spéciales de +30% dégâts",
     icon: Flame,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => {
         return {
           ...p,
           moves: p.moves.map((m) =>
-            m.power > 0 ? { ...m, power: Math.round(m.power * 1.5) } : m,
+            m.power > 0 ? { ...m, power: Math.round(m.power * 1.3) } : m,
           ),
         };
       }),
