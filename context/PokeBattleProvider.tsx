@@ -1688,7 +1688,7 @@ export function PokeBattleProvider({
           // Vérification de K.O. avant d'attaquer
           if (currentHp <= 0) break;
 
-          const isCrit = checkIsCritical(move || 0, rollDice);
+          const isCrit = checkIsCritical(move, rollDice);
           const damage = calculateSingleHitDamage(isCrit);
 
           // Mise à jour de la variable locale
@@ -1728,7 +1728,7 @@ export function PokeBattleProvider({
         }
       } else {
         // Attaque classique les dégâts totaux correspondent au finalDamage
-        const isCrit = checkIsCritical(move || 0, rollDice);
+        const isCrit = checkIsCritical(move, rollDice);
         if (isCrit) hasTriggeredCrit = true;
 
         totalDamageApplied = calculateSingleHitDamage(isCrit);
@@ -2193,8 +2193,18 @@ export function PokeBattleProvider({
 
     // Application de tes paramètres de puissance
     const teamSize = 3;
-    const totalTargetPower = 650 + (nextFloor - 1) * 50; // Étage 1 = 650, Étage 2 = 690...
-    const targetPowerPerPokemon = totalTargetPower / teamSize; // Puissance équitablement répartie
+    const bonusParEtage =
+      nextFloor >= 40
+        ? 80 // Étage 40 et plus
+        : nextFloor >= 30
+          ? 70 // Étage 30 à 39
+          : nextFloor >= 20
+            ? 60 // Étage 20 à 29
+            : nextFloor >= 10
+              ? 50 // Étage 10 à 19
+              : 40;
+    const totalTargetPower = 650 + (nextFloor - 1) * bonusParEtage;
+    const targetPowerPerPokemon = totalTargetPower / teamSize;
 
     const newTeam: PokeBattlePokemonDetails[] = [];
     const pokemonIds: number[] = [];

@@ -34,6 +34,7 @@ import {
   Crown,
   Dices,
   Droplet,
+  Eye,
   EyeOff,
   Flame,
   FlameKindling,
@@ -1302,17 +1303,33 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     id: "team_heal_buff",
     title: "Rosée Sacrée",
     quality: "common",
-    description: "Soigne instantanément 25% des PV max de toute l'équipe",
+    description:
+      "Soigne instantanément 25% des PV max des Pokémon en vie et +10% de PV globaux pour toute l'équipe",
     icon: Heart,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => {
-        if (p.currentHp <= 0) return p;
+        const oldMax = p.stats.hp;
+        // Applique le +10% permanent (sans le +50 fixe pour rester équilibré en commun)
+        const newMax = Math.round(oldMax * 1.1);
+
+        // Sécurité : Si le Pokémon est KO (0 ou moins), on ne le soigne pas et on applique juste le nouveau max
+        if (p.currentHp <= 0) {
+          return {
+            ...p,
+            stats: { ...p.stats, hp: newMax },
+            currentHp: 0,
+          };
+        }
+
+        // Si le Pokémon est en vie, on calcule ses PV mis à l'échelle du nouveau max,
+        // PUIS on lui ajoute le soin de 25% du nouveau max.
+        const scaledHp = Math.round(p.currentHp * 1.1);
+        const healAmount = Math.round(newMax * 0.25);
+
         return {
           ...p,
-          currentHp: Math.min(
-            p.stats.hp,
-            p.currentHp + Math.round(p.stats.hp * 0.25),
-          ),
+          stats: { ...p.stats, hp: newMax },
+          currentHp: Math.min(newMax, scaledHp + healAmount),
         };
       }),
   },
@@ -1320,14 +1337,18 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     id: "hp_boost_1",
     title: "Pilule d'Endurance",
     quality: "common",
-    description: "+100 PV Max pour toute l'équipe",
+    description: "+50 PV Max et +10% PV globaux pour toute l'équipe",
     icon: Heart,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => {
+        const oldMax = p.stats.hp;
+        const newMax = Math.round((oldMax + 50) * 1.1);
+        const currentHpRatio = p.currentHp / oldMax;
+
         return {
           ...p,
-          stats: { ...p.stats, hp: p.stats.hp + 100 },
-          currentHp: p.currentHp > 0 ? p.currentHp + 100 : 0,
+          stats: { ...p.stats, hp: newMax },
+          currentHp: p.currentHp > 0 ? Math.round(newMax * currentHpRatio) : 0,
         };
       }),
   },
@@ -1480,6 +1501,26 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
           "special-attack": Math.round(p.stats["special-attack"] * 1.3),
           accuracy: Math.round(p.stats.accuracy * 0.9),
         },
+      })),
+  },
+  {
+    id: "precision_lens",
+    title: "Lentille de Précision",
+    quality: "common",
+    description:
+      "+10 de Précision fixe sur toutes les capacités, et +15 et +10% d'Attaque Spéciale",
+    icon: Eye,
+    action: (pokes: PokeBattlePokemonDetails[]) =>
+      pokes.map((p) => ({
+        ...p,
+        stats: {
+          ...p.stats,
+          "special-attack": Math.round((p.stats["special-attack"] + 15) * 1.1),
+        },
+        moves: p.moves.map((m) => ({
+          ...m,
+          accuracy: Math.min(100, m.accuracy + 10),
+        })),
       })),
   },
   {
@@ -1641,30 +1682,6 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
         isSeeded: false,
         confusionTurns: 0,
         sleepTurns: 0,
-      })),
-  },
-  {
-    id: "hypnotic_fury",
-    title: "Sable du Marchand",
-    quality: "common",
-    description: "Les capacités infligeant le Sommeil durent 1 tour de plus",
-    icon: Moon,
-    action: (pokes: PokeBattlePokemonDetails[]) =>
-      pokes.map((p) => ({
-        ...p,
-        sleepTurns: p.sleepTurns > 0 ? p.sleepTurns + 1 : 0,
-      })),
-  },
-  {
-    id: "confuse_ray",
-    title: "Miroir Brisé",
-    quality: "common",
-    description: "Les capacités infligeant la Confusion durent 1 tour de plus",
-    icon: HelpCircle,
-    action: (pokes: PokeBattlePokemonDetails[]) =>
-      pokes.map((p) => ({
-        ...p,
-        confusionTurns: p.confusionTurns > 0 ? p.confusionTurns + 1 : 0,
       })),
   },
   {
@@ -1985,14 +2002,24 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     title: "Nuée de Guêpes",
     quality: "common",
     description:
-      "Les capacités de type Insecte frappent automatiqument avec un critique",
+      "Les capacités de type Insecte frappent désormais 1 fois de plus",
     icon: Bug,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
         ...p,
-        moves: p.moves.map((m) =>
-          m.type === "insecte" ? { ...m, critRate: m.critRate + 5 } : m,
-        ),
+        moves: p.moves.map((m) => {
+          if (m.type !== "insecte") return m;
+
+          // Si le move est déjà multi-hit de base, on récupère sa valeur, sinon c'est 1 coup de base
+          const currentMin = m.minHits || 1;
+          const currentMax = m.maxHits || 1;
+
+          return {
+            ...m,
+            minHits: currentMin + 1, // +1 coup minimum
+            maxHits: currentMax + 1, // +1 coup maximum
+          };
+        }),
       })),
   },
   {
@@ -2030,12 +2057,14 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     title: "Pacte Sanglant d'Yveltal",
     quality: "legendary",
     description:
-      "Octroie un vol de vie de 25% sur toutes les capacités infligeant des dégâts",
+      "Augmente le vol de vie de 25% sur toutes les capacités infligeant des dégâts",
     icon: Droplet,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
         ...p,
-        moves: p.moves.map((m) => (m.power > 0 ? { ...m, drain: 25 } : m)),
+        moves: p.moves.map((m) =>
+          m.power > 0 ? { ...m, drain: m.drain + 25 } : m,
+        ),
       })),
   },
   {
@@ -2079,15 +2108,17 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     title: "Garde Mystik Suprême",
     quality: "legendary",
     description:
-      "Augmente la Défense et la Défense Spéciale de toute l'équipe de 150",
+      "Augmente la Défense et la Défense Spéciale de toute l'équipe de +50 et de +30%",
     icon: ShieldCheck,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => ({
         ...p,
         stats: {
           ...p.stats,
-          defense: p.stats.defense + 150,
-          "special-defense": p.stats["special-defense"] + 150,
+          defense: Math.round((p.stats.defense + 50) * 1.3),
+          "special-defense": Math.round(
+            (p.stats["special-defense"] + 50) * 1.3,
+          ),
         },
       })),
   },
@@ -2111,15 +2142,15 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
     title: "Énergie Infinie d'Eternatus",
     quality: "legendary",
     description:
-      "Augmente de 120 les PV Max de toute l'équipe et soigne/réanime instantanément l'intégralité des PV",
+      "+100 PV Max, +20% PV globaux pour toute l'équipe et soigne l'intégralité des PV",
     icon: HeartPulse,
     action: (pokes: PokeBattlePokemonDetails[]) =>
       pokes.map((p) => {
-        const newMaxHp = p.stats.hp + 120;
+        const newMax = Math.round((p.stats.hp + 100) * 1.2);
         return {
           ...p,
-          stats: { ...p.stats, hp: newMaxHp },
-          currentHp: newMaxHp,
+          stats: { ...p.stats, hp: newMax },
+          currentHp: newMax,
         };
       }),
   },
@@ -2144,7 +2175,7 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
           accuracy: Math.round(p.stats.accuracy * 1.05),
         },
         currentHp:
-          p.currentHp > 0 ? p.currentHp + Math.round(p.stats.hp * 0.2) : 0,
+          p.currentHp > 0 ? p.currentHp + Math.round(p.stats.hp * 0.25) : 0,
       })),
   },
   {
@@ -2217,7 +2248,7 @@ export const TOWER_BUFFS: PokeBattleBuffOption[] = [
       pokes.map((p) => ({
         ...p,
         moves: p.moves.map((m) =>
-          m.accuracy < 80
+          m.accuracy <= 80
             ? {
                 ...m,
                 accuracy: Math.min(100, m.accuracy + 25),
